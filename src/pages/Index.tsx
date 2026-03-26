@@ -908,7 +908,7 @@ const Index = () => {
       <Navbar onScrollToSection={scrollToSection} />
       
       {/* Hero Section */}
-      <section id="hero" className="relative py-6 lg:py-8 overflow-visible bg-black">
+      <section id="hero" className="relative py-6 lg:py-8 overflow-visible bg-black z-20">
         <div className="absolute inset-0 bg-black" />
         
         <div 
@@ -960,7 +960,7 @@ const Index = () => {
             </div>
 
             {/* Search Interface with AI and Live Preview */}
-            <div className="max-w-4xl mx-auto mb-4 overflow-visible relative z-10">
+            <div className="max-w-4xl mx-auto mb-4 overflow-visible relative z-[70]">
               <div 
                 className="bg-background/80 backdrop-blur-sm rounded-2xl shadow-2xl p-3 sm:p-4 border border-border/20 overflow-visible"
               >
@@ -1091,7 +1091,7 @@ const Index = () => {
 
 
       {/* Supplier Map Section */}
-      <section id="supplier-map" className="py-8 bg-black">
+      <section id="supplier-map" className="py-8 bg-black relative z-0">
         <div 
           ref={mapRef}
           className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8"
