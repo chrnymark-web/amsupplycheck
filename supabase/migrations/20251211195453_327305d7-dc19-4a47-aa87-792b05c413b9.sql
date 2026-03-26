@@ -10,4 +10,8 @@ CREATE EXTENSION pg_net SCHEMA extensions;
 -- Fix WARN: scrape_cache_service_role_only
 -- The current policy with "true" allows ALL users to access the table
 -- For service-role-only access, we should have NO policies (RLS blocks regular users, service role bypasses RLS)
-DROP POLICY IF EXISTS "Service role can manage scrape cache" ON public.scrape_cache;
+DO $$ BEGIN
+  IF EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'scrape_cache') THEN
+    DROP POLICY IF EXISTS "Service role can manage scrape cache" ON public.scrape_cache;
+  END IF;
+END $$;

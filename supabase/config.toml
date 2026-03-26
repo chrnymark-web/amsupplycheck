@@ -1,10 +1,8 @@
 project_id = "iptzktfftyusmvcgtlcy"
 
-[edge_runtime.cron.scheduled-validation]
-schedule = "0 * * * *"
-
-[edge_runtime.cron.discover-suppliers]
-schedule = "0 2 1 * *"
+# Cron jobs moved to Supabase dashboard (not supported in CLI v2.84+)
+# scheduled-validation: "0 * * * *"
+# discover-suppliers: "0 2 1 * *"
 
 [functions.validate-supplier]
 verify_jwt = true

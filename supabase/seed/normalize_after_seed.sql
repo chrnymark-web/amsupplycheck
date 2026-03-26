@@ -14,6 +14,8 @@
 -- 5. Rebuild ARRAY columns from junction tables (single source of truth)
 -- =============================================================================
 
+-- This migration normalizes technology/material data.
+-- Safe to run on empty DB - all statements use WHERE clauses that match nothing if tables are empty.
 BEGIN;
 
 -- =============================================
