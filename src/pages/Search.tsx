@@ -309,10 +309,41 @@ const Search = () => {
         if (!hasMatchingTech) return false;
       }
 
-      // Apply area filters
+      // Apply area filters (with sub-region to region mapping for AI search)
       if (filters.areas.length > 0) {
+        const supplierRegion = (supplier as any).region?.toLowerCase() || '';
+        const supplierCountry = supplier.location.country?.toLowerCase() || '';
+        const supplierCity = supplier.location.city?.toLowerCase() || '';
         const supplierArea = getAreaForCountry(supplier.location.country);
-        if (!supplierArea || !filters.areas.includes(supplierArea)) return false;
+
+        // Map AI sub-regions to database region values
+        const regionMapping: Record<string, string[]> = {
+          'europe': ['europe', 'western europe', 'central europe', 'eastern europe', 'scandinavia', 'uk & ireland', 'nordic', 'southern europe', 'northern europe'],
+          'northamerica': ['north america', 'usa', 'united states', 'canada', 'north america & canada'],
+          'asia': ['asia', 'asia-pacific', 'east asia', 'southeast asia', 'south asia'],
+          'middleeast': ['middle east', 'gulf'],
+          'southamerica': ['south america', 'latin america'],
+          'africa': ['africa'],
+          'global': ['global', 'worldwide'],
+        };
+
+        const hasMatchingArea = filters.areas.some(area => {
+          const areaLower = area.toLowerCase();
+          // Direct area match (from getAreaForCountry)
+          if (supplierArea && supplierArea.toLowerCase() === areaLower) return true;
+          // Direct region match
+          if (supplierRegion.includes(areaLower)) return true;
+          // Country/city match
+          if (supplierCountry.includes(areaLower) || supplierCity.includes(areaLower)) return true;
+          // Sub-region to region mapping (AI returns "Western Europe", DB has "europe")
+          for (const [dbRegion, aiAreas] of Object.entries(regionMapping)) {
+            if (aiAreas.some(a => areaLower.includes(a) || a.includes(areaLower)) && supplierRegion === dbRegion) {
+              return true;
+            }
+          }
+          return false;
+        });
+        if (!hasMatchingArea) return false;
       }
 
       // Apply certification filters
