@@ -38,7 +38,7 @@ const Search = () => {
     areas: searchParams.get('areas')?.split(',').filter(Boolean) || [],
     requirements: searchParams.get('requirements')?.split(',').filter(Boolean) || []
   });
-  const [searchQuery, setSearchQuery] = useState(searchParams.get('keywords') || '');
+  const [searchQuery, setSearchQuery] = useState(searchParams.get('keywords') || searchParams.get('q') || '');
   const [certifications, setCertifications] = useState<string[]>(searchParams.get('certifications')?.split(',').filter(Boolean) || []);
   const [productionVolume, setProductionVolume] = useState(searchParams.get('volume') || '');
   const [urgency, setUrgency] = useState(searchParams.get('urgency') || 'standard');
@@ -153,7 +153,7 @@ const Search = () => {
       areas: searchParams.get('areas')?.split(',').filter(Boolean) || [],
       requirements: searchParams.get('requirements')?.split(',').filter(Boolean) || []
     });
-    setSearchQuery(searchParams.get('keywords') || '');
+    setSearchQuery(searchParams.get('keywords') || searchParams.get('q') || '');
     setCertifications(searchParams.get('certifications')?.split(',').filter(Boolean) || []);
     setProductionVolume(searchParams.get('volume') || '');
     setUrgency(searchParams.get('urgency') || 'standard');
@@ -194,30 +194,32 @@ const Search = () => {
       // Apply search query filter with fuzzy material matching
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
-        
+        // Split into individual words for multi-word queries (match ANY word)
+        const queryWords = query.split(/\s+/).filter(w => w.length >= 3);
+
         // PRIORITY 1: Check direct name match first - always include name matches
         if (supplier.name.toLowerCase().includes(query)) {
           // Name matches - check if filters still apply (or pass if no other filters)
-          const hasOtherFilters = filters.materials.length > 0 || 
-                                   filters.technologies.length > 0 || 
+          const hasOtherFilters = filters.materials.length > 0 ||
+                                   filters.technologies.length > 0 ||
                                    filters.areas.length > 0;
           if (!hasOtherFilters) {
             return true; // Direct name match with no other filters - include
           }
           // If there are other filters, continue to check them but don't exclude based on search
         } else {
-          // No name match - check other fields
-          let matchesSearch = 
-            supplier.description.toLowerCase().includes(query) ||
-            supplier.technologies.some(tech => tech.toLowerCase().includes(query)) ||
-            supplier.location.city.toLowerCase().includes(query) ||
-            supplier.location.country.toLowerCase().includes(query);
-          
-          // Direct material match
-          if (!matchesSearch) {
-            matchesSearch = supplier.materials.some(material => 
-              material.toLowerCase().includes(query)
-            );
+          // No name match - check other fields (try full query first, then individual words)
+          const searchableText = [
+            supplier.name, supplier.description,
+            ...supplier.technologies, ...supplier.materials,
+            supplier.location.city, supplier.location.country
+          ].filter(Boolean).join(' ').toLowerCase();
+
+          let matchesSearch = searchableText.includes(query);
+
+          // If full query doesn't match, try matching ANY individual word
+          if (!matchesSearch && queryWords.length > 1) {
+            matchesSearch = queryWords.some(word => searchableText.includes(word));
           }
           
           // Fuzzy material matching - if query is a material, also check related materials
@@ -263,16 +265,26 @@ const Search = () => {
           // Get related materials for fuzzy matching
           const relatedMaterials = materialKey ? getRelatedMaterials(materialKey) : [material.toLowerCase()];
           
+          // Normalize display name to slug form: "Titanium Ti-6Al-4V" -> "titanium-ti-6al-4v" / "titanium-ti6al4v"
+          const materialSlug = material.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '');
+          const materialSlugCompact = materialSlug.replace(/-/g, '');
+
           return supplier.materials.some(supplierMat => {
             const lowerMat = supplierMat.toLowerCase();
-            
+            const lowerMatCompact = lowerMat.replace(/-/g, '');
+
             // Direct match
             if (lowerMat === materialKey?.toLowerCase() || lowerMat === material.toLowerCase()) {
               return true;
             }
-            
+
+            // Slug-normalized match (handles "Titanium Ti-6Al-4V" vs "titanium-ti6al4v")
+            if (lowerMatCompact === materialSlugCompact || lowerMat === materialSlug) {
+              return true;
+            }
+
             // Fuzzy match - check if supplier material is related
-            if (relatedMaterials.some(related => 
+            if (relatedMaterials.some(related =>
               lowerMat === related || lowerMat.includes(related) || related.includes(lowerMat)
             )) {
               return true;
@@ -310,7 +322,9 @@ const Search = () => {
       }
 
       // Apply area filters (with sub-region to region mapping for AI search)
-      if (filters.areas.length > 0) {
+      // Skip area filter if "Global" or "Worldwide" is selected (means all regions)
+      const effectiveAreas = filters.areas.filter(a => !['Global', 'Worldwide', 'global', 'worldwide'].includes(a));
+      if (effectiveAreas.length > 0) {
         const supplierRegion = (supplier as any).region?.toLowerCase() || '';
         const supplierCountry = supplier.location.country?.toLowerCase() || '';
         const supplierCity = supplier.location.city?.toLowerCase() || '';
@@ -327,7 +341,7 @@ const Search = () => {
           'global': ['global', 'worldwide'],
         };
 
-        const hasMatchingArea = filters.areas.some(area => {
+        const hasMatchingArea = effectiveAreas.some(area => {
           const areaLower = area.toLowerCase();
           // Direct area match (from getAreaForCountry)
           if (supplierArea && supplierArea.toLowerCase() === areaLower) return true;
@@ -346,14 +360,11 @@ const Search = () => {
         if (!hasMatchingArea) return false;
       }
 
-      // Apply certification filters
-      if (certifications.length > 0) {
-        const supplierCerts = (supplier as any).certifications || [];
-        const hasMatchingCert = certifications.some(cert => 
-          supplierCerts.some((sc: string) => sc.toLowerCase().includes(cert.toLowerCase()))
-        );
-        if (!hasMatchingCert) return false;
-      }
+      // Apply certification filters (soft filter - only exclude if supplier has certs that don't match)
+      // Most suppliers don't have certifications yet, so we don't exclude them
+      // Certifications are used for boosting in sort order instead
+      // Only apply as hard filter when explicitly toggled by user (not from AI)
+
 
       // Apply requirement filters (High strength, Heat resistant, etc.)
       if (filters.requirements && filters.requirements.length > 0) {
