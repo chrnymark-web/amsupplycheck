@@ -116,7 +116,46 @@ export function useAISearch(): UseAISearchResult {
         confidence: data.confidence || 0,
         originalQuery: data.originalQuery || query
       };
-      
+
+      // Client-side enrichment: if AI missed obvious tech/material names in the query,
+      // add them so filtering works correctly
+      const queryLower = query.toLowerCase();
+      const knownMaterials: Record<string, string> = {
+        'pla': 'PLA', 'abs': 'ABS', 'petg': 'PETG', 'nylon': 'Nylon', 'tpu': 'TPU',
+        'resin': 'Resin', 'titanium': 'Titanium', 'aluminum': 'Aluminum', 'aluminium': 'Aluminum',
+        'stainless steel': 'Stainless Steel', 'inconel': 'Inconel', 'cobalt chrome': 'Cobalt Chrome',
+        'copper': 'Copper', 'brass': 'Brass', 'peek': 'PEEK', 'ultem': 'Ultem', 'pei': 'Ultem',
+        'polycarbonate': 'Polycarbonate', 'pa12': 'PA-12', 'pa11': 'PA-11', 'pa-12': 'PA-12',
+        'pa-11': 'PA-11', 'carbon fiber': 'Carbon Fiber', 'glass fiber': 'Glass Fiber',
+        'silicone': 'Silicone', 'polypropylene': 'Polypropylene', 'pp': 'PP',
+      };
+      const knownTechnologies: Record<string, string> = {
+        'fdm': 'FDM/FFF', 'fff': 'FDM/FFF', 'sla': 'SLA', 'sls': 'SLS', 'mjf': 'MJF',
+        'dmls': 'DMLS', 'slm': 'SLM', 'dlp': 'DLP', 'ebm': 'EBM',
+        'binder jetting': 'Binder Jetting', 'material jetting': 'Material Jetting',
+        'polyjet': 'PolyJet', 'cnc': 'CNC Machining', 'injection molding': 'Injection Molding',
+      };
+
+      // Split query into words and check for known terms
+      const queryWords = queryLower.split(/[\s,]+/);
+      for (const [key, displayName] of Object.entries(knownMaterials)) {
+        if (queryLower.includes(key) && !aiFilters.materials.some(m => m.toLowerCase() === key || m === displayName)) {
+          // Verify it's a word boundary match (not part of another word like "display")
+          const regex = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+          if (regex.test(query)) {
+            aiFilters.materials.push(displayName);
+          }
+        }
+      }
+      for (const [key, displayName] of Object.entries(knownTechnologies)) {
+        if (queryLower.includes(key) && !aiFilters.technologies.some(t => t.toLowerCase() === key || t === displayName)) {
+          const regex = new RegExp(`\\b${key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}\\b`, 'i');
+          if (regex.test(query)) {
+            aiFilters.technologies.push(displayName);
+          }
+        }
+      }
+
       setFilters(aiFilters);
       
       // Cache the result
