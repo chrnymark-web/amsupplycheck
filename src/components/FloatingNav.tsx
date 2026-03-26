@@ -32,7 +32,7 @@ const FloatingNav: React.FC<FloatingNavProps> = ({
 
   return (
     <TooltipProvider>
-      <div className="fixed bottom-4 left-4 sm:bottom-6 sm:left-6 z-50 flex flex-col items-start gap-3">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 flex flex-col items-end gap-3">
         {/* Navigation Menu Items */}
         <div
           className={cn(
@@ -62,7 +62,7 @@ const FloatingNav: React.FC<FloatingNavProps> = ({
                   </span>
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="right">
+              <TooltipContent side="left">
                 <p>Go to {item.label}</p>
               </TooltipContent>
             </Tooltip>
@@ -77,15 +77,15 @@ const FloatingNav: React.FC<FloatingNavProps> = ({
                 size="icon"
                 onClick={onScrollTop}
                 className={cn(
-                  "h-12 w-12 rounded-full shadow-lg bg-gradient-primary hover:shadow-xl transition-all duration-300 hover:scale-110",
-                  !isOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+                  "h-12 w-12 rounded-full shadow-lg bg-gradient-primary hover:shadow-xl transition-all duration-300 hover:scale-110 hover:opacity-100",
+                  !isOpen ? "opacity-60" : "opacity-0 pointer-events-none"
                 )}
                 aria-label="Scroll to top"
               >
                 <ChevronUp className="h-5 w-5" />
               </Button>
             </TooltipTrigger>
-            <TooltipContent side="right">
+            <TooltipContent side="left">
               <p>Back to top</p>
             </TooltipContent>
           </Tooltip>
@@ -98,7 +98,7 @@ const FloatingNav: React.FC<FloatingNavProps> = ({
               size="icon"
               onClick={() => setIsOpen(!isOpen)}
               className={cn(
-                "h-14 w-14 rounded-full shadow-lg bg-gradient-primary hover:shadow-2xl transition-all duration-300 hover:scale-125 hover:rotate-90",
+                "h-14 w-14 rounded-full shadow-lg bg-gradient-primary hover:shadow-2xl transition-all duration-300 hover:scale-125 hover:rotate-90 hover:opacity-100 opacity-60",
                 isOpen && "rotate-90 scale-110"
               )}
               aria-label="Toggle navigation menu"
@@ -110,7 +110,7 @@ const FloatingNav: React.FC<FloatingNavProps> = ({
               )}
             </Button>
           </TooltipTrigger>
-          <TooltipContent side="right">
+          <TooltipContent side="left">
             <p>{isOpen ? 'Close menu' : 'Quick Navigation'}</p>
           </TooltipContent>
         </Tooltip>
