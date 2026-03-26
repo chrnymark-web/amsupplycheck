@@ -1,0 +1,184 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 3D Printing Marketplace Design System */
+
+@layer base {
+  :root {
+    /* Brand Colors - Professional Tech Blue Palette */
+    --background: 0 0% 3%;
+    --foreground: 0 0% 98%;
+
+    --card: 0 0% 8%;
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 98%;
+
+    --primary: 87 20% 45%;
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 87 20% 40%;
+
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 85%;
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+
+    --accent: 87 20% 45%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 18%;
+    --ring: 87 20% 45%;
+
+    /* Marketplace Specific Colors */
+    --supplier-verified: 87 20% 45%;
+    --supplier-premium: 280 100% 60%;
+    --price-highlight: 25 95% 53%;
+    
+    /* Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(87, 20%, 45%), hsl(87, 22%, 50%));
+    --gradient-hero: linear-gradient(135deg, hsl(87, 20%, 45%) 0%, hsl(87, 22%, 50%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0, 0%, 8%) 0%, hsl(0, 0%, 12%) 100%);
+    
+    /* Shadows & Effects */
+    --shadow-card: 0 4px 20px hsl(0, 0%, 0%, 0.5);
+    --shadow-hover: 0 8px 30px hsl(87, 20%, 45%, 0.15);
+    --shadow-filter: 0 2px 15px hsl(0, 0%, 0%, 0.3);
+    
+    /* Animations */
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-bounce: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 225 25% 8%;
+    --foreground: 220 15% 95%;
+
+    --card: 225 25% 10%;
+    --card-foreground: 220 15% 95%;
+
+    --popover: 225 25% 10%;
+    --popover-foreground: 220 15% 95%;
+
+    --primary: 87 20% 50%;
+    --primary-foreground: 225 25% 8%;
+    --primary-hover: 87 20% 55%;
+
+    --secondary: 225 15% 15%;
+    --secondary-foreground: 220 15% 85%;
+
+    --muted: 225 15% 15%;
+    --muted-foreground: 220 10% 60%;
+
+    --accent: 87 20% 50%;
+    --accent-foreground: 225 25% 8%;
+
+    --destructive: 0 84% 55%;
+    --destructive-foreground: 220 15% 95%;
+
+    --border: 225 15% 20%;
+    --input: 225 15% 18%;
+    --ring: 87 20% 50%;
+
+    /* Dark Mode Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(87, 20%, 50%), hsl(87, 22%, 55%));
+    --gradient-hero: linear-gradient(135deg, hsl(87, 20%, 50%) 0%, hsl(87, 22%, 55%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(225, 25%, 10%) 0%, hsl(225, 15%, 12%) 100%);
+    
+    /* Dark Shadows */
+    --shadow-card: 0 4px 20px hsl(225, 25%, 5%);
+    --shadow-hover: 0 8px 30px hsl(87, 20%, 50%, 0.2);
+    --shadow-filter: 0 2px 15px hsl(225, 25%, 5%);
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  
+  html, body {
+    overflow-x: clip;
+    max-width: 100vw;
+    width: 100%;
+  }
+
+  /* Hide Lovable badge */
+  #lovable-badge {
+    display: none !important;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Custom Scrollbar Styles */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: hsl(var(--primary));
+  border-radius: 3px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--primary-hover));
+}
+
+/* Ensure Mapbox GL map fills container */
+.mapboxgl-map {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Ensure markers render above map tiles with correct positioning */
+.mapboxgl-marker {
+  position: absolute !important;
+  z-index: 1 !important;
+  pointer-events: auto !important;
+}
+
+/* Ensure popups render above markers */
+.mapboxgl-popup {
+  z-index: 10 !important;
+}

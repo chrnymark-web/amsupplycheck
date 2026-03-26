@@ -1,0 +1,67 @@
+project_id = "iptzktfftyusmvcgtlcy"
+
+[edge_runtime.cron.scheduled-validation]
+schedule = "0 * * * *"
+
+[edge_runtime.cron.discover-suppliers]
+schedule = "0 2 1 * *"
+
+[functions.validate-supplier]
+verify_jwt = true
+
+[functions.update-supplier-csv]
+verify_jwt = true
+
+[functions.import-suppliers-csv]
+verify_jwt = true
+
+[functions.scheduled-validation]
+verify_jwt = false
+
+[functions.import-addidex-suppliers]
+verify_jwt = true
+
+[functions.normalize-supplier-data]
+verify_jwt = true
+
+[functions.test-lovable-ai]
+verify_jwt = false
+
+[functions.check-service-account]
+verify_jwt = true
+
+[functions.geocode-suppliers]
+verify_jwt = true
+
+[functions.extract-supplier-locations]
+verify_jwt = true
+
+[functions.send-signup-notification]
+verify_jwt = false
+
+[functions.generate-sitemap]
+verify_jwt = false
+
+[functions.ai-search]
+verify_jwt = false
+
+[functions.supplier-chat]
+verify_jwt = false
+
+[functions.ai-supplier-matching]
+verify_jwt = false
+
+[functions.discover-suppliers]
+verify_jwt = false
+
+[functions.test-validation]
+verify_jwt = false
+
+[functions.generate-supplier-comparison]
+verify_jwt = false
+
+[functions.shapeways-printability]
+verify_jwt = false
+
+[functions.assign-supplier-tags]
+verify_jwt = false

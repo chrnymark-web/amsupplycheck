@@ -1,0 +1,1 @@
+UPDATE suppliers SET logo_url = NULL WHERE logo_url IS NOT NULL;

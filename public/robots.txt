@@ -1,0 +1,28 @@
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: *
+Allow: /
+
+# Disallow admin/internal pages
+Disallow: /admin
+Disallow: /analytics
+Disallow: /validation
+Disallow: /monitoring
+Disallow: /normalize
+Disallow: /export
+Disallow: /signups
+Disallow: /auth
+Disallow: /seo-dashboard
+
+# Sitemap
+Sitemap: https://amsupplycheck.com/sitemap.xml

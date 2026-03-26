@@ -1,0 +1,1 @@
+DELETE FROM suppliers WHERE supplier_id = 'discovered-9d4985dd';
