@@ -74,10 +74,10 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
             className="flex items-center cursor-pointer flex-shrink-0 mt-2"
             onClick={() => navigate('/')}
           >
-            <img 
-              src={logo} 
-              alt="AMSupplyCheck" 
-              className="h-36 w-auto"
+            <img
+              src={logo}
+              alt="AMSupplyCheck"
+              className="h-16 w-auto"
             />
           </div>
 
