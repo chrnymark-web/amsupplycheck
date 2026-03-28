@@ -259,6 +259,9 @@ export function PriceCalculator() {
                         Total: ${(estimate.lowEstimate * quantity).toFixed(2)} &ndash; ${(estimate.highEstimate * quantity).toFixed(2)}
                       </p>
                     )}
+                    <p className="text-[10px] text-muted-foreground/50 mt-2">
+                      Market average estimate. Actual prices vary by supplier, finish and lead time. Contact suppliers for exact quotes.
+                    </p>
                   </div>
 
                   {/* Factors */}
@@ -275,7 +278,7 @@ export function PriceCalculator() {
                   {/* Matching suppliers */}
                   {estimate.matchingSuppliers.length > 0 && (
                     <div>
-                      <p className="text-xs text-muted-foreground mb-2">Matching suppliers for {technology} + {material}:</p>
+                      <p className="text-xs text-muted-foreground mb-2">Suppliers offering {technology} — contact for exact pricing:</p>
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         {estimate.matchingSuppliers.slice(0, 3).map((s) => (
                           <a
