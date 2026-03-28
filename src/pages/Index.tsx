@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react
 import { useNavigate } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import ShapewaysPrintabilityDialog from '@/components/ShapewaysPrintabilityDialog';
+import { PriceCalculator } from '@/components/PriceCalculator';
 import { supabase as supabaseClient } from '@/integrations/supabase/client';
 import { useForm } from 'react-hook-form';
 import Map from '@/components/ui/map';
@@ -958,6 +959,9 @@ const Index = () => {
                 <Globe className="h-3 w-3 mr-1" /> Browse by Country
               </Button>
             </div>
+
+            {/* Price Calculator */}
+            <PriceCalculator />
 
             {/* Search Interface with AI and Live Preview */}
             <div className="max-w-4xl mx-auto mb-4 overflow-visible relative z-[70]">

@@ -1,4 +1,4 @@
-project_id = "iptzktfftyusmvcgtlcy"
+project_id = "ypjgbuldsiwkjxeoeefo"
 
 # Cron jobs moved to Supabase dashboard (not supported in CLI v2.84+)
 # scheduled-validation: "0 * * * *"
@@ -62,4 +62,7 @@ verify_jwt = false
 verify_jwt = false
 
 [functions.assign-supplier-tags]
+verify_jwt = false
+
+[functions.estimate-price]
 verify_jwt = false
