@@ -125,7 +125,8 @@ serve(async (req) => {
         .from('suppliers')
         .select('id, name, website, region')
         .overlaps('technologies', techSlugs)
-        .limit(6);
+        .order('verified', { ascending: false })
+        .limit(50);
 
       if (data) {
         matchingSuppliers = data.map(s => ({

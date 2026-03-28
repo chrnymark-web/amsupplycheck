@@ -279,8 +279,8 @@ export function PriceCalculator() {
                   {estimate.matchingSuppliers.length > 0 && (
                     <div>
                       <p className="text-xs text-muted-foreground mb-2">Suppliers offering {technology} — contact for exact pricing:</p>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        {estimate.matchingSuppliers.slice(0, 3).map((s) => (
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-48 overflow-y-auto pr-1">
+                        {estimate.matchingSuppliers.map((s) => (
                           <a
                             key={s.id}
                             href={s.website}
