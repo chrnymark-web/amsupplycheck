@@ -74,8 +74,9 @@ serve(async (req) => {
     let lowPerPart = volumeCm3 * basePrice.low * materialMult;
     let highPerPart = volumeCm3 * basePrice.high * materialMult;
 
-    // Minimum price floor
-    const minPrice = technology.includes('DM') || technology === 'SLM' ? 25 : 3;
+    // Minimum price floor (metal technologies have higher minimums)
+    const isMetalTech = technology === 'DMLS' || technology === 'SLM' || technology === 'Binder Jetting';
+    const minPrice = isMetalTech ? 25 : 3;
     lowPerPart = Math.max(lowPerPart, minPrice);
     highPerPart = Math.max(highPerPart, minPrice * 1.5);
 
