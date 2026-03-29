@@ -28,6 +28,7 @@ const ExportSuppliers = lazy(() => import("./pages/ExportSuppliers"));
 const Auth = lazy(() => import("./pages/Auth"));
 const NormalizeData = lazy(() => import("./pages/NormalizeData"));
 const Signups = lazy(() => import("./pages/Signups"));
+const CrmBoardPage = lazy(() => import("./pages/CrmBoard"));
 const Analytics = lazy(() => import("./pages/Analytics"));
 const ProjectMatch = lazy(() => import("./pages/ProjectMatch"));
 
@@ -112,6 +113,7 @@ const App = () => (
             <Route path="/admin/export" element={<AdminPage><ExportSuppliers /></AdminPage>} />
             <Route path="/admin/normalize" element={<AdminPage><NormalizeData /></AdminPage>} />
             <Route path="/admin/signups" element={<AdminPage><Signups /></AdminPage>} />
+            <Route path="/admin/crm" element={<AdminPage><CrmBoardPage /></AdminPage>} />
             <Route path="/admin/discovered" element={<AdminPage><DiscoveredSuppliers /></AdminPage>} />
             <Route path="/analytics" element={<AdminPage><Analytics /></AdminPage>} />
             <Route path="/match" element={<ProjectMatch />} />
