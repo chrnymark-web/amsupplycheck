@@ -49,7 +49,11 @@ const whiteLogos = [
   'imaterialise',
   'i.materialise',
   'oceanz',
-  'treatstock'
+  'treatstock',
+  'norra am',
+  'norra additive',
+  'norraadditive',
+  'norraam'
 ];
 
 const shouldUseBlackBackground = (name: string): boolean => {

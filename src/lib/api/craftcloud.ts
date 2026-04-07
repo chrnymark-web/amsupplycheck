@@ -3,6 +3,7 @@
 // Tested live 2026-04-07: 97 vendors, 8874 quotes for a 20mm cube
 
 import type { LiveQuote, QuoteRequest, Currency } from './types';
+import { getLocalLogoForSupplier } from '@/lib/supplierLogos';
 
 const CRAFTCLOUD_BASE_URL = 'https://api.craftcloud3d.com';
 
@@ -146,10 +147,13 @@ function toQuotes(
   // Show best quote per vendor (not all 8000+ combos)
   const bestPerVendor = getBestQuotePerVendor(priceResponse.quotes);
 
-  return bestPerVendor.map((q) => ({
+  return bestPerVendor.map((q) => {
+    const name = formatVendorName(q.vendorId);
+    return {
     type: 'live' as const,
     supplierId: `craftcloud-${q.vendorId}`,
-    supplierName: formatVendorName(q.vendorId),
+    supplierName: name,
+    supplierLogo: getLocalLogoForSupplier(name),
     material: q.materialConfigId,
     technology: '',
     unitPrice: q.price,
@@ -161,7 +165,8 @@ function toQuotes(
     quoteUrl: `https://craftcloud3d.com`,
     fetchedAt: new Date(),
     source: 'craftcloud' as const,
-  }));
+  };
+  });
 }
 
 // Prettify vendor IDs like "bone3dgroup" → "Bone 3D Group"

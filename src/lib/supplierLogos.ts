@@ -37,6 +37,11 @@ import treatstockLogo from '@/assets/supplier-logos/treatstock.png';
 import mx3dLogo from '@/assets/supplier-logos/mx3d.png';
 import oceanzLogo from '@/assets/supplier-logos/oceanz.png';
 import forecast3dDarkLogo from '@/assets/supplier-logos/forecast3d-dark.png';
+import metalcentreCakovecLogo from '@/assets/supplier-logos/metalcentre-cakovec.png';
+import norraAmLogo from '@/assets/supplier-logos/norra-am.png';
+import zone3dplusLogo from '@/assets/supplier-logos/zone3dplus.png';
+import ryse3dLogo from '@/assets/supplier-logos/ryse3d.png';
+import baesstechLogo from '@/assets/supplier-logos/baesstech.png';
 
 // Logo mapping object - Top 35 most well-known suppliers only
 export const supplierLogoMap: Record<string, string> = {
@@ -90,6 +95,24 @@ export const supplierLogoMap: Record<string, string> = {
   'forecast 3d': forecast3dDarkLogo,
   'addman': addmanLogo,
   'mx3d': mx3dLogo,
+
+  // Craftcloud vendors
+  'metalcentrecakovec': metalcentreCakovecLogo,
+  'metalcentre cakovec': metalcentreCakovecLogo,
+  'metalska jezgra': metalcentreCakovecLogo,
+  'norra am': norraAmLogo,
+  'norra additive': norraAmLogo,
+  'norraadditive': norraAmLogo,
+  'norraam': norraAmLogo,
+  'zone 3 dplus': zone3dplusLogo,
+  'zone3dplus': zone3dplusLogo,
+  'zone 3d plus': zone3dplusLogo,
+  'ryse 3 d': ryse3dLogo,
+  'ryse3d': ryse3dLogo,
+  'ryse 3d': ryse3dLogo,
+  'baesstech': baesstechLogo,
+  'baesstech-engineering': baesstechLogo,
+  'baesstech engineering': baesstechLogo,
 };
 
 /**
