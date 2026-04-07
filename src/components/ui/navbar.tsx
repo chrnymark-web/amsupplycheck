@@ -70,16 +70,17 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
         {/* Single row with logo left and menu items right */}
         <div className="flex items-center justify-between h-28 py-1">
           {/* Logo on left */}
-          <div 
+          <a
+            href="/"
             className="flex items-center cursor-pointer flex-shrink-0"
-            onClick={() => navigate('/')}
+            onClick={(e) => { e.preventDefault(); navigate('/'); }}
           >
             <img
               src={logo}
               alt="AMSupplyCheck"
               className="h-24 w-auto"
             />
-          </div>
+          </a>
 
           {/* All menu items on right */}
           <div className="hidden md:flex items-center space-x-4">
