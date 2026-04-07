@@ -1,5 +1,5 @@
-import React from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useMemo } from 'react';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useSupplierDetail } from '@/hooks/use-suppliers';
 import Navbar from '@/components/ui/navbar';
@@ -8,11 +8,42 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import SupplierLogo from '@/components/ui/supplier-logo';
-import { MapPin, ExternalLink, Verified, ArrowLeft, Globe, Factory, Shield, Tag, Cpu, Building2 } from 'lucide-react';
+import { MapPin, ExternalLink, Verified, ArrowLeft, Globe, Factory, Shield, Tag, Cpu, Building2, Clock, Package, Signal } from 'lucide-react';
+import type { LiveQuote } from '@/lib/api/types';
+import { slugifyVendorName } from '@/lib/utils';
 
 const SupplierProfile: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
   const { data: supplier, isLoading, error } = useSupplierDetail(slug || '');
+
+  const craftcloudVendor = useMemo((): LiveQuote | null => {
+    if (supplier) return null;
+
+    // Priority 1: Navigation state
+    const stateVendor = (location.state as { craftcloudVendor?: LiveQuote })?.craftcloudVendor;
+    if (stateVendor) return stateVendor;
+
+    // Priority 2: SessionStorage lookup by slug
+    try {
+      const raw = sessionStorage.getItem('stl-live-quotes');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      const storedAt = new Date(parsed.storedAt).getTime();
+      if (Date.now() - storedAt > 30 * 60 * 1000) return null;
+      const match = parsed.quotes.find((q: Record<string, unknown>) => {
+        const qSlug = slugifyVendorName(q.supplierName as string);
+        return qSlug === slug;
+      });
+      if (!match) return null;
+      return {
+        ...match,
+        fetchedAt: new Date(match.fetchedAt),
+      } as LiveQuote;
+    } catch {
+      return null;
+    }
+  }, [location.state, slug, supplier]);
 
   if (isLoading) {
     return (
@@ -28,6 +59,142 @@ const SupplierProfile: React.FC = () => {
               </div>
               <div className="space-y-4">
                 <Skeleton className="h-40 w-full rounded-lg" />
+              </div>
+            </div>
+          </div>
+        </main>
+      </>
+    );
+  }
+
+  // Craftcloud vendor fallback (no DB entry)
+  if (!supplier && craftcloudVendor) {
+    const formatCurrency = (amount: number, currency: string) => {
+      const symbols: Record<string, string> = { EUR: '€', USD: '$', GBP: '£', DKK: 'kr' };
+      const sym = symbols[currency] || currency;
+      return `${sym}${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    };
+
+    return (
+      <>
+        <Helmet>
+          <title>{craftcloudVendor.supplierName} - Craftcloud Vendor | Supplycheck</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+
+        <Navbar />
+
+        <main className="min-h-screen bg-background pt-20">
+          <div className="max-w-5xl mx-auto px-4 py-8">
+            <Link to="/suppliers" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+              <ArrowLeft className="h-4 w-4" /> Back to suppliers
+            </Link>
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Main content */}
+              <div className="lg:col-span-2 space-y-6">
+                {/* Header card */}
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-5">
+                      <SupplierLogo name={craftcloudVendor.supplierName} logoUrl={craftcloudVendor.supplierLogo} size="2xl" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h1 className="text-2xl font-bold text-foreground">{craftcloudVendor.supplierName}</h1>
+                        </div>
+                        <Badge variant="secondary" className="text-xs">
+                          <Signal className="h-3 w-3 mr-1" />
+                          Craftcloud Marketplace Vendor
+                        </Badge>
+                        <p className="text-muted-foreground leading-relaxed mt-3">
+                          This vendor is available through the Craftcloud 3D printing marketplace. Pricing data shown is from a live quote.
+                        </p>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                {/* Live quote card */}
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Package className="h-5 w-5 text-primary" /> Live Quote Data
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                        <div className="space-y-1">
+                          <p className="text-xs text-muted-foreground">Unit Price</p>
+                          <p className="text-lg font-semibold text-foreground">{formatCurrency(craftcloudVendor.unitPrice, craftcloudVendor.currency)}</p>
+                        </div>
+                        {craftcloudVendor.quantity > 1 && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">Total ({craftcloudVendor.quantity} pcs)</p>
+                            <p className="text-lg font-semibold text-foreground">{formatCurrency(craftcloudVendor.totalPrice, craftcloudVendor.currency)}</p>
+                          </div>
+                        )}
+                        {craftcloudVendor.estimatedLeadTimeDays != null && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">Lead Time</p>
+                            <p className="text-lg font-semibold text-foreground flex items-center gap-1">
+                              <Clock className="h-4 w-4 text-muted-foreground" />
+                              {craftcloudVendor.estimatedLeadTimeDays} days
+                            </p>
+                          </div>
+                        )}
+                        {craftcloudVendor.shippingEstimate != null && (
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">Shipping</p>
+                            <p className="text-lg font-semibold text-foreground">{formatCurrency(craftcloudVendor.shippingEstimate, craftcloudVendor.currency)}</p>
+                          </div>
+                        )}
+                      </div>
+
+                      {craftcloudVendor.material && (
+                        <div className="pt-2 border-t border-border">
+                          <p className="text-xs text-muted-foreground mb-1">Material</p>
+                          <Badge variant="outline">{craftcloudVendor.material.replace(/[_-]/g, ' ')}</Badge>
+                        </div>
+                      )}
+
+                      {/* Alternative quotes */}
+                      {craftcloudVendor.alternativeQuotes && craftcloudVendor.alternativeQuotes.length > 0 && (
+                        <div className="pt-2 border-t border-border">
+                          <p className="text-xs text-muted-foreground mb-2">Alternative Materials</p>
+                          <div className="space-y-2">
+                            {craftcloudVendor.alternativeQuotes.map((alt, i) => (
+                              <div key={i} className="flex items-center justify-between p-2 rounded-md border border-border">
+                                <span className="text-sm text-foreground">{alt.label || alt.material.replace(/[_-]/g, ' ')}</span>
+                                <span className="text-sm font-medium text-foreground">{formatCurrency(alt.unitPrice, craftcloudVendor.currency)}</span>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Sidebar */}
+              <div className="space-y-4">
+                <Card className="bg-card border-border sticky top-24">
+                  <CardContent className="p-5 space-y-4">
+                    <h3 className="font-semibold text-foreground">Get a Quote</h3>
+                    <a
+                      href="https://craftcloud3d.com"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-center gap-2 w-full rounded-md bg-primary text-primary-foreground hover:bg-primary-hover h-10 px-4 text-sm font-medium transition-colors"
+                    >
+                      Visit Craftcloud <ExternalLink className="h-4 w-4" />
+                    </a>
+                    <p className="text-xs text-muted-foreground">
+                      This vendor offers quotes through the Craftcloud marketplace. Upload your 3D model on Craftcloud to get an instant quote.
+                    </p>
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
@@ -192,7 +359,7 @@ const SupplierProfile: React.FC = () => {
               <Card className="bg-card border-border sticky top-24">
                 <CardContent className="p-5 space-y-4">
                   <h3 className="font-semibold text-foreground">Contact Supplier</h3>
-                  
+
                   {supplier.website && (
                     <a
                       href={supplier.website}

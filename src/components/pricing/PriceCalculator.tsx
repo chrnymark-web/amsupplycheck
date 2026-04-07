@@ -7,6 +7,7 @@ import { getCraftcloudQuotes } from '@/lib/api/craftcloud';
 import type { LiveQuote } from '@/lib/api/types';
 import SupplierLogo from '@/components/ui/supplier-logo';
 import { useNavigate } from 'react-router-dom';
+import { slugifyVendorName } from '@/lib/utils';
 
 const TECH_MATERIALS: Record<string, string[]> = {
   'FDM/FFF': ['PLA', 'ABS', 'PETG', 'Nylon', 'TPU', 'ASA', 'Polycarbonate', 'PEEK', 'PEI/Ultem'],
@@ -418,8 +419,10 @@ export function PriceCalculator() {
                                   className="flex-1 flex items-center justify-center gap-1.5 py-2 text-[11px] font-medium text-primary/70 hover:text-primary hover:bg-primary/5 transition-colors"
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    const slug = q.supplierName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                                    navigate(`/suppliers/${slug}`);
+                                    const slug = slugifyVendorName(q.supplierName);
+                                    navigate(`/suppliers/${slug}`, {
+                                      state: { craftcloudVendor: q }
+                                    });
                                   }}
                                 >
                                   <ChevronRight className="h-3 w-3" />
