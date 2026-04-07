@@ -276,7 +276,7 @@ const Map: React.FC<MapProps> = ({
       if (showControls && window.innerWidth >= 1024) {
         map.current.addControl(
           new mapboxgl.NavigationControl(),
-          'top-right'
+          'bottom-right'
         );
       }
 
