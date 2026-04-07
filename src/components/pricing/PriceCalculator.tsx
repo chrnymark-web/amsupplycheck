@@ -1,8 +1,10 @@
 import { useState, useCallback, useRef } from 'react';
-import { Upload, Calculator, ChevronDown, ChevronUp, Package, Loader2, ExternalLink, X } from 'lucide-react';
+import { Upload, Calculator, ChevronDown, ChevronUp, Package, Loader2, ExternalLink, X, Signal, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { parseSTL, type STLResult } from '@/lib/stlParser';
 import { supabase } from '@/integrations/supabase/client';
+import { getCraftcloudQuotes } from '@/lib/api/craftcloud';
+import type { LiveQuote } from '@/lib/api/types';
 
 const TECH_MATERIALS: Record<string, string[]> = {
   'FDM/FFF': ['PLA', 'ABS', 'PETG', 'Nylon', 'TPU', 'ASA', 'Polycarbonate', 'PEEK', 'PEI/Ultem'],
@@ -36,6 +38,9 @@ export function PriceCalculator() {
   const [error, setError] = useState('');
   const [parseError, setParseError] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [liveQuotes, setLiveQuotes] = useState<LiveQuote[]>([]);
+  const [liveLoading, setLiveLoading] = useState(false);
+  const [liveError, setLiveError] = useState('');
 
   const handleFile = useCallback(async (f: File) => {
     setFile(f);
@@ -73,24 +78,37 @@ export function PriceCalculator() {
   }, [handleFile]);
 
   const handleEstimate = async () => {
-    if (!stlData) return;
+    if (!stlData || !file) return;
     setLoading(true);
     setError('');
     setEstimate(null);
+    setLiveQuotes([]);
+    setLiveError('');
+    setLiveLoading(true);
 
+    // Run market estimate + Craftcloud live quotes in parallel
+    const estimatePromise = supabase.functions.invoke('estimate-price', {
+      body: {
+        volumeCm3: stlData.volumeCm3,
+        surfaceAreaCm2: stlData.surfaceAreaCm2,
+        boundingBox: stlData.boundingBox,
+        triangleCount: stlData.triangleCount,
+        technology,
+        material,
+        quantity,
+      },
+    });
+
+    const livePromise = getCraftcloudQuotes({
+      file,
+      quantity,
+      currency: 'EUR',
+      countryCode: 'DK',
+    });
+
+    // Handle market estimate
     try {
-      const { data, error: fnError } = await supabase.functions.invoke('estimate-price', {
-        body: {
-          volumeCm3: stlData.volumeCm3,
-          surfaceAreaCm2: stlData.surfaceAreaCm2,
-          boundingBox: stlData.boundingBox,
-          triangleCount: stlData.triangleCount,
-          technology,
-          material,
-          quantity,
-        },
-      });
-
+      const { data, error: fnError } = await estimatePromise;
       if (fnError) throw new Error(fnError.message);
       setEstimate(data);
     } catch (e: unknown) {
@@ -98,6 +116,17 @@ export function PriceCalculator() {
       setError(msg);
     } finally {
       setLoading(false);
+    }
+
+    // Handle live quotes (may take longer due to polling)
+    try {
+      const quotes = await livePromise;
+      setLiveQuotes(quotes);
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : 'Failed to fetch live quotes';
+      setLiveError(msg);
+    } finally {
+      setLiveLoading(false);
     }
   };
 
@@ -107,6 +136,9 @@ export function PriceCalculator() {
     setEstimate(null);
     setError('');
     setParseError('');
+    setLiveQuotes([]);
+    setLiveError('');
+    setLiveLoading(false);
   };
 
   const materials = TECH_MATERIALS[technology] || [];
@@ -299,9 +331,70 @@ export function PriceCalculator() {
                     </div>
                   )}
 
+                  {/* Live Quotes from Craftcloud */}
+                  {liveLoading && (
+                    <div className="p-4 rounded-xl bg-card/50 border border-border/20">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Signal className="h-3.5 w-3.5 text-green-500" />
+                        <span className="text-xs font-medium">Fetching live quotes from 90+ vendors...</span>
+                      </div>
+                      <div className="space-y-2">
+                        {[1, 2, 3].map((i) => (
+                          <div key={i} className="h-10 rounded-lg bg-muted/50 animate-pulse" />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {liveQuotes.length > 0 && (
+                    <div className="p-4 rounded-xl bg-green-500/5 border border-green-500/20">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Signal className="h-3.5 w-3.5 text-green-500" />
+                        <span className="text-xs font-medium text-green-700 dark:text-green-400">
+                          {liveQuotes.length} live quotes from real vendors
+                        </span>
+                      </div>
+                      <div className="space-y-1.5 max-h-64 overflow-y-auto">
+                        {liveQuotes.slice(0, 15).map((q, i) => (
+                          <div
+                            key={`${q.supplierId}-${i}`}
+                            className={`flex items-center gap-3 p-2.5 rounded-lg border transition-colors ${
+                              i === 0
+                                ? 'border-green-500/30 bg-green-500/5'
+                                : 'border-border/20 bg-card/30 hover:border-border/40'
+                            }`}
+                          >
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-medium truncate">{q.supplierName}</p>
+                              {i === 0 && (
+                                <span className="text-[10px] text-green-600 font-medium">Lowest price</span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 text-[10px] text-muted-foreground shrink-0">
+                              <Clock className="h-2.5 w-2.5" />
+                              {q.estimatedLeadTimeDays ? `${q.estimatedLeadTimeDays}d` : '—'}
+                            </div>
+                            <p className={`text-sm font-semibold shrink-0 ${i === 0 ? 'text-green-600' : ''}`}>
+                              €{q.unitPrice.toFixed(2)}
+                            </p>
+                          </div>
+                        ))}
+                        {liveQuotes.length > 15 && (
+                          <p className="text-[10px] text-muted-foreground text-center pt-1">
+                            +{liveQuotes.length - 15} more vendors
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {liveError && !liveLoading && (
+                    <p className="text-xs text-muted-foreground">Live quotes unavailable: {liveError}</p>
+                  )}
+
                   {/* Try again */}
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setEstimate(null)}>
+                    <Button variant="outline" size="sm" onClick={() => { setEstimate(null); setLiveQuotes([]); setLiveError(''); }}>
                       Change options
                     </Button>
                     <Button variant="outline" size="sm" onClick={reset}>
