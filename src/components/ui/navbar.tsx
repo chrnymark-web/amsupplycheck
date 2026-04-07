@@ -73,7 +73,7 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
           <a
             href="/"
             className="flex items-center cursor-pointer flex-shrink-0"
-            onClick={(e) => { e.preventDefault(); navigate('/'); }}
+            onClick={(e) => { e.preventDefault(); if (location.pathname === '/') { window.location.href = '/'; } else { navigate('/'); } }}
           >
             <img
               src={logo}

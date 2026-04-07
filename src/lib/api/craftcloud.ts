@@ -2,7 +2,7 @@
 // Docs: https://swagger.craftcloud3d.com/ | OpenAPI: https://api.craftcloud3d.com/api-docs.json
 // Tested live 2026-04-07: 97 vendors, 8874 quotes for a 20mm cube
 
-import type { LiveQuote, QuoteRequest, Currency } from './types';
+import type { LiveQuote, QuoteOption, QuoteRequest, Currency } from './types';
 import { getLocalLogoForSupplier } from '@/lib/supplierLogos';
 
 const CRAFTCLOUD_BASE_URL = 'https://api.craftcloud3d.com';
@@ -129,6 +129,50 @@ function getBestQuotePerVendor(quotes: CraftcloudQuote[]): CraftcloudQuote[] {
   return [...best.values()];
 }
 
+// Get top 3 distinct quotes per vendor: cheapest, fastest, and a mid-range option
+function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, CraftcloudQuote[]> {
+  const byVendor = new Map<string, CraftcloudQuote[]>();
+  for (const q of quotes) {
+    if (!byVendor.has(q.vendorId)) byVendor.set(q.vendorId, []);
+    byVendor.get(q.vendorId)!.push(q);
+  }
+
+  const result = new Map<string, CraftcloudQuote[]>();
+  for (const [vendorId, vendorQuotes] of byVendor) {
+    // Sort by price to find distinct price tiers
+    const sorted = [...vendorQuotes].sort((a, b) => a.price - b.price);
+    const picked: CraftcloudQuote[] = [sorted[0]]; // Always include cheapest
+
+    // Find fastest option (different from cheapest)
+    const fastest = [...vendorQuotes].sort((a, b) => a.productionTimeFast - b.productionTimeFast)[0];
+    if (fastest.quoteId !== picked[0].quoteId && fastest.price !== picked[0].price) {
+      picked.push(fastest);
+    }
+
+    // Find a mid-range option if we have enough variety
+    if (sorted.length > 2) {
+      const midIdx = Math.floor(sorted.length / 2);
+      const mid = sorted[midIdx];
+      if (!picked.some(p => p.quoteId === mid.quoteId) && mid.price !== picked[0].price) {
+        picked.push(mid);
+      }
+    }
+
+    // If we still need options, grab distinct price tiers
+    if (picked.length < 3) {
+      for (const q of sorted) {
+        if (picked.length >= 3) break;
+        if (!picked.some(p => p.quoteId === q.quoteId) && !picked.some(p => Math.abs(p.price - q.price) < 0.5)) {
+          picked.push(q);
+        }
+      }
+    }
+
+    result.set(vendorId, picked.slice(0, 3));
+  }
+  return result;
+}
+
 // Convert to normalized LiveQuote format
 function toQuotes(
   priceResponse: CraftcloudPriceResponse,
@@ -144,28 +188,41 @@ function toQuotes(
     }
   }
 
-  // Show best quote per vendor (not all 8000+ combos)
+  // Show best quote per vendor with alternative options
   const bestPerVendor = getBestQuotePerVendor(priceResponse.quotes);
+  const topQuotes = getTopQuotesPerVendor(priceResponse.quotes);
 
   return bestPerVendor.map((q) => {
     const name = formatVendorName(q.vendorId);
+    const vendorAlts = topQuotes.get(q.vendorId) || [];
+    const alternativeQuotes: QuoteOption[] = vendorAlts
+      .filter(alt => alt.quoteId !== q.quoteId)
+      .map(alt => ({
+        material: alt.materialConfigId,
+        unitPrice: alt.price,
+        totalPrice: alt.price * quantity,
+        estimatedLeadTimeDays: alt.productionTimeFast,
+        shippingEstimate: shippingByVendor.get(q.vendorId) ?? null,
+      }));
+
     return {
-    type: 'live' as const,
-    supplierId: `craftcloud-${q.vendorId}`,
-    supplierName: name,
-    supplierLogo: getLocalLogoForSupplier(name),
-    material: q.materialConfigId,
-    technology: '',
-    unitPrice: q.price,
-    totalPrice: q.price * quantity,
-    currency: (q.currency as Currency) || 'EUR',
-    quantity,
-    estimatedLeadTimeDays: q.productionTimeFast,
-    shippingEstimate: shippingByVendor.get(q.vendorId) ?? null,
-    quoteUrl: `https://craftcloud3d.com`,
-    fetchedAt: new Date(),
-    source: 'craftcloud' as const,
-  };
+      type: 'live' as const,
+      supplierId: `craftcloud-${q.vendorId}`,
+      supplierName: name,
+      supplierLogo: getLocalLogoForSupplier(name),
+      material: q.materialConfigId,
+      technology: '',
+      unitPrice: q.price,
+      totalPrice: q.price * quantity,
+      currency: (q.currency as Currency) || 'EUR',
+      quantity,
+      estimatedLeadTimeDays: q.productionTimeFast,
+      shippingEstimate: shippingByVendor.get(q.vendorId) ?? null,
+      quoteUrl: `https://craftcloud3d.com`,
+      fetchedAt: new Date(),
+      source: 'craftcloud' as const,
+      alternativeQuotes: alternativeQuotes.length > 0 ? alternativeQuotes : undefined,
+    };
   });
 }
 

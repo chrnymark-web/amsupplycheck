@@ -4,6 +4,15 @@ export type Currency = 'EUR' | 'USD' | 'GBP' | 'DKK';
 
 export type PriceSource = 'craftcloud' | 'treatstock';
 
+// A single material/finish option from a vendor
+export interface QuoteOption {
+  material: string;
+  unitPrice: number;
+  totalPrice: number;
+  estimatedLeadTimeDays: number | null;
+  shippingEstimate: number | null;
+}
+
 // A real-time quote from a supplier API
 export interface LiveQuote {
   type: 'live';
@@ -21,6 +30,7 @@ export interface LiveQuote {
   quoteUrl: string | null;
   fetchedAt: Date;
   source: PriceSource;
+  alternativeQuotes?: QuoteOption[];
 }
 
 // An estimated price based on market data / technology index
