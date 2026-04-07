@@ -435,21 +435,22 @@ export function PriceCalculator() {
                           </p>
                         )}
 
-                        {/* CTA: Navigate to search page with all quotes */}
-                        <Button
-                          className="w-full mt-2"
-                          onClick={() => {
-                            sessionStorage.setItem('stl-live-quotes', JSON.stringify({
-                              quotes: liveQuotes.map(q => ({ ...q, fetchedAt: q.fetchedAt instanceof Date ? q.fetchedAt.toISOString() : q.fetchedAt })),
-                              storedAt: new Date().toISOString(),
-                            }));
-                            navigate('/search?source=stl-quotes');
-                          }}
-                        >
-                          <Search className="h-4 w-4 mr-2" />
-                          Compare all {liveQuotes.length} vendors
-                        </Button>
                       </div>
+
+                      {/* CTA: Navigate to search page with all quotes */}
+                      <Button
+                        className="w-full mt-3"
+                        onClick={() => {
+                          sessionStorage.setItem('stl-live-quotes', JSON.stringify({
+                            quotes: liveQuotes.map(q => ({ ...q, fetchedAt: q.fetchedAt instanceof Date ? q.fetchedAt.toISOString() : q.fetchedAt })),
+                            storedAt: new Date().toISOString(),
+                          }));
+                          navigate('/search?source=stl-quotes');
+                        }}
+                      >
+                        <Search className="h-4 w-4 mr-2" />
+                        Compare all {liveQuotes.length} vendors
+                      </Button>
                     </div>
                   )}
 
