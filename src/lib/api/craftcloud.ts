@@ -130,23 +130,25 @@ function getBestQuotePerVendor(quotes: CraftcloudQuote[]): CraftcloudQuote[] {
 }
 
 // Get top 3 distinct quotes per vendor: cheapest, fastest, and a mid-range option
-function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, CraftcloudQuote[]> {
+// Returns quotes with labels explaining why each was picked
+type LabeledQuote = CraftcloudQuote & { label: string };
+function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, LabeledQuote[]> {
   const byVendor = new Map<string, CraftcloudQuote[]>();
   for (const q of quotes) {
     if (!byVendor.has(q.vendorId)) byVendor.set(q.vendorId, []);
     byVendor.get(q.vendorId)!.push(q);
   }
 
-  const result = new Map<string, CraftcloudQuote[]>();
+  const result = new Map<string, LabeledQuote[]>();
   for (const [vendorId, vendorQuotes] of byVendor) {
     // Sort by price to find distinct price tiers
     const sorted = [...vendorQuotes].sort((a, b) => a.price - b.price);
-    const picked: CraftcloudQuote[] = [sorted[0]]; // Always include cheapest
+    const picked: LabeledQuote[] = [{ ...sorted[0], label: 'Cheapest material' }];
 
     // Find fastest option (different from cheapest)
     const fastest = [...vendorQuotes].sort((a, b) => a.productionTimeFast - b.productionTimeFast)[0];
     if (fastest.quoteId !== picked[0].quoteId && fastest.price !== picked[0].price) {
-      picked.push(fastest);
+      picked.push({ ...fastest, label: 'Fastest delivery' });
     }
 
     // Find a mid-range option if we have enough variety
@@ -154,7 +156,7 @@ function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, Craftclou
       const midIdx = Math.floor(sorted.length / 2);
       const mid = sorted[midIdx];
       if (!picked.some(p => p.quoteId === mid.quoteId) && mid.price !== picked[0].price) {
-        picked.push(mid);
+        picked.push({ ...mid, label: 'Alternative material' });
       }
     }
 
@@ -163,7 +165,7 @@ function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, Craftclou
       for (const q of sorted) {
         if (picked.length >= 3) break;
         if (!picked.some(p => p.quoteId === q.quoteId) && !picked.some(p => Math.abs(p.price - q.price) < 0.5)) {
-          picked.push(q);
+          picked.push({ ...q, label: 'Alternative material' });
         }
       }
     }
@@ -199,6 +201,7 @@ function toQuotes(
       .filter(alt => alt.quoteId !== q.quoteId)
       .map(alt => ({
         material: alt.materialConfigId,
+        label: alt.label,
         unitPrice: alt.price,
         totalPrice: alt.price * quantity,
         estimatedLeadTimeDays: alt.productionTimeFast,

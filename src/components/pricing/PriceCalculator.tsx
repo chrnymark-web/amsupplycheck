@@ -353,7 +353,7 @@ export function PriceCalculator() {
                                     {hasAlts && (
                                       <span className="inline-flex items-center gap-0.5 text-[10px] text-primary/60">
                                         <Zap className="h-2.5 w-2.5" />
-                                        {q.alternativeQuotes!.length} more option{q.alternativeQuotes!.length > 1 ? 's' : ''}
+                                        {q.alternativeQuotes!.length} more material{q.alternativeQuotes!.length > 1 ? 's' : ''}
                                       </span>
                                     )}
                                   </div>
@@ -371,19 +371,33 @@ export function PriceCalculator() {
                               {/* Alternative quotes (expanded) */}
                               {isExpanded && hasAlts && (
                                 <div className="border-t border-border/10 bg-muted/20 px-3 pb-3 pt-2 space-y-1.5 animate-in slide-in-from-top-1 duration-200">
-                                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Other options from {q.supplierName}</p>
-                                  {q.alternativeQuotes!.map((alt, j) => (
+                                  <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">Other materials from {q.supplierName}</p>
+                                  {q.alternativeQuotes!.map((alt, j) => {
+                                    const priceDiff = alt.unitPrice / q.unitPrice;
+                                    const priceLabel = priceDiff > 1
+                                      ? `${priceDiff.toFixed(1)}× more`
+                                      : priceDiff < 1
+                                        ? `${(1 / priceDiff).toFixed(1)}× less`
+                                        : 'same price';
+                                    return (
                                     <div key={j} className="flex items-center gap-3 p-2 rounded-lg bg-background/60 border border-border/10">
                                       <div className="flex-1 min-w-0">
-                                        <p className="text-xs text-muted-foreground truncate">Option {j + 1}</p>
-                                        <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
-                                          <Clock className="h-2.5 w-2.5" />
-                                          {alt.estimatedLeadTimeDays ? `${alt.estimatedLeadTimeDays} days` : '—'}
-                                        </span>
+                                        <p className="text-xs text-foreground/80 font-medium truncate">{alt.label || `Option ${j + 1}`}</p>
+                                        <div className="flex items-center gap-2 mt-0.5">
+                                          <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
+                                            <Clock className="h-2.5 w-2.5" />
+                                            {alt.estimatedLeadTimeDays ? `${alt.estimatedLeadTimeDays} days` : '—'}
+                                          </span>
+                                          <span className="text-[10px] text-muted-foreground/60">·</span>
+                                          <span className={`text-[10px] ${priceDiff > 2 ? 'text-red-400/70' : priceDiff < 0.8 ? 'text-green-400/70' : 'text-muted-foreground/60'}`}>
+                                            {priceLabel}
+                                          </span>
+                                        </div>
                                       </div>
                                       <p className="text-sm font-semibold tabular-nums">€{alt.unitPrice.toFixed(2)}</p>
                                     </div>
-                                  ))}
+                                    );
+                                  })}
                                 </div>
                               )}
 

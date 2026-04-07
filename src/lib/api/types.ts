@@ -7,6 +7,7 @@ export type PriceSource = 'craftcloud' | 'treatstock';
 // A single material/finish option from a vendor
 export interface QuoteOption {
   material: string;
+  label?: string;           // e.g. "Fastest delivery", "Alternative material"
   unitPrice: number;
   totalPrice: number;
   estimatedLeadTimeDays: number | null;
