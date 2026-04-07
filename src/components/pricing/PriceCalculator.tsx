@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { Upload, Calculator, ChevronDown, ChevronUp, Package, Loader2, ExternalLink, X, Signal, Clock, Zap, Award, ChevronRight } from 'lucide-react';
+import { Upload, Calculator, ChevronDown, ChevronUp, Package, Loader2, ExternalLink, X, Signal, Clock, Zap, Award, ChevronRight, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { parseSTL, type STLResult } from '@/lib/stlParser';
 import { supabase } from '@/integrations/supabase/client';
@@ -382,7 +382,7 @@ export function PriceCalculator() {
                                     return (
                                     <div key={j} className="flex items-center gap-3 p-2 rounded-lg bg-background/60 border border-border/10">
                                       <div className="flex-1 min-w-0">
-                                        <p className="text-xs text-foreground/80 font-medium truncate">{alt.label || `Option ${j + 1}`}</p>
+                                        <p className="text-xs text-foreground/80 font-medium truncate">{alt.label || alt.material || `Option ${j + 1}`}</p>
                                         <div className="flex items-center gap-2 mt-0.5">
                                           <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                                             <Clock className="h-2.5 w-2.5" />
@@ -434,6 +434,21 @@ export function PriceCalculator() {
                             +{liveQuotes.length - 15} more vendors available
                           </p>
                         )}
+
+                        {/* CTA: Navigate to search page with all quotes */}
+                        <Button
+                          className="w-full mt-2"
+                          onClick={() => {
+                            sessionStorage.setItem('stl-live-quotes', JSON.stringify({
+                              quotes: liveQuotes.map(q => ({ ...q, fetchedAt: q.fetchedAt instanceof Date ? q.fetchedAt.toISOString() : q.fetchedAt })),
+                              storedAt: new Date().toISOString(),
+                            }));
+                            navigate('/search?source=stl-quotes');
+                          }}
+                        >
+                          <Search className="h-4 w-4 mr-2" />
+                          Compare all {liveQuotes.length} vendors
+                        </Button>
                       </div>
                     </div>
                   )}

@@ -10,12 +10,13 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Search as SearchIcon, SlidersHorizontal, MapPin, Zap, Factory, Award, X, Star, Clock, ArrowUpDown, Filter } from 'lucide-react';
+import { Search as SearchIcon, SlidersHorizontal, MapPin, Zap, Factory, Award, X, Star, Clock, ArrowUpDown, Filter, Signal } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { loadSuppliers, getAreaForCountry, getMaterialKeyFromDisplayName, getTechnologyKeyFromDisplayName, type ParsedSupplier } from '@/lib/supplierData';
 import { getRelatedMaterials, findMaterialKey, MATERIAL_CATEGORIES } from '@/lib/validMaterials';
 import { requirementToTechnologies, requirementToMaterials, type SearchRequirement } from '@/lib/technologyMaterialCompatibility';
 import { trackViewItemList, supplierToGA4Item } from '@/lib/analytics';
+import type { LiveQuote } from '@/lib/api/types';
 import { useSearchHistory } from '@/hooks/use-search-history';
 import { useSavedSearches } from '@/hooks/use-saved-searches';
 import SearchHistoryPanel from '@/components/search/SearchHistoryPanel';
@@ -26,6 +27,10 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+
+function normalizeVendorId(id: string): string {
+  return id.replace(/^craftcloud-/, '').toLowerCase().replace(/[^a-z0-9]/g, '');
+}
 
 const Search = () => {
   const [searchParams] = useSearchParams();
@@ -56,7 +61,8 @@ const Search = () => {
   const [showSaveDialog, setShowSaveDialog] = useState(false);
   const [saveName, setSaveName] = useState('');
   const [showHistoryPanel, setShowHistoryPanel] = useState(false);
-  const [sortBy, setSortBy] = useState<'relevance' | 'name' | 'location'>('relevance');
+  const [sortBy, setSortBy] = useState<'relevance' | 'name' | 'location' | 'price'>('relevance');
+  const [quoteData, setQuoteData] = useState<LiveQuote[] | null>(null);
   // Measure filter panel height
   useEffect(() => {
     const updateHeight = () => {
@@ -144,6 +150,40 @@ const Search = () => {
 
     fetchSuppliers();
   }, []);
+
+  // Load live quote data from sessionStorage when arriving from PriceCalculator
+  useEffect(() => {
+    if (searchParams.get('source') !== 'stl-quotes') return;
+    try {
+      const raw = sessionStorage.getItem('stl-live-quotes');
+      if (!raw) return;
+      const parsed = JSON.parse(raw);
+      // Check staleness (30 min)
+      const storedAt = new Date(parsed.storedAt).getTime();
+      if (Date.now() - storedAt > 30 * 60 * 1000) {
+        sessionStorage.removeItem('stl-live-quotes');
+        return;
+      }
+      const quotes: LiveQuote[] = parsed.quotes.map((q: Record<string, unknown>) => ({
+        ...q,
+        fetchedAt: new Date(q.fetchedAt as string),
+      }));
+      setQuoteData(quotes);
+      setSortBy('price');
+    } catch {
+      console.error('Failed to parse STL quote data');
+    }
+  }, [searchParams]);
+
+  // Build quote lookup map: normalized supplier ID → LiveQuote
+  const quoteMap = useMemo(() => {
+    if (!quoteData) return new Map<string, LiveQuote>();
+    const map = new Map<string, LiveQuote>();
+    for (const q of quoteData) {
+      map.set(normalizeVendorId(q.supplierId), q);
+    }
+    return map;
+  }, [quoteData]);
 
   // Sync filters and search query with URL parameters
   useEffect(() => {
@@ -398,9 +438,55 @@ const Search = () => {
     });
     
     console.log('Filtered suppliers count:', filtered.length);
-    
+
+    // When we have quote data, merge in synthetic suppliers for unmatched vendors
+    let withQuoteVendors = filtered;
+    if (quoteData && quoteData.length > 0) {
+      const matchedIds = new Set<string>();
+      for (const s of filtered) {
+        const normId = normalizeVendorId(s.id);
+        const normName = s.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (quoteMap.has(normId) || quoteMap.has(normName)) {
+          matchedIds.add(normId);
+          matchedIds.add(normName);
+        }
+      }
+      // Create synthetic suppliers for unmatched quote vendors
+      const synthetics: ParsedSupplier[] = quoteData
+        .filter(q => {
+          const normId = normalizeVendorId(q.supplierId);
+          const normName = q.supplierName.toLowerCase().replace(/[^a-z0-9]/g, '');
+          return !matchedIds.has(normId) && !matchedIds.has(normName);
+        })
+        .map(q => ({
+          id: q.supplierId,
+          name: q.supplierName,
+          location: { lat: 0, lng: 0, city: '', country: '', fullAddress: '' },
+          technologies: [q.technology].filter(Boolean),
+          materials: [q.material].filter(Boolean),
+          verified: false,
+          premium: false,
+          rating: 0,
+          reviewCount: 0,
+          description: `Live quote available via Craftcloud`,
+          website: q.quoteUrl || '',
+          logoUrl: q.supplierLogo,
+          region: 'global',
+        }));
+      withQuoteVendors = [...filtered, ...synthetics];
+    }
+
     // Apply sorting
-    const sorted = [...filtered].sort((a, b) => {
+    const sorted = [...withQuoteVendors].sort((a, b) => {
+      if (sortBy === 'price') {
+        const aId = normalizeVendorId(a.id);
+        const aName = a.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const bId = normalizeVendorId(b.id);
+        const bName = b.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+        const aPrice = (quoteMap.get(aId) || quoteMap.get(aName))?.unitPrice ?? Infinity;
+        const bPrice = (quoteMap.get(bId) || quoteMap.get(bName))?.unitPrice ?? Infinity;
+        return aPrice - bPrice;
+      }
       if (sortBy === 'name') return a.name.localeCompare(b.name);
       if (sortBy === 'location') return (a.location.country || '').localeCompare(b.location.country || '');
       // Relevance: name match > premium > verified > filter overlap
@@ -415,9 +501,9 @@ const Search = () => {
         (filters.technologies.length > 0 ? filters.technologies.filter(t => b.technologies.some(bt => bt.toLowerCase().includes(t.toLowerCase()))).length * 5 : 0);
       return bScore - aScore;
     });
-    
+
     return sorted;
-  }, [filters, searchQuery, suppliers, sortBy, certifications]);
+  }, [filters, searchQuery, suppliers, sortBy, certifications, quoteData, quoteMap]);
 
   // Filter suppliers for map display - only include those with valid coordinates
   const suppliersForMap = useMemo(() => {
@@ -600,6 +686,31 @@ const Search = () => {
       </div>
       
       <div className={`transition-all duration-300 ${showNavbar ? 'pt-16 md:pt-20' : 'pt-0'}`}>
+        {/* Live Quotes Banner */}
+        {quoteData && (
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3">
+            <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+              <Signal className="h-4 w-4 text-emerald-400 flex-shrink-0" />
+              <span className="text-sm text-foreground flex-1">
+                Showing <span className="font-semibold text-emerald-400">{quoteData.length} live quotes</span> for your uploaded file — sorted by price
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 text-xs text-muted-foreground hover:text-destructive"
+                onClick={() => {
+                  setQuoteData(null);
+                  setSortBy('relevance');
+                  sessionStorage.removeItem('stl-live-quotes');
+                  navigate('/search');
+                }}
+              >
+                <X className="h-3 w-3 mr-1" /> Clear
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Results Summary Bar */}
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-wrap items-center gap-2">
@@ -715,6 +826,7 @@ const Search = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="relevance">Relevance</SelectItem>
+                {quoteData && <SelectItem value="price">Price</SelectItem>}
                 <SelectItem value="name">Name A-Z</SelectItem>
                 <SelectItem value="location">Location</SelectItem>
               </SelectContent>
@@ -839,13 +951,24 @@ const Search = () => {
                     );
                     return techMatch || matMatch;
                   });
+                  // Look up live quote for this supplier
+                  const normId = normalizeVendorId(supplier.id);
+                  const normName = supplier.name.toLowerCase().replace(/[^a-z0-9]/g, '');
+                  const matchedQuote = quoteMap.get(normId) || quoteMap.get(normName);
+                  const liveQuoteProp = matchedQuote ? {
+                    unitPrice: matchedQuote.unitPrice,
+                    currency: matchedQuote.currency,
+                    estimatedLeadTimeDays: matchedQuote.estimatedLeadTimeDays,
+                    material: matchedQuote.material,
+                  } : undefined;
                   return (
-                    <SupplierCard 
-                      key={supplier.id} 
-                      supplier={supplier} 
+                    <SupplierCard
+                      key={supplier.id}
+                      supplier={supplier}
                       index={index}
-                      listName="Search Results"
+                      listName={quoteData ? 'STL Quote Results' : 'Search Results'}
                       matchedRequirements={matched}
+                      liveQuote={liveQuoteProp}
                     />
                   );
                 })}

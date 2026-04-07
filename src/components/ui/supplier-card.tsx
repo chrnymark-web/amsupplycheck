@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import SupplierLogo from '@/components/ui/supplier-logo';
-import { MapPin, Verified, ExternalLink, Crown } from 'lucide-react';
+import { MapPin, Verified, ExternalLink, Crown, Clock } from 'lucide-react';
 import { getDisplayNameFromMaterialKey, getDisplayNameFromTechnologyKey } from '@/lib/supplierData';
 import { trackSupplierInteraction, trackOutboundLink, trackSelectItem, supplierToGA4Item, trackSupplierImpression } from '@/lib/analytics';
 import { TechInfoBadge } from '@/components/comparison/TechnologyTooltip';
@@ -32,12 +32,20 @@ interface Supplier {
   hasInstantQuote?: boolean;
 }
 
+interface LiveQuoteInfo {
+  unitPrice: number;
+  currency: string;
+  estimatedLeadTimeDays: number | null;
+  material: string;
+}
+
 interface SupplierCardProps {
   supplier: Supplier;
   className?: string;
   index?: number;
   listName?: string;
   matchedRequirements?: string[];
+  liveQuote?: LiveQuoteInfo;
 }
 
 const REQUIREMENT_ICONS: Record<string, string> = {
@@ -53,12 +61,13 @@ const REQUIREMENT_ICONS: Record<string, string> = {
   'Low cost': '💰',
 };
 
-const SupplierCard: React.FC<SupplierCardProps> = ({ 
-  supplier, 
+const SupplierCard: React.FC<SupplierCardProps> = ({
+  supplier,
   className = "",
   index = 0,
   listName = "Search Results",
-  matchedRequirements = []
+  matchedRequirements = [],
+  liveQuote
 }) => {
   const cardRef = React.useRef<HTMLDivElement>(null);
   const [hasBeenViewed, setHasBeenViewed] = React.useState(false);
@@ -144,10 +153,28 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
                 )}
               </div>
             </div>
-            <div className="flex items-center space-x-1 text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300">
-              <MapPin className="h-2.5 w-2.5 flex-shrink-0" />
-              <span className="truncate">{supplier.location.city}, {supplier.location.country}</span>
-            </div>
+            {supplier.location.city && (
+              <div className="flex items-center space-x-1 text-xs text-muted-foreground group-hover:text-foreground transition-colors duration-300">
+                <MapPin className="h-2.5 w-2.5 flex-shrink-0" />
+                <span className="truncate">{supplier.location.city}, {supplier.location.country}</span>
+              </div>
+            )}
+            {liveQuote && (
+              <div className="flex items-center gap-2 mt-1 px-2 py-1 rounded-md bg-emerald-500/10 border border-emerald-500/20">
+                <span className="text-sm font-bold text-emerald-400">
+                  {liveQuote.currency === 'EUR' ? '€' : liveQuote.currency === 'USD' ? '$' : liveQuote.currency}{liveQuote.unitPrice.toFixed(2)}
+                </span>
+                {liveQuote.material && (
+                  <span className="text-[10px] text-muted-foreground truncate">{liveQuote.material}</span>
+                )}
+                {liveQuote.estimatedLeadTimeDays && (
+                  <span className="inline-flex items-center gap-0.5 text-[10px] text-muted-foreground ml-auto">
+                    <Clock className="h-2.5 w-2.5" />
+                    {liveQuote.estimatedLeadTimeDays}d
+                  </span>
+                )}
+              </div>
+            )}
             <div className="flex flex-wrap gap-1 mt-1">
               {supplier.technologies.slice(0, 3).map((tech, index) => (
                 <TechInfoBadge 

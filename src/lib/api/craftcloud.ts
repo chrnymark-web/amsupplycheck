@@ -129,6 +129,15 @@ function getBestQuotePerVendor(quotes: CraftcloudQuote[]): CraftcloudQuote[] {
   return [...best.values()];
 }
 
+// Format materialConfigId into a readable name, e.g. "PA_12_GF" → "PA 12 GF"
+function formatMaterialId(id: string): string {
+  return id
+    .replace(/([a-z])([A-Z])/g, '$1 $2')  // camelCase → spaced
+    .replace(/[_-]/g, ' ')                  // underscores/hyphens → spaces
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 // Get top 3 distinct quotes per vendor: cheapest, fastest, and a mid-range option
 // Returns quotes with labels explaining why each was picked
 type LabeledQuote = CraftcloudQuote & { label: string };
@@ -156,7 +165,7 @@ function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, LabeledQu
       const midIdx = Math.floor(sorted.length / 2);
       const mid = sorted[midIdx];
       if (!picked.some(p => p.quoteId === mid.quoteId) && mid.price !== picked[0].price) {
-        picked.push({ ...mid, label: 'Alternative material' });
+        picked.push({ ...mid, label: formatMaterialId(mid.materialConfigId) });
       }
     }
 
@@ -165,7 +174,7 @@ function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, LabeledQu
       for (const q of sorted) {
         if (picked.length >= 3) break;
         if (!picked.some(p => p.quoteId === q.quoteId) && !picked.some(p => Math.abs(p.price - q.price) < 0.5)) {
-          picked.push({ ...q, label: 'Alternative material' });
+          picked.push({ ...q, label: formatMaterialId(q.materialConfigId) });
         }
       }
     }
