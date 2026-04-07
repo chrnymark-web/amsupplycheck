@@ -375,7 +375,7 @@ export function PriceCalculator() {
                                   {q.alternativeQuotes!.map((alt, j) => (
                                     <div key={j} className="flex items-center gap-3 p-2 rounded-lg bg-background/60 border border-border/10">
                                       <div className="flex-1 min-w-0">
-                                        <p className="text-xs text-muted-foreground truncate">{alt.material}</p>
+                                        <p className="text-xs text-muted-foreground truncate">Option {j + 1}</p>
                                         <span className="inline-flex items-center gap-1 text-[10px] text-muted-foreground">
                                           <Clock className="h-2.5 w-2.5" />
                                           {alt.estimatedLeadTimeDays ? `${alt.estimatedLeadTimeDays} days` : '—'}
@@ -405,7 +405,7 @@ export function PriceCalculator() {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     const slug = q.supplierName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-                                    navigate(`/search?q=${encodeURIComponent(q.supplierName)}`);
+                                    navigate(`/suppliers/${slug}`);
                                   }}
                                 >
                                   <ChevronRight className="h-3 w-3" />
