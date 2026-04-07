@@ -593,8 +593,8 @@ Deno.serve(async (req) => {
             .eq('supplier_id', supplier.supplier_id);
         }
 
-        // Longer delay to avoid rate limiting and ensure quality
-        await new Promise(resolve => setTimeout(resolve, 5000));
+        // Delay between validations to avoid rate limiting
+        await new Promise(resolve => setTimeout(resolve, 2000));
 
       } catch (error) {
         console.error(`❌ Error processing ${supplier.name}:`, error);

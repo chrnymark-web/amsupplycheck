@@ -1,5 +1,4 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.39.3';
-import puppeteer from "https://deno.land/x/puppeteer@16.2.0/mod.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,55 +21,48 @@ interface ScrapedPage {
   type: 'homepage' | 'about' | 'contact' | 'imprint';
 }
 
-async function scrapeWithPuppeteer(url: string): Promise<{ html: string; visibleText: string } | null> {
-  let browser;
-  try {
-    console.log(`Launching Puppeteer for ${url}`);
-    browser = await puppeteer.launch({
-      args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      headless: true,
-    });
-    
-    const page = await browser.newPage();
-    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36');
-    
-    await page.goto(url, { 
-      waitUntil: 'networkidle2',
-      timeout: 30000 
-    });
-    
-    const html = await page.content();
-    const visibleText = await page.evaluate(() => document.body.innerText);
-    
-    return { html, visibleText };
-  } catch (error) {
-    console.error('Puppeteer scraping failed:', error);
-    return null;
-  } finally {
-    if (browser) {
-      await browser.close();
-    }
-  }
+// Strip HTML tags and extract visible text from raw HTML
+function extractVisibleText(html: string): string {
+  // Remove script/style/nav/footer/header tags and their content
+  let cleaned = html.replace(/<(script|style|nav|footer|header|noscript)[^>]*>[\s\S]*?<\/\1>/gi, '');
+  // Remove remaining HTML tags
+  cleaned = cleaned.replace(/<[^>]+>/g, ' ');
+  // Decode common HTML entities
+  cleaned = cleaned.replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&nbsp;/g, ' ');
+  // Collapse whitespace
+  const lines = cleaned.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  return lines.join('\n');
 }
 
-async function basicFetch(url: string): Promise<string | null> {
+async function fetchPage(url: string): Promise<{ html: string; visibleText: string } | null> {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 10000);
+
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'text/html,application/xhtml+xml',
+        'Accept-Language': 'en-US,en;q=0.9,de;q=0.8,da;q=0.7',
+      },
+      signal: controller.signal,
+      redirect: 'follow',
     });
-    return await response.text();
+    clearTimeout(timeout);
+
+    if (!response.ok) return null;
+
+    const html = await response.text();
+    const visibleText = extractVisibleText(html);
+    return { html, visibleText };
   } catch (error) {
-    console.error('Basic fetch failed:', error);
+    console.log(`Fetch failed for ${url}:`, error.message);
     return null;
   }
 }
 
-async function scrapeMultiplePages(baseUrl: string, supplierName: string): Promise<ScrapedPage[]> {
-  const pages: ScrapedPage[] = [];
-  
-  // Define potential pages to scrape (in priority order)
+async function scrapeMultiplePages(baseUrl: string, supplierName: string, supabase?: any, supplierId?: string): Promise<ScrapedPage[]> {
+  // Define potential pages to scrape (in priority order, grouped by type)
   const pagesToTry = [
     { url: baseUrl, type: 'homepage' as const },
     { url: `${baseUrl}/about`, type: 'about' as const },
@@ -82,39 +74,62 @@ async function scrapeMultiplePages(baseUrl: string, supplierName: string): Promi
     { url: `${baseUrl}/company`, type: 'about' as const },
   ];
 
-  for (const page of pagesToTry) {
-    if (pages.length >= 4) break; // Limit to 4 pages max
-    
-    try {
-      console.log(`Trying to scrape: ${page.url}`);
-      const result = await scrapeWithPuppeteer(page.url);
-      
-      if (result && result.visibleText.length > 200) {
-        pages.push({
-          url: page.url,
-          content: result.visibleText,
-          type: page.type
-        });
-        console.log(`✓ Successfully scraped ${page.type} page (${result.visibleText.length} chars)`);
-      }
-    } catch (error) {
-      console.log(`✗ Failed to scrape ${page.url}:`, error.message);
-    }
-    
-    // Small delay between requests
-    await new Promise(resolve => setTimeout(resolve, 1000));
-  }
+  // Check scrape_cache first if supabase client is available
+  const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
 
-  // If no pages were scraped, try basic homepage fetch
-  if (pages.length === 0) {
-    const html = await basicFetch(baseUrl);
-    if (html) {
-      pages.push({
-        url: baseUrl,
-        content: html.substring(0, 20000),
-        type: 'homepage'
-      });
-    }
+  // Fetch all pages in parallel, using cache when available
+  const fetchResults = await Promise.allSettled(
+    pagesToTry.map(async (page) => {
+      // Try cache first
+      if (supabase && supplierId) {
+        const cacheKey = `${supplierId}:${page.url}`;
+        const { data: cached } = await supabase
+          .from('scrape_cache')
+          .select('visible_text')
+          .eq('key', cacheKey)
+          .gte('created_at', twentyFourHoursAgo)
+          .maybeSingle();
+
+        if (cached?.visible_text && cached.visible_text.length > 200) {
+          console.log(`[CACHE HIT] ${page.url}`);
+          return { ...page, content: cached.visible_text };
+        }
+      }
+
+      console.log(`Fetching: ${page.url}`);
+      const result = await fetchPage(page.url);
+      if (result && result.visibleText.length > 200) {
+        // Store in cache for future use
+        if (supabase && supplierId) {
+          const cacheKey = `${supplierId}:${page.url}`;
+          await supabase.from('scrape_cache').upsert({
+            key: cacheKey,
+            html: result.html.substring(0, 50000),
+            visible_text: result.visibleText.substring(0, 30000),
+            created_at: new Date().toISOString(),
+          }, { onConflict: 'key' }).catch(() => {});
+        }
+        return { ...page, content: result.visibleText };
+      }
+      return null;
+    })
+  );
+
+  // Collect successful results, limit to 4 pages, deduplicate by type
+  const pages: ScrapedPage[] = [];
+  const seenTypes = new Set<string>();
+
+  for (const outcome of fetchResults) {
+    if (pages.length >= 4) break;
+    if (outcome.status !== 'fulfilled' || !outcome.value) continue;
+
+    const { url, type, content } = outcome.value;
+    // Keep max 1 page per type (e.g. don't keep both /about and /about-us)
+    if (seenTypes.has(type) && type !== 'homepage') continue;
+    seenTypes.add(type);
+
+    pages.push({ url, content, type });
+    console.log(`Successfully fetched ${type} page (${content.length} chars)`);
   }
 
   return pages;
@@ -321,7 +336,7 @@ Deno.serve(async (req) => {
         status: 'scraping'
       });
 
-      const scrapedPages = await scrapeMultiplePages(supplier.website, supplier.name);
+      const scrapedPages = await scrapeMultiplePages(supplier.website, supplier.name, supabase, supplier.supplier_id);
 
       if (scrapedPages.length === 0) {
         results.push({ supplier: supplier.name, status: 'failed', reason: 'scraping failed' });
@@ -347,10 +362,9 @@ Deno.serve(async (req) => {
 
       let locationData = await extractLocationWithAI(scrapedPages, supplier.name, 1);
       
-      // If confidence is low, retry with more aggressive extraction
+      // If confidence is low, retry with enhanced prompt
       if (locationData.confidence < 70 && locationData.confidence > 0) {
-        console.log(`⚠ Low confidence (${locationData.confidence}%), retrying with enhanced prompt...`);
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log(`Low confidence (${locationData.confidence}%), retrying with enhanced prompt...`);
         locationData = await extractLocationWithAI(scrapedPages, supplier.name, 2);
       }
 
@@ -418,8 +432,8 @@ Deno.serve(async (req) => {
         }
       }
 
-      // Longer delay to respect rate limits and avoid overwhelming AI
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      // Short delay to respect AI rate limits
+      await new Promise(resolve => setTimeout(resolve, 1000));
     }
 
     await sendProgress({
