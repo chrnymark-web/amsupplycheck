@@ -269,14 +269,27 @@ export function useSupplierDetail(supplierSlug: string) {
         .maybeSingle();
 
       if (error) throw error;
-      if (!supplier) return null;
+
+      // Fallback: try matching Craftcloud vendor ID or URL slug in metadata
+      let resolvedSupplier = supplier;
+      if (!resolvedSupplier) {
+        const cleanSlug = supplierSlug.replace(/^craftcloud-/, '');
+        const { data: ccSupplier } = await supabase
+          .from('suppliers')
+          .select('*')
+          .eq('verified', true)
+          .or(`metadata->>craftcloud_vendor_id.eq.${cleanSlug},metadata->>craftcloud_url_slug.eq.${supplierSlug}`)
+          .maybeSingle();
+        resolvedSupplier = ccSupplier;
+      }
+      if (!resolvedSupplier) return null;
 
       // Fetch relations in parallel
       const [techRes, matRes, certRes, tagRes] = await Promise.all([
-        supabase.from('supplier_technologies').select('technology_id').eq('supplier_id', supplier.id),
-        supabase.from('supplier_materials').select('material_id').eq('supplier_id', supplier.id),
-        supabase.from('supplier_certifications').select('certification_id').eq('supplier_id', supplier.id),
-        supabase.from('supplier_tags').select('tag_id').eq('supplier_id', supplier.id),
+        supabase.from('supplier_technologies').select('technology_id').eq('supplier_id', resolvedSupplier.id),
+        supabase.from('supplier_materials').select('material_id').eq('supplier_id', resolvedSupplier.id),
+        supabase.from('supplier_certifications').select('certification_id').eq('supplier_id', resolvedSupplier.id),
+        supabase.from('supplier_tags').select('tag_id').eq('supplier_id', resolvedSupplier.id),
       ]);
 
       // Fetch entity details
@@ -290,22 +303,22 @@ export function useSupplierDetail(supplierSlug: string) {
         matIds.length ? supabase.from('materials').select('*').in('id', matIds) : { data: [] },
         certIds.length ? supabase.from('certifications').select('*').in('id', certIds) : { data: [] },
         tagIds.length ? supabase.from('tags').select('*').in('id', tagIds) : { data: [] },
-        supplier.country_id ? supabase.from('countries').select('*').eq('id', supplier.country_id).maybeSingle() : { data: null },
+        resolvedSupplier.country_id ? supabase.from('countries').select('*').eq('id', resolvedSupplier.country_id).maybeSingle() : { data: null },
       ]);
 
       return {
-        id: supplier.id,
-        supplier_id: supplier.supplier_id,
-        name: supplier.name,
-        website: supplier.website,
-        description: supplier.description,
-        location_city: supplier.location_city,
-        location_country: supplier.location_country,
-        location_lat: supplier.location_lat ? Number(supplier.location_lat) : null,
-        location_lng: supplier.location_lng ? Number(supplier.location_lng) : null,
-        verified: supplier.verified ?? false,
-        premium: supplier.premium ?? false,
-        logo_url: supplier.logo_url,
+        id: resolvedSupplier.id,
+        supplier_id: resolvedSupplier.supplier_id,
+        name: resolvedSupplier.name,
+        website: resolvedSupplier.website,
+        description: resolvedSupplier.description,
+        location_city: resolvedSupplier.location_city,
+        location_country: resolvedSupplier.location_country,
+        location_lat: resolvedSupplier.location_lat ? Number(resolvedSupplier.location_lat) : null,
+        location_lng: resolvedSupplier.location_lng ? Number(resolvedSupplier.location_lng) : null,
+        verified: resolvedSupplier.verified ?? false,
+        premium: resolvedSupplier.premium ?? false,
+        logo_url: resolvedSupplier.logo_url,
         technologies: (techs.data || []) as any[],
         materials: (mats.data || []) as any[],
         certifications: (certs.data || []) as any[],

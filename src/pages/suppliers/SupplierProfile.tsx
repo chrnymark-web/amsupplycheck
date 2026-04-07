@@ -17,14 +17,13 @@ const SupplierProfile: React.FC = () => {
   const location = useLocation();
   const { data: supplier, isLoading, error } = useSupplierDetail(slug || '');
 
+  // Look for live quote data (both for Craftcloud-only vendors and DB suppliers with Craftcloud links)
   const craftcloudVendor = useMemo((): LiveQuote | null => {
-    if (supplier) return null;
-
     // Priority 1: Navigation state
     const stateVendor = (location.state as { craftcloudVendor?: LiveQuote })?.craftcloudVendor;
     if (stateVendor) return stateVendor;
 
-    // Priority 2: SessionStorage lookup by slug
+    // Priority 2: SessionStorage lookup by slug or craftcloud vendor ID
     try {
       const raw = sessionStorage.getItem('stl-live-quotes');
       if (!raw) return null;
@@ -35,15 +34,23 @@ const SupplierProfile: React.FC = () => {
         const qSlug = slugifyVendorName(q.supplierName as string);
         return qSlug === slug;
       });
-      if (!match) return null;
-      return {
-        ...match,
-        fetchedAt: new Date(match.fetchedAt),
-      } as LiveQuote;
+      if (match) return { ...match, fetchedAt: new Date(match.fetchedAt) } as LiveQuote;
+
+      // Also try matching by craftcloud vendor ID from supplierId field (e.g. "craftcloud-norraam")
+      const ccMatch = parsed.quotes.find((q: Record<string, unknown>) => {
+        const supplierId = q.supplierId as string;
+        if (!supplierId?.startsWith('craftcloud-')) return false;
+        const vendorId = supplierId.replace('craftcloud-', '');
+        // Match against the slug or known vendor ID patterns
+        return vendorId === slug || vendorId === slug?.replace(/-/g, '');
+      });
+      if (ccMatch) return { ...ccMatch, fetchedAt: new Date(ccMatch.fetchedAt) } as LiveQuote;
+
+      return null;
     } catch {
       return null;
     }
-  }, [location.state, slug, supplier]);
+  }, [location.state, slug]);
 
   if (isLoading) {
     return (
@@ -351,6 +358,68 @@ const SupplierProfile: React.FC = () => {
                   </CardContent>
                 </Card>
               )}
+
+              {/* Live quote data (shown when navigated from price comparison) */}
+              {craftcloudVendor && (() => {
+                const formatCurrency = (amount: number, currency: string) => {
+                  const symbols: Record<string, string> = { EUR: '€', USD: '$', GBP: '£', DKK: 'kr' };
+                  const sym = symbols[currency] || currency;
+                  return `${sym}${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+                };
+                return (
+                  <Card className="bg-card border-border">
+                    <CardHeader>
+                      <CardTitle className="flex items-center gap-2 text-lg">
+                        <Package className="h-5 w-5 text-primary" /> Live Quote Data
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                          <div className="space-y-1">
+                            <p className="text-xs text-muted-foreground">Unit Price</p>
+                            <p className="text-lg font-semibold text-foreground">{formatCurrency(craftcloudVendor.unitPrice, craftcloudVendor.currency)}</p>
+                          </div>
+                          {craftcloudVendor.quantity > 1 && (
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">Total ({craftcloudVendor.quantity} pcs)</p>
+                              <p className="text-lg font-semibold text-foreground">{formatCurrency(craftcloudVendor.totalPrice, craftcloudVendor.currency)}</p>
+                            </div>
+                          )}
+                          {craftcloudVendor.estimatedLeadTimeDays != null && (
+                            <div className="space-y-1">
+                              <p className="text-xs text-muted-foreground">Lead Time</p>
+                              <p className="text-lg font-semibold text-foreground flex items-center gap-1">
+                                <Clock className="h-4 w-4 text-muted-foreground" />
+                                {craftcloudVendor.estimatedLeadTimeDays} days
+                              </p>
+                            </div>
+                          )}
+                        </div>
+                        {craftcloudVendor.material && (
+                          <div className="pt-2 border-t border-border">
+                            <p className="text-xs text-muted-foreground mb-1">Quoted Material</p>
+                            <Badge variant="outline">{craftcloudVendor.material.replace(/[_-]/g, ' ')}</Badge>
+                          </div>
+                        )}
+                        {craftcloudVendor.alternativeQuotes && craftcloudVendor.alternativeQuotes.length > 0 && (
+                          <div className="pt-2 border-t border-border">
+                            <p className="text-xs text-muted-foreground mb-2">Alternative Materials</p>
+                            <div className="space-y-2">
+                              {craftcloudVendor.alternativeQuotes.map((alt, i) => (
+                                <div key={i} className="flex items-center justify-between p-2 rounded-md border border-border">
+                                  <span className="text-sm text-foreground">{alt.label || alt.material.replace(/[_-]/g, ' ')}</span>
+                                  <span className="text-sm font-medium text-foreground">{formatCurrency(alt.unitPrice, craftcloudVendor.currency)}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })()}
             </div>
 
             {/* Sidebar */}
