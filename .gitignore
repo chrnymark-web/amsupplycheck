@@ -15,6 +15,17 @@ dist-ssr
 .env.*
 .workspace/
 
+# WAT framework
+.tmp/
+tools/__pycache__/
+tools/*.pyc
+
+# Build artifacts
+*.tsbuildinfo
+
+# Trigger.dev
+.trigger/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -25,3 +36,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+.vercel

@@ -28,7 +28,7 @@ const POPULAR_SEARCHES = [
   { label: 'Fast turnaround Europe', query: 'quick prototyping services in Europe' },
 ];
 import { trackFilterApplied } from '@/lib/analytics';
-import AISearchInput from '@/components/AISearchInput';
+import AISearchInput from '@/components/search/AISearchInput';
 import type { AISearchFilters } from '@/hooks/use-ai-search';
 
 interface FilterPanelProps {

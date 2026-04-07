@@ -193,7 +193,7 @@ Deno.serve(async (req) => {
     }
 
     // Check if we've hit the monthly limit
-    const monthlyLimit = config.monthly_validation_limit || 76;
+    const monthlyLimit = config.monthly_validation_limit || 310;
     if (config.validations_this_month >= monthlyLimit) {
       console.log(`Monthly validation limit reached: ${config.validations_this_month}/${monthlyLimit}`);
       
@@ -377,7 +377,7 @@ Deno.serve(async (req) => {
             continue; // Skip this supplier and move to next
           }
           
-          // Check if Lovable AI credits are exhausted (429 = rate limit, 402 = payment required)
+          // Check if AI API credits are exhausted (429 = rate limit, 402 = payment required)
           const isRateLimitError = errorMsg.includes('429') || errorMsg.toLowerCase().includes('rate limit');
           const isPaymentError = errorMsg.includes('402') || 
                                  errorMsg.includes('FunctionsHttpError') ||
@@ -408,7 +408,7 @@ Deno.serve(async (req) => {
             return new Response(
               JSON.stringify({ 
                 success: false, 
-                message: `${errorType}. Validation has been auto-paused. Please check your Lovable AI credits and resume manually when ready.`,
+                message: `${errorType}. Validation has been auto-paused. Please check your AI API credits and resume manually when ready.`,
                 autoPaused: true,
                 errorType: isPaymentError ? 'CREDITS_EXHAUSTED' : 'RATE_LIMIT'
               }),
@@ -559,14 +559,22 @@ Deno.serve(async (req) => {
 
         // Only mark as verified if validation actually succeeded (confidence > 0)
         // AND we have some actual data (technologies OR materials)
+        // AND the supplier is confirmed as a 3D printing provider
         const overallConfidence = validationResult.overallConfidence || validationResult.confidence?.overall || 0;
         const hasTechnologies = validationResult.scrapedTechnologies?.length > 0 || validationResult.scrapedData?.technologies?.length > 0;
         const hasMaterials = validationResult.scrapedMaterials?.length > 0 || validationResult.scrapedData?.materials?.length > 0;
-        const validationSucceeded = overallConfidence > 0 && (hasTechnologies || hasMaterials);
-        
-        const validationOnlyUpdate: any = { 
+        const is3dProvider = validationResult.scrapedData?.is_3d_printing_provider ?? validationResult.updated?.is_3d_printing_provider;
+        const validationSucceeded = overallConfidence > 0 && (hasTechnologies || hasMaterials) && is3dProvider !== false;
+
+        if (is3dProvider === false) {
+          console.log(`⚠️ ${supplier.name} is NOT a 3D printing provider - will not be verified`);
+        } else if (is3dProvider === true) {
+          console.log(`✅ ${supplier.name} confirmed as 3D printing provider`);
+        }
+
+        const validationOnlyUpdate: any = {
           last_validated_at: new Date().toISOString(),
-          verified: validationSucceeded, // Only verify if validation actually worked
+          verified: validationSucceeded, // Only verify if validation actually worked and is a 3D printing provider
           last_validation_confidence: overallConfidence
         };
         

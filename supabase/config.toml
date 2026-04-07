@@ -66,3 +66,9 @@ verify_jwt = false
 
 [functions.estimate-price]
 verify_jwt = false
+
+[functions.trigger-supplier-match]
+verify_jwt = false
+
+[functions.trigger-stl-match]
+verify_jwt = false

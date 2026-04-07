@@ -6,9 +6,9 @@ import SupplierLogo from '@/components/ui/supplier-logo';
 import { MapPin, Verified, ExternalLink, Crown } from 'lucide-react';
 import { getDisplayNameFromMaterialKey, getDisplayNameFromTechnologyKey } from '@/lib/supplierData';
 import { trackSupplierInteraction, trackOutboundLink, trackSelectItem, supplierToGA4Item, trackSupplierImpression } from '@/lib/analytics';
-import { TechInfoBadge } from '@/components/TechnologyTooltip';
+import { TechInfoBadge } from '@/components/comparison/TechnologyTooltip';
 
-import { LeadTimeBadge } from '@/components/LeadTimeBadge';
+import { LeadTimeBadge } from '@/components/pricing/LeadTimeBadge';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 interface Supplier {

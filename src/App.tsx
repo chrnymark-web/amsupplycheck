@@ -5,50 +5,59 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useParams } from "react-router-dom";
-import { SupplierChatbot } from "./components/SupplierChatbot";
+import { SupplierChatbot } from "./components/chat/SupplierChatbot";
 
-// Lazy load ALL pages including Index for better code splitting
-const Index = lazy(() => import("./pages/Index"));
+// Lazy load pages - core
+const Index = lazy(() => import("./pages/core/Index"));
+const About = lazy(() => import("./pages/core/About"));
+const NotFound = lazy(() => import("./pages/core/NotFound"));
 
-// Lazy load pages for better code splitting
-const Search = lazy(() => import("./pages/Search"));
-const KeywordSearch = lazy(() => import("./pages/KeywordSearch"));
-const About = lazy(() => import("./pages/About"));
-const CompatibilityMatrix = lazy(() => import("./pages/CompatibilityMatrix"));
-const SupplierDetail = lazy(() => import("./pages/SupplierDetail"));
-const SupplierRoute = lazy(() => import("./components/SupplierRoute"));
-const SitemapRedirect = lazy(() => import("./pages/SitemapRedirect"));
-const DataValidation = lazy(() => import("./pages/DataValidation"));
-const ValidationDashboard = lazy(() => import("./pages/ValidationDashboard"));
-const MonitoringDashboard = lazy(() => import("./pages/MonitoringDashboard"));
-const AIAnalyticsDashboard = lazy(() => import("./pages/AIAnalyticsDashboard"));
-const AdminSuppliers = lazy(() => import("./pages/AdminSuppliers"));
-const AdminSupplierEditor = lazy(() => import("./pages/AdminSupplierEditor"));
-const ExportSuppliers = lazy(() => import("./pages/ExportSuppliers"));
-const Auth = lazy(() => import("./pages/Auth"));
-const NormalizeData = lazy(() => import("./pages/NormalizeData"));
-const Signups = lazy(() => import("./pages/Signups"));
-const Analytics = lazy(() => import("./pages/Analytics"));
-const ProjectMatch = lazy(() => import("./pages/ProjectMatch"));
+// Lazy load pages - suppliers
+const Suppliers = lazy(() => import("./pages/suppliers/Suppliers"));
+const SupplierDetail = lazy(() => import("./pages/suppliers/SupplierDetail"));
+const SupplierProfile = lazy(() => import("./pages/suppliers/SupplierProfile"));
+const SupplierRoute = lazy(() => import("./components/supplier/SupplierRoute"));
+const Browse = lazy(() => import("./pages/suppliers/Browse"));
+const Favorites = lazy(() => import("./pages/suppliers/Favorites"));
 
-const DiscoveredSuppliers = lazy(() => import("./pages/DiscoveredSuppliers"));
-const TechnologyGuide = lazy(() => import("./pages/TechnologyGuide"));
-const NotFound = lazy(() => import("./pages/NotFound"));
-const IntentPage = lazy(() => import("./pages/IntentPage"));
-const GuidePage = lazy(() => import("./pages/GuidePage"));
-const GuidesIndex = lazy(() => import("./pages/GuidesIndex"));
-const Favorites = lazy(() => import("./pages/Favorites"));
-const AlternativePage = lazy(() => import("./pages/AlternativePage"));
-const EmbedCompare = lazy(() => import("./pages/EmbedCompare"));
-const PlatformStats = lazy(() => import("./pages/PlatformStats"));
-const SEOPresentation = lazy(() => import("./pages/SEOPresentation"));
-const SEODashboard = lazy(() => import("./pages/SEODashboard"));
-const DataOverview = lazy(() => import("./pages/Admin"));
-const Suppliers = lazy(() => import("./pages/Suppliers"));
-const SupplierProfile = lazy(() => import("./pages/SupplierProfile"));
-const Knowledge = lazy(() => import("./pages/Knowledge"));
-const KnowledgeDetail = lazy(() => import("./pages/KnowledgeDetail"));
-const Browse = lazy(() => import("./pages/Browse"));
+// Lazy load pages - search
+const Search = lazy(() => import("./pages/search/Search"));
+const KeywordSearch = lazy(() => import("./pages/search/KeywordSearch"));
+const ProjectMatch = lazy(() => import("./pages/search/ProjectMatch"));
+const STLMatch = lazy(() => import("./pages/search/STLMatch"));
+const CompatibilityMatrix = lazy(() => import("./pages/search/CompatibilityMatrix"));
+const ComparePrices = lazy(() => import("./pages/search/ComparePrices"));
+
+// Lazy load pages - guides
+const GuidesIndex = lazy(() => import("./pages/guides/GuidesIndex"));
+const GuidePage = lazy(() => import("./pages/guides/GuidePage"));
+const AlternativePage = lazy(() => import("./pages/guides/AlternativePage"));
+const IntentPage = lazy(() => import("./pages/guides/IntentPage"));
+const Knowledge = lazy(() => import("./pages/guides/Knowledge"));
+const KnowledgeDetail = lazy(() => import("./pages/guides/KnowledgeDetail"));
+const TechnologyGuide = lazy(() => import("./pages/guides/TechnologyGuide"));
+
+// Lazy load pages - admin
+const DataOverview = lazy(() => import("./pages/admin/Admin"));
+const AdminSuppliers = lazy(() => import("./pages/admin/AdminSuppliers"));
+const AdminSupplierEditor = lazy(() => import("./pages/admin/AdminSupplierEditor"));
+const DataValidation = lazy(() => import("./pages/admin/DataValidation"));
+const ValidationDashboard = lazy(() => import("./pages/admin/ValidationDashboard"));
+const MonitoringDashboard = lazy(() => import("./pages/admin/MonitoringDashboard"));
+const AIAnalyticsDashboard = lazy(() => import("./pages/admin/AIAnalyticsDashboard"));
+const SEODashboard = lazy(() => import("./pages/admin/SEODashboard"));
+const DiscoveredSuppliers = lazy(() => import("./pages/admin/DiscoveredSuppliers"));
+const Signups = lazy(() => import("./pages/admin/Signups"));
+const Analytics = lazy(() => import("./pages/admin/Analytics"));
+const NormalizeData = lazy(() => import("./pages/admin/NormalizeData"));
+const ExportSuppliers = lazy(() => import("./pages/admin/ExportSuppliers"));
+
+// Lazy load pages - auth & embed
+const Auth = lazy(() => import("./pages/auth/Auth"));
+const EmbedCompare = lazy(() => import("./pages/embed/EmbedCompare"));
+const PlatformStats = lazy(() => import("./pages/embed/PlatformStats"));
+const SEOPresentation = lazy(() => import("./pages/embed/SEOPresentation"));
+const SitemapRedirect = lazy(() => import("./pages/embed/SitemapRedirect"));
 
 // Redirect component for old /supplier/:id URLs
 const SupplierRedirect = () => {
@@ -115,6 +124,8 @@ const App = () => (
             <Route path="/admin/discovered" element={<AdminPage><DiscoveredSuppliers /></AdminPage>} />
             <Route path="/analytics" element={<AdminPage><Analytics /></AdminPage>} />
             <Route path="/match" element={<ProjectMatch />} />
+            <Route path="/stl-match" element={<STLMatch />} />
+            <Route path="/compare-prices" element={<ComparePrices />} />
             
             <Route path="/knowledge" element={<Knowledge />} />
             <Route path="/knowledge/:type/:slug" element={<KnowledgeDetail />} />

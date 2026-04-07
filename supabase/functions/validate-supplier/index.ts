@@ -730,9 +730,9 @@ serve(async (req) => {
 
     console.log(`🔍 Starting validation for ${supplierName} (${supplierWebsite})`);
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    if (!LOVABLE_API_KEY) {
-      throw new Error('LOVABLE_API_KEY not configured');
+    const ANTHROPIC_API_KEY = Deno.env.get('ANTHROPIC_API_KEY');
+    if (!ANTHROPIC_API_KEY) {
+      throw new Error('ANTHROPIC_API_KEY not configured');
     }
 
     // Initialize Supabase client
@@ -1093,6 +1093,7 @@ serve(async (req) => {
 Extract comprehensive, accurate information and return ONLY valid JSON (no markdown):
 
 {
+  "is_3d_printing_provider": true,
   "technologies": ["technology1", "technology2"],
   "materials": ["material1", "material2"],
   "certifications": ["ISO 9001", "AS9100D"],
@@ -1121,7 +1122,8 @@ Extract comprehensive, accurate information and return ONLY valid JSON (no markd
     "location": 95,
     "description": 85,
     "logo": 80,
-    "lead_time": 75
+    "lead_time": 75,
+    "is_3d_printing_provider": 95
   }
 }
 
@@ -1190,6 +1192,13 @@ Material Synonyms (map these to valid keys):
 - "Carbon Fiber Reinforced" or "CFRP" -> carbon-fiber
 
 CRITICAL INSTRUCTIONS:
+0. is_3d_printing_provider: Determine if this company is an ACTUAL 3D printing / additive manufacturing service provider.
+   - true: Company offers 3D printing services, sells 3D printed parts, or manufactures using additive manufacturing as a core business
+   - false: Company is a software-only company, pure reseller without printing capability, news/blog site, consultancy without printing, or unrelated business
+   - Evidence FOR: owns 3D printers, lists printing materials/technologies, accepts part orders, shows manufactured parts, has production facility
+   - Evidence AGAINST: only sells software, only writes about 3D printing, only resells others' services with no own capability
+   - When in doubt (e.g., company does both consulting AND printing), set to true
+   - Confidence should be 90+ only if clear evidence exists on the website
 1. PRIORITIZE visible text content - it's cleaner and more accurate
 2. Use HTML only for verification and structured data
 3. Focus on ACTUAL capabilities, not marketing fluff
@@ -1239,12 +1248,14 @@ CRITICAL INSTRUCTIONS:
     - Set rush_service: true if any express/rush option is mentioned
     - Set instant_quote: true if they offer online quoting tools`;
 
-    console.log(`🤖 Calling Lovable AI for analysis...`);
-    
+    console.log(`🤖 Calling Anthropic Claude for analysis...`);
+
     const requestBody = {
-      model: 'google/gemini-2.5-flash',
+      model: 'claude-haiku-4-5-20251001',
+      max_tokens: 3000,
+      temperature: 0.3,
+      system: systemPrompt,
       messages: [
-        { role: 'system', content: systemPrompt },
         {
           role: 'user',
           content: `Analyze ${supplierName} (${supplierWebsite})
@@ -1256,15 +1267,14 @@ HTML (for verification):
 ${htmlContent.substring(0, 50000)}`
         }
       ],
-      temperature: 0.3,
-      max_tokens: 3000,
     };
-    
+
     const aiStartTime = Date.now();
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const aiResponse = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'x-api-key': ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(requestBody),
@@ -1275,17 +1285,18 @@ ${htmlContent.substring(0, 50000)}`
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
-      console.error('❌ Lovable AI error:', aiResponse.status, errorText);
-      throw new Error(`Lovable AI error: ${aiResponse.status} - ${errorText}`);
+      console.error('❌ Anthropic API error:', aiResponse.status, errorText);
+      throw new Error(`Anthropic API error: ${aiResponse.status} - ${errorText}`);
     }
 
     const aiData = await aiResponse.json();
-    const aiContent = aiData.choices?.[0]?.message?.content || '';
+    const aiContent = aiData.content?.[0]?.text || '';
     
     console.log(`✅ AI response received (${aiContent.length} chars)`);
 
     // Parse AI response
     let extractedData: {
+      is_3d_printing_provider?: boolean;
       technologies: string[];
       materials: string[];
       certifications?: string[];
@@ -1306,6 +1317,7 @@ ${htmlContent.substring(0, 50000)}`
         logo: number;
         lead_time?: number;
         certifications?: number;
+        is_3d_printing_provider?: number;
       };
     };
 
@@ -1597,13 +1609,24 @@ ${htmlContent.substring(0, 50000)}`
     const shouldUpdateLogo = logoConfidence >= 50 && scrapedLogoUrl && validateLogoUrl(scrapedLogoUrl, supplierWebsite);
     const shouldUpdateCertifications = certConfidence >= 60 && scrapedCertifications.length > 0;
     
-    const shouldVerify = shouldUpdateTechnologies && shouldUpdateMaterials;
-    
+    const shouldVerify = shouldUpdateTechnologies && shouldUpdateMaterials && extractedData.is_3d_printing_provider !== false;
+
     // Update supplier record
     const supplierUpdate: any = {
       last_validation_confidence: overallConfidence,
       last_validated_at: new Date().toISOString()
     };
+
+    // Update is_3d_printing_provider
+    if (extractedData.is_3d_printing_provider !== undefined) {
+      supplierUpdate.is_3d_printing_provider = extractedData.is_3d_printing_provider;
+      const providerConfidence = extractedData.confidence?.is_3d_printing_provider || 0;
+      if (extractedData.is_3d_printing_provider === false) {
+        console.log(`⚠️ ${supplierName} identified as NOT a 3D printing provider (confidence: ${providerConfidence}%) - will not be verified`);
+      } else {
+        console.log(`✅ ${supplierName} confirmed as 3D printing provider (confidence: ${providerConfidence}%)`);
+      }
+    }
     
     if (shouldUpdateTechnologies) {
       supplierUpdate.technologies = dbTechnologies;
@@ -1696,7 +1719,8 @@ ${htmlContent.substring(0, 50000)}`
         certifications: scrapedCertifications,
         leadTime: extractedData.lead_time?.typical || null,
         rushService: extractedData.lead_time?.rush_service || false,
-        instantQuote: extractedData.lead_time?.instant_quote || false
+        instantQuote: extractedData.lead_time?.instant_quote || false,
+        is_3d_printing_provider: extractedData.is_3d_printing_provider ?? null
       },
       confidence: {
         overall: overallConfidence,
@@ -1713,7 +1737,8 @@ ${htmlContent.substring(0, 50000)}`
         logo: shouldUpdateLogo,
         certifications: shouldUpdateCertifications,
         leadTime: shouldUpdateLeadTime,
-        verified: shouldVerify
+        verified: shouldVerify,
+        is_3d_printing_provider: extractedData.is_3d_printing_provider ?? null
       },
       timing: {
         scrapingMs: totalScrapingTime - (aiEndTime - aiStartTime),
