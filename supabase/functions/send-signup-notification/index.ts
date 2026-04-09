@@ -188,7 +188,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const emailResponse = await resend.emails.send({
       from: "AMSupplyCheck <onboarding@resend.dev>",
-      to: ["chr.nymark@gmail.com"],
+      to: ["info@supplycheck.io", "chr.nymark@gmail.com"],
       subject: emailSubject,
       html: emailHtml,
     });
