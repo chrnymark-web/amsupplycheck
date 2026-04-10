@@ -685,7 +685,7 @@ const Search = () => {
         <Navbar />
       </div>
       
-      <div className={`transition-all duration-300 ${showNavbar ? 'pt-16 md:pt-20' : 'pt-0'}`}>
+      <div className={`transition-all duration-300 ${showNavbar ? 'pt-20 md:pt-24' : 'pt-0'}`}>
         {/* Live Quotes Banner */}
         {quoteData && (
           <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-3">
