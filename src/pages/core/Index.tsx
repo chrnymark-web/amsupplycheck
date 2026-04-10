@@ -919,9 +919,6 @@ const Index = () => {
           }`}
         >
           <div className="max-w-4xl mx-auto">
-            <Badge variant="outline" className="mb-3 text-xs bg-primary/10 text-primary border-primary/20">
-              The Search Engine for Manufacturing Suppliers
-            </Badge>
             <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-1">
               Find suppliers by capability, not by name
             </h1>
