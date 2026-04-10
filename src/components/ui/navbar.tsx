@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { RippleButton } from '@/components/ui/ripple-button';
-import { Search, Menu, Sparkles, X, RefreshCw, Grid3X3, Info, UserPlus, BookOpen, Globe, BarChart3, User, LogOut, Layers, ChevronDown, Cpu, FlaskConical, MapPin } from 'lucide-react';
+import { Menu, Sparkles, X, Grid3X3, Info, UserPlus, BookOpen, BarChart3, Layers, ChevronDown, Cpu, FlaskConical, MapPin } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '@/assets/amsupplycheck-logo-white.png';
 import SupplierFormDialog from '@/components/supplier/SupplierFormDialog';
-import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -26,22 +25,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
   const isHomePage = location.pathname === '/';
   const isAdminPage = location.pathname.startsWith('/admin');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [user, setUser] = useState<{ email?: string } | null>(null);
-
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null);
-    });
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const handleSignOut = async () => {
-    await supabase.auth.signOut();
-    setMobileMenuOpen(false);
-  };
 
   const handleAboutClick = () => {
     if (isHomePage && onScrollToSection) {
@@ -122,28 +105,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
             <Button 
               variant="ghost" 
               className="text-muted-foreground hover:text-foreground group"
-              onClick={() => navigate('/search')}
-            >
-              <RefreshCw className="h-4 w-4 mr-1.5 transition-transform duration-300 group-hover:animate-spin" />
-              Search
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="text-muted-foreground hover:text-foreground group"
-              onClick={() => {
-                if (isHomePage && onScrollToSection) {
-                  onScrollToSection('supplier-map');
-                } else {
-                  navigate('/#supplier-map');
-                }
-              }}
-            >
-              <Globe className="h-4 w-4 mr-1.5 transition-transform duration-300 group-hover:rotate-12" />
-              Map
-            </Button>
-            <Button 
-              variant="ghost" 
-              className="text-muted-foreground hover:text-foreground group"
               onClick={() => navigate('/guides')}
             >
               <Grid3X3 className="h-4 w-4 mr-1.5 transition-transform duration-300 group-hover:scale-110" />
@@ -187,29 +148,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
                 </Button>
               </SupplierFormDialog>
             )}
-            {/* User account button */}
-            {user ? (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground group"
-                onClick={handleSignOut}
-                title={user.email}
-              >
-                <User className="h-4 w-4 mr-1.5" />
-                <LogOut className="h-3.5 w-3.5" />
-              </Button>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground"
-                onClick={() => navigate('/auth')}
-              >
-                <User className="h-4 w-4 mr-1.5" />
-                Sign In
-              </Button>
-            )}
           </div>
 
           {/* Mobile menu button */}
@@ -249,29 +187,6 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted group"
-                onClick={() => {
-                  if (isHomePage && onScrollToSection) {
-                    onScrollToSection('supplier-map');
-                  } else {
-                    navigate('/#supplier-map');
-                  }
-                  setMobileMenuOpen(false);
-                }}
-              >
-                <Globe className="h-4 w-4 mr-3 transition-transform duration-300 group-hover:rotate-12" />
-                Global Supplier Map
-              </Button>
-              <Button 
-                variant="ghost" 
-                className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted group"
-                onClick={() => handleNavigate('/search')}
-              >
-                <RefreshCw className="h-4 w-4 mr-3 transition-transform duration-300 group-hover:animate-spin" />
-                Advanced Search
-              </Button>
               <Button 
                 variant="ghost" 
                 className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
