@@ -4,7 +4,7 @@ import { Helmet } from 'react-helmet';
 import Navbar from '@/components/ui/navbar';
 import FilterPanel, { FilterState } from '@/components/ui/filter-panel';
 import SupplierCard from '@/components/ui/supplier-card';
-import Map from '@/components/ui/map';
+import SupplierMap from '@/components/ui/map';
 import RelatedSearches from '@/components/search/RelatedSearches';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -1003,7 +1003,7 @@ const Search = () => {
                   : `${(showNavbar ? 80 : 0) + filterPanelHeight}px` 
               }}
             >
-              <Map 
+              <SupplierMap
                 suppliers={suppliersForMap}
                 height={
                   typeof window !== 'undefined' && window.innerWidth < 1024 && mobileView === 'map'
