@@ -46,6 +46,8 @@ interface SupplierCardProps {
   listName?: string;
   matchedRequirements?: string[];
   liveQuote?: LiveQuoteInfo;
+  searchedMaterials?: string[];
+  searchedTechnologies?: string[];
 }
 
 const REQUIREMENT_ICONS: Record<string, string> = {
@@ -67,7 +69,9 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
   index = 0,
   listName = "Search Results",
   matchedRequirements = [],
-  liveQuote
+  liveQuote,
+  searchedMaterials = [],
+  searchedTechnologies = []
 }) => {
   const cardRef = React.useRef<HTMLDivElement>(null);
   const [hasBeenViewed, setHasBeenViewed] = React.useState(false);
@@ -175,38 +179,72 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
                 )}
               </div>
             )}
-            <div className="flex flex-wrap gap-1 mt-1">
-              {supplier.technologies.slice(0, 3).map((tech, index) => (
-                <TechInfoBadge 
-                  key={index}
-                  name={getDisplayNameFromTechnologyKey(tech)}
-                  type="technology"
-                  variant="secondary"
-                  className="text-xs px-1.5 py-0 group-hover:scale-105 transition-transform duration-300"
-                />
-              ))}
-              {supplier.technologies.length > 3 && (
-                <Badge variant="secondary" className="text-xs px-1.5 py-0 group-hover:scale-105 transition-transform duration-300">
-                  +{supplier.technologies.length - 3}
-                </Badge>
-              )}
-            </div>
-            <div className="flex flex-wrap gap-1 mt-1">
-              {supplier.materials.slice(0, 3).map((material, index) => (
-                <TechInfoBadge 
-                  key={index}
-                  name={getDisplayNameFromMaterialKey(material)}
-                  type="material"
-                  variant="outline"
-                  className="text-xs px-1.5 py-0 group-hover:scale-105 transition-transform duration-300"
-                />
-              ))}
-              {supplier.materials.length > 3 && (
-                <Badge variant="outline" className="text-xs px-1.5 py-0 group-hover:scale-105 transition-transform duration-300">
-                  +{supplier.materials.length - 3}
-                </Badge>
-              )}
-            </div>
+            {/* Technologies - searched first, then others */}
+            {supplier.technologies.length > 0 && (() => {
+              const searchedTechSet = new Set(searchedTechnologies.map(t => t.toLowerCase()));
+              const sorted = [...supplier.technologies].sort((a, b) => {
+                const aMatch = searchedTechSet.has(a.toLowerCase()) ? 0 : 1;
+                const bMatch = searchedTechSet.has(b.toLowerCase()) ? 0 : 1;
+                return aMatch - bMatch;
+              });
+              const visible = sorted.slice(0, 3);
+              const remaining = sorted.length - 3;
+              return (
+                <div className="flex flex-wrap items-center gap-1 mt-1.5">
+                  <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mr-0.5">Tech</span>
+                  {visible.map((tech, i) => {
+                    const isSearched = searchedTechSet.has(tech.toLowerCase());
+                    return (
+                      <TechInfoBadge
+                        key={i}
+                        name={getDisplayNameFromTechnologyKey(tech)}
+                        type="technology"
+                        variant={isSearched ? "default" : "secondary"}
+                        className={`text-[11px] px-1.5 py-0.5 group-hover:scale-105 transition-transform duration-300 ${isSearched ? 'bg-primary/20 text-primary border border-primary/30 font-medium' : ''}`}
+                      />
+                    );
+                  })}
+                  {remaining > 0 && (
+                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 group-hover:scale-105 transition-transform duration-300">
+                      +{remaining}
+                    </Badge>
+                  )}
+                </div>
+              );
+            })()}
+            {/* Materials - searched first, then others */}
+            {supplier.materials.length > 0 && (() => {
+              const searchedMatSet = new Set(searchedMaterials.map(m => m.toLowerCase()));
+              const sorted = [...supplier.materials].sort((a, b) => {
+                const aMatch = searchedMatSet.has(a.toLowerCase()) ? 0 : 1;
+                const bMatch = searchedMatSet.has(b.toLowerCase()) ? 0 : 1;
+                return aMatch - bMatch;
+              });
+              const visible = sorted.slice(0, 3);
+              const remaining = sorted.length - 3;
+              return (
+                <div className="flex flex-wrap items-center gap-1 mt-1">
+                  <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mr-0.5">Mat</span>
+                  {visible.map((material, i) => {
+                    const isSearched = searchedMatSet.has(material.toLowerCase());
+                    return (
+                      <TechInfoBadge
+                        key={i}
+                        name={getDisplayNameFromMaterialKey(material)}
+                        type="material"
+                        variant={isSearched ? "default" : "outline"}
+                        className={`text-[11px] px-1.5 py-0.5 group-hover:scale-105 transition-transform duration-300 ${isSearched ? 'bg-primary/20 text-primary border border-primary/30 font-medium' : ''}`}
+                      />
+                    );
+                  })}
+                  {remaining > 0 && (
+                    <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 group-hover:scale-105 transition-transform duration-300">
+                      +{remaining}
+                    </Badge>
+                  )}
+                </div>
+              );
+            })()}
           </div>
         </div>
       </CardHeader>

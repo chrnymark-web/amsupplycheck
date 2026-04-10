@@ -399,7 +399,11 @@ const KeywordSearch = () => {
                       className="opacity-0 animate-bounce-in"
                       style={{ animationDelay: `${index * 50}ms` }}
                     >
-                      <SupplierCard supplier={supplier} />
+                      <SupplierCard
+                        supplier={supplier}
+                        searchedMaterials={aiFilters?.materials || []}
+                        searchedTechnologies={aiFilters?.technologies || []}
+                      />
                     </div>
                   ))}
                 </div>

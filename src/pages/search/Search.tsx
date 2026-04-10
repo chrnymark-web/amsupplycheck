@@ -970,6 +970,8 @@ const Search = () => {
                       listName={quoteData ? 'STL Quote Results' : 'Search Results'}
                       matchedRequirements={matched}
                       liveQuote={liveQuoteProp}
+                      searchedMaterials={filters.materials}
+                      searchedTechnologies={filters.technologies}
                     />
                   );
                 })}
