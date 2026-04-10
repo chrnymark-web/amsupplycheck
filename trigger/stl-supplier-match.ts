@@ -83,10 +83,28 @@ export const stlSupplierMatch = schemaTask({
           (m) => m.name.toLowerCase().includes(material.toLowerCase()) ||
                  material.toLowerCase().includes(m.name.toLowerCase())
         );
-        return hasTech || hasMat; // Include if they have either
+        return hasTech && hasMat; // Require both technology AND material
       });
 
-      console.log(`[stl-match] Pre-filtered to ${filteredSuppliers.length} suppliers (tech: ${technology}, mat: ${material})`);
+      // Tiered fallback: prefer both tech+mat, then tech-only, then all
+      let techOnlySuppliers: typeof allSuppliers = [];
+      if (filteredSuppliers.length === 0) {
+        techOnlySuppliers = allSuppliers.filter((s) =>
+          s.technologies.some(
+            (t) => t.name.toLowerCase().includes(technology.toLowerCase()) ||
+                   technology.toLowerCase().includes(t.name.toLowerCase())
+          )
+        );
+      }
+
+      const suppliersToScore = filteredSuppliers.length > 0
+        ? filteredSuppliers
+        : techOnlySuppliers.length > 0
+          ? techOnlySuppliers
+          : allSuppliers;
+
+      const filterTier = filteredSuppliers.length > 0 ? "both" : techOnlySuppliers.length > 0 ? "tech-only" : "all";
+      console.log(`[stl-match] Pre-filtered to ${suppliersToScore.length} suppliers (tech: ${technology}, mat: ${material}, tier: ${filterTier})`);
 
       // Use Claude to analyze STL metrics + create requirements for scoring
       const anthropic = new Anthropic();
@@ -153,8 +171,7 @@ Based on the part size, complexity, and material, what should we look for in a s
         projectSummary: extractedReqs.projectSummary || `${technology} part in ${material}`,
       };
 
-      // Score using the filtered suppliers
-      const suppliersToScore = filteredSuppliers.length >= 3 ? filteredSuppliers : allSuppliers;
+      // Score using the pre-filtered suppliers
       const matches = scoreSuppliers(suppliersToScore, requirements, 8);
       console.log(`[stl-match] Found ${matches.length} matches`);
 

@@ -8,10 +8,10 @@ const corsHeaders = {
 
 // Weight factors for matching - certification weight increased
 const WEIGHTS = {
-  technology: 0.25,
-  material: 0.20,
-  location: 0.15,
-  certification: 0.25,
+  technology: 0.30,
+  material: 0.25,
+  location: 0.10,
+  certification: 0.20,
   capacity: 0.15,
 };
 
@@ -407,7 +407,7 @@ Extract the requirements. Prioritize the recommended technologies if they match 
           }
         }
       } else {
-        techScore = 0.5; // Neutral if no specific requirement
+        techScore = 0; // No requirement = no score
       }
 
       // Material match score
@@ -425,7 +425,7 @@ Extract the requirements. Prioritize the recommended technologies if they match 
           }
         }
       } else {
-        materialScore = 0.5; // Neutral if no specific requirement
+        materialScore = 0; // No requirement = no score
       }
 
       // Location match score
@@ -433,14 +433,15 @@ Extract the requirements. Prioritize the recommended technologies if they match 
       if (requirements.preferredRegions && requirements.preferredRegions.length > 0) {
         for (const region of requirements.preferredRegions) {
           if (supplierRegion.toLowerCase().includes(region.toLowerCase()) ||
-              region.toLowerCase().includes(supplierRegion.toLowerCase()) ||
-              supplierRegion === 'Global') {
+              region.toLowerCase().includes(supplierRegion.toLowerCase())) {
             locationScore = 1;
             break;
+          } else if (supplierRegion === 'Global') {
+            locationScore = 0.5; // Global = partial match, not perfect
           }
         }
       } else {
-        locationScore = 0.5; // Neutral if no preference
+        locationScore = 0.3; // Slight benefit when no region preference
       }
 
       // Certification match score (enhanced)
@@ -466,7 +467,7 @@ Extract the requirements. Prioritize the recommended technologies if they match 
       }
 
       // Capacity score based on whether it's production or prototype
-      let capacityScore = 0.5;
+      let capacityScore = 0.3;
       if (requirements.isProductionRun) {
         // Production-oriented technologies get higher score
         const productionTechs = ['Multi Jet Fusion', 'SLS', 'SAF'];
@@ -483,8 +484,8 @@ Extract the requirements. Prioritize the recommended technologies if they match 
         (certificationScore * WEIGHTS.certification) +
         (capacityScore * WEIGHTS.capacity);
 
-      // Only include suppliers with meaningful matches
-      if (totalScore > 0.2 && (matchedTechs.length > 0 || matchedMats.length > 0 || locationScore > 0)) {
+      // Only include suppliers with meaningful matches (must match both tech AND material)
+      if (totalScore > 0.35 && matchedTechs.length > 0 && matchedMats.length > 0) {
         matches.push({
           supplier: {
             supplier_id: supplier.supplier_id,

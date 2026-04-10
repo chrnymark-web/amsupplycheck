@@ -5,10 +5,10 @@
 import type { EnrichedSupplier, ExtractedRequirements, MatchResult } from "./types.js";
 
 const WEIGHTS = {
-  technology: 0.25,
-  material: 0.20,
-  location: 0.15,
-  certification: 0.25,
+  technology: 0.30,
+  material: 0.25,
+  location: 0.10,
+  certification: 0.20,
   capacity: 0.15,
 };
 
@@ -144,7 +144,7 @@ export function scoreSuppliers(
         }
       }
     } else {
-      techScore = 0.5;
+      techScore = 0;
     }
 
     // Material score: match against supplier.materials[].name
@@ -159,7 +159,7 @@ export function scoreSuppliers(
         }
       }
     } else {
-      materialScore = 0.5;
+      materialScore = 0;
     }
 
     // Location score: match against supplier.country.region or location_country
@@ -168,17 +168,15 @@ export function scoreSuppliers(
       const supplierRegion = supplier.country?.region || supplier.region || "";
       const supplierCountry = supplier.location_country || "";
       for (const region of requirements.preferredRegions) {
-        if (
-          fuzzyMatch(supplierRegion, region) ||
-          fuzzyMatch(supplierCountry, region) ||
-          supplierRegion === "Global"
-        ) {
+        if (fuzzyMatch(supplierRegion, region) || fuzzyMatch(supplierCountry, region)) {
           locationScore = 1;
           break;
+        } else if (supplierRegion === "Global") {
+          locationScore = 0.5; // Global = partial match, not perfect
         }
       }
     } else {
-      locationScore = 0.5;
+      locationScore = 0.3;
     }
 
     // Certification score: match against supplier.certifications[].name
@@ -197,7 +195,7 @@ export function scoreSuppliers(
     }
 
     // Capacity score
-    let capacityScore = 0.5;
+    let capacityScore = 0.3;
     if (requirements.isProductionRun) {
       const productionTechs = ["Multi Jet Fusion", "SLS", "SAF"];
       if (supplier.technologies.some((t) => productionTechs.some((pt) => fuzzyMatch(t.name, pt)))) {
@@ -213,8 +211,8 @@ export function scoreSuppliers(
       certificationScore * WEIGHTS.certification +
       capacityScore * WEIGHTS.capacity;
 
-    // Include suppliers with meaningful matches
-    if (totalScore > 0.2 && (matchedTechs.length > 0 || matchedMats.length > 0 || locationScore > 0)) {
+    // Include suppliers with meaningful matches (must match both tech AND material)
+    if (totalScore > 0.35 && matchedTechs.length > 0 && matchedMats.length > 0) {
       matches.push({
         supplier: {
           supplier_id: supplier.supplier_id,
