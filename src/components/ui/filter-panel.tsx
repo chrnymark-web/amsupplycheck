@@ -16,17 +16,11 @@ import {
   requirementToMaterials,
   type SearchRequirement
 } from '@/lib/technologyMaterialCompatibility';
-import { X, Zap, TrendingUp } from 'lucide-react';
+import { X, Zap } from 'lucide-react';
 import MultiSelect from '@/components/ui/multi-select';
 import GroupedMultiSelect from '@/components/ui/grouped-multi-select';
 
-const POPULAR_SEARCHES = [
-  { label: 'SLS Nylon in Germany', query: 'SLS nylon parts in Germany' },
-  { label: 'Metal 3D printing USA', query: 'metal 3D printing services in USA' },
-  { label: 'Medical-grade prototypes', query: 'biocompatible prototypes for medical devices' },
-  { label: 'Aerospace titanium parts', query: 'titanium parts for aerospace with AS9100' },
-  { label: 'Fast turnaround Europe', query: 'quick prototyping services in Europe' },
-];
+
 import { trackFilterApplied } from '@/lib/analytics';
 import AISearchInput from '@/components/search/AISearchInput';
 import type { AISearchFilters } from '@/hooks/use-ai-search';
@@ -59,9 +53,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   const [previousFilterCounts, setPreviousFilterCounts] = React.useState<Record<string, number>>({});
   const [aiSearchQuery, setAiSearchQuery] = React.useState('');
 
-  const handlePopularSearch = (query: string) => {
-    setAiSearchQuery(query);
-  };
 
   // Get dynamic data arrays from supplier data
   const allMaterials = getAllMaterials();
@@ -214,23 +205,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             placeholder="Try: 'metal parts for aerospace in Europe' or 'flexible prototypes in Scandinavia'"
             externalQuery={aiSearchQuery}
           />
-
-          {/* Popular Searches */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-muted-foreground flex items-center gap-1">
-              <TrendingUp className="h-3 w-3" />
-              Popular:
-            </span>
-            {POPULAR_SEARCHES.map((item) => (
-              <button
-                key={item.label}
-                onClick={() => handlePopularSearch(item.query)}
-                className="text-xs text-primary/80 hover:text-primary hover:underline underline-offset-2 transition-colors"
-              >
-                {item.label}
-              </button>
-            ))}
-          </div>
 
           {/* Separator */}
           <div className="border-t border-border/50" />
