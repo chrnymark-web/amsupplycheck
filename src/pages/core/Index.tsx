@@ -926,37 +926,6 @@ const Index = () => {
               Search technologies, materials &amp; expertise
             </p>
 
-            {/* Quick browse chips */}
-            <div className="flex flex-wrap justify-center gap-2 mb-4">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs bg-card/50 hover:bg-primary hover:text-primary-foreground"
-                onClick={() => navigate('/browse')}
-              >
-                <Cpu className="h-3 w-3 mr-1" /> Browse Technologies
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs bg-card/50 hover:bg-primary hover:text-primary-foreground"
-                onClick={() => navigate('/knowledge?tab=materials')}
-              >
-                <FlaskConical className="h-3 w-3 mr-1" /> Browse Materials
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-xs bg-card/50 hover:bg-primary hover:text-primary-foreground"
-                onClick={() => {
-                  const el = document.getElementById('supplier-map');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
-                }}
-              >
-                <Globe className="h-3 w-3 mr-1" /> Browse by Country
-              </Button>
-            </div>
-
             {/* Price Calculator */}
             <PriceCalculator />
 

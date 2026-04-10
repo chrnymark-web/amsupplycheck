@@ -1,18 +1,10 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { RippleButton } from '@/components/ui/ripple-button';
-import { Menu, Sparkles, X, Grid3X3, Info, UserPlus, BookOpen, BarChart3, Layers, ChevronDown, Cpu, FlaskConical, MapPin } from 'lucide-react';
+import { Menu, Sparkles, X, Grid3X3, Info, UserPlus, BookOpen, BarChart3, Cpu, FlaskConical, Globe } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import logo from '@/assets/amsupplycheck-logo-white.png';
 import SupplierFormDialog from '@/components/supplier/SupplierFormDialog';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-  DropdownMenuLabel,
-} from '@/components/ui/dropdown-menu';
 
 interface NavbarProps {
   className?: string;
@@ -67,41 +59,30 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
 
           {/* All menu items on right */}
           <div className="hidden md:flex items-center space-x-4">
-            {/* Browse Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="text-muted-foreground hover:text-foreground group">
-                  <Layers className="h-4 w-4 mr-1.5" />
-                  Browse
-                  <ChevronDown className="h-3 w-3 ml-1" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56">
-                <DropdownMenuLabel className="text-xs text-muted-foreground">Browse by</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => navigate('/browse')}>
-                  <Layers className="h-4 w-4 mr-2" />
-                  All Capabilities
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/knowledge?tab=technologies')}>
-                  <Cpu className="h-4 w-4 mr-2" />
-                  Technologies
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/knowledge?tab=materials')}>
-                  <FlaskConical className="h-4 w-4 mr-2" />
-                  Materials
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => navigate('/suppliers')}>
-                  <MapPin className="h-4 w-4 mr-2" />
-                  Countries &amp; Suppliers
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => navigate('/knowledge')}>
-                  <BookOpen className="h-4 w-4 mr-2" />
-                  Knowledge Base
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <Button
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground group"
+              onClick={() => navigate('/browse')}
+            >
+              <Cpu className="h-4 w-4 mr-1.5 transition-transform duration-300 group-hover:scale-110" />
+              Browse Technologies
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground group"
+              onClick={() => navigate('/knowledge?tab=materials')}
+            >
+              <FlaskConical className="h-4 w-4 mr-1.5 transition-transform duration-300 group-hover:scale-110" />
+              Browse Materials
+            </Button>
+            <Button
+              variant="ghost"
+              className="text-muted-foreground hover:text-foreground group"
+              onClick={() => navigate('/suppliers')}
+            >
+              <Globe className="h-4 w-4 mr-1.5 transition-transform duration-300 group-hover:scale-110" />
+              Browse by Country
+            </Button>
             <Button 
               variant="ghost" 
               className="text-muted-foreground hover:text-foreground group"
@@ -187,8 +168,32 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
               </Button>
             </div>
             <div className="flex-1 overflow-y-auto py-4 px-2 space-y-1">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
+                onClick={() => handleNavigate('/browse')}
+              >
+                <Cpu className="h-4 w-4 mr-3" />
+                Browse Technologies
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
+                onClick={() => handleNavigate('/knowledge?tab=materials')}
+              >
+                <FlaskConical className="h-4 w-4 mr-3" />
+                Browse Materials
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
+                onClick={() => handleNavigate('/suppliers')}
+              >
+                <Globe className="h-4 w-4 mr-3" />
+                Browse by Country
+              </Button>
+              <Button
+                variant="ghost"
                 className="w-full justify-start text-muted-foreground hover:text-foreground hover:bg-muted"
                 onClick={() => handleNavigate('/technology-guide')}
               >
