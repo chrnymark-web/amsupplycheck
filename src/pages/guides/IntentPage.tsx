@@ -317,7 +317,7 @@ function IntentPageContent({ config }: { config: IntentPageConfig }) {
           )}
           {displaySuppliers.length > 30 && (
             <div className="text-center mt-8">
-              <Button variant="outline" onClick={() => navigate('/search')}>
+              <Button variant="outline" onClick={() => navigate('/suppliers')}>
                 View All {displaySuppliers.length} Suppliers
                 <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

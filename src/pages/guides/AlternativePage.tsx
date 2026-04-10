@@ -327,7 +327,7 @@ export default function AlternativePage() {
           <p className="text-muted-foreground mb-4">
             Filter by technology, material, location, and more to find the perfect manufacturing partner.
           </p>
-          <Link to="/search">
+          <Link to="/suppliers">
             <Button className="gap-2">
               <Search className="h-4 w-4" /> Search All Suppliers
             </Button>
