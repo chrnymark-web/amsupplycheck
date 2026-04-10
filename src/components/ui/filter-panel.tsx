@@ -11,12 +11,11 @@ import {
   technologyPriceIndex,
   materialPriceIndex,
   getPriceTier,
-  SEARCH_REQUIREMENTS,
   requirementToTechnologies,
   requirementToMaterials,
   type SearchRequirement
 } from '@/lib/technologyMaterialCompatibility';
-import { X, Zap } from 'lucide-react';
+import { X } from 'lucide-react';
 import MultiSelect from '@/components/ui/multi-select';
 import GroupedMultiSelect from '@/components/ui/grouped-multi-select';
 
@@ -205,38 +204,6 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             placeholder="Try: 'metal parts for aerospace in Europe' or 'flexible prototypes in Scandinavia'"
             externalQuery={aiSearchQuery}
           />
-
-          {/* Separator */}
-          <div className="border-t border-border/50" />
-
-          {/* Quick Requirements Badges */}
-          <div className="flex flex-wrap gap-1.5">
-            {SEARCH_REQUIREMENTS.map((req) => {
-              const isSelected = filters.requirements?.includes(req);
-              return (
-                <Badge
-                  key={req}
-                  variant={isSelected ? "default" : "outline"}
-                  className={`cursor-pointer transition-all duration-200 text-xs px-2 py-0.5 hover:scale-105 active:scale-95 ${
-                    isSelected 
-                      ? 'bg-primary text-primary-foreground shadow-sm hover:bg-primary/90' 
-                      : 'hover:bg-accent hover:border-primary/30 border-border'
-                  }`}
-                  onClick={() => {
-                    const current = filters.requirements || [];
-                    if (isSelected) {
-                      handleValuesChange('requirements', current.filter(r => r !== req));
-                    } else {
-                      handleValuesChange('requirements', [...current, req]);
-                    }
-                  }}
-                >
-                  <Zap className="h-3 w-3 mr-1" />
-                  {req}
-                </Badge>
-              );
-            })}
-          </div>
 
           {/* Filter Dropdowns - Single Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
