@@ -686,32 +686,6 @@ const Search = () => {
       </div>
       
       <div className={`transition-all duration-300 ${showNavbar ? 'pt-28' : 'pt-0'}`}>
-        {/* Live Quotes Banner */}
-        {quoteData && (
-          <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-3">
-            <div className="relative flex items-center gap-3 px-4 py-2.5 rounded-lg bg-primary/[0.07] border border-primary/15 overflow-hidden">
-              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-lg" />
-              <Signal className="h-4 w-4 text-primary flex-shrink-0 animate-pulse" />
-              <span className="text-sm text-muted-foreground flex-1">
-                Showing <span className="font-semibold text-primary">{quoteData.length} live quotes</span><span className="hidden sm:inline"> for your uploaded file</span> — sorted by price
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md"
-                onClick={() => {
-                  setQuoteData(null);
-                  setSortBy('relevance');
-                  sessionStorage.removeItem('stl-live-quotes');
-                  navigate('/search');
-                }}
-              >
-                <X className="h-3 w-3 mr-1" /> Clear
-              </Button>
-            </div>
-          </div>
-        )}
-
         {/* Results Summary Bar */}
         <div className="mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-wrap items-center gap-2">
