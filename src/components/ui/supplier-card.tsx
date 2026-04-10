@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import SupplierLogo from '@/components/ui/supplier-logo';
-import { MapPin, Verified, ExternalLink, Crown, Clock } from 'lucide-react';
+import { MapPin, Verified, ExternalLink, Crown, Clock, Factory, Layers } from 'lucide-react';
 import { getDisplayNameFromMaterialKey, getDisplayNameFromTechnologyKey } from '@/lib/supplierData';
 import { trackSupplierInteraction, trackOutboundLink, trackSelectItem, supplierToGA4Item, trackSupplierImpression } from '@/lib/analytics';
 import { TechInfoBadge } from '@/components/comparison/TechnologyTooltip';
@@ -179,7 +179,15 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
                 )}
               </div>
             )}
-            {/* Technologies - searched first, then others */}
+          </div>
+        </div>
+      </CardHeader>
+
+      {/* Technologies & Materials section */}
+      {(supplier.technologies.length > 0 || supplier.materials.length > 0) && (
+        <div className="px-3 pb-1.5">
+          <div className="pt-1.5 border-t border-border/50 space-y-1.5">
+            {/* Technologies */}
             {supplier.technologies.length > 0 && (() => {
               const searchedTechSet = new Set(searchedTechnologies.map(t => t.toLowerCase()));
               const sorted = [...supplier.technologies].sort((a, b) => {
@@ -187,11 +195,11 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
                 const bMatch = searchedTechSet.has(b.toLowerCase()) ? 0 : 1;
                 return aMatch - bMatch;
               });
-              const visible = sorted.slice(0, 3);
-              const remaining = sorted.length - 3;
+              const visible = sorted.slice(0, 4);
+              const remaining = sorted.length - 4;
               return (
-                <div className="flex flex-wrap items-center gap-1 mt-1.5">
-                  <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mr-0.5">Tech</span>
+                <div className="flex flex-wrap items-center gap-1">
+                  <Factory className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                   {visible.map((tech, i) => {
                     const isSearched = searchedTechSet.has(tech.toLowerCase());
                     return (
@@ -200,19 +208,19 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
                         name={getDisplayNameFromTechnologyKey(tech)}
                         type="technology"
                         variant={isSearched ? "default" : "secondary"}
-                        className={`text-[11px] px-1.5 py-0.5 group-hover:scale-105 transition-transform duration-300 ${isSearched ? 'bg-primary/20 text-primary border border-primary/30 font-medium' : ''}`}
+                        className={`text-xs px-2 py-0.5 ${isSearched ? 'bg-primary/20 text-primary border border-primary/30 font-semibold' : ''}`}
                       />
                     );
                   })}
                   {remaining > 0 && (
-                    <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5 group-hover:scale-105 transition-transform duration-300">
+                    <Badge variant="secondary" className="text-xs px-2 py-0.5">
                       +{remaining}
                     </Badge>
                   )}
                 </div>
               );
             })()}
-            {/* Materials - searched first, then others */}
+            {/* Materials */}
             {supplier.materials.length > 0 && (() => {
               const searchedMatSet = new Set(searchedMaterials.map(m => m.toLowerCase()));
               const sorted = [...supplier.materials].sort((a, b) => {
@@ -220,11 +228,11 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
                 const bMatch = searchedMatSet.has(b.toLowerCase()) ? 0 : 1;
                 return aMatch - bMatch;
               });
-              const visible = sorted.slice(0, 3);
-              const remaining = sorted.length - 3;
+              const visible = sorted.slice(0, 4);
+              const remaining = sorted.length - 4;
               return (
-                <div className="flex flex-wrap items-center gap-1 mt-1">
-                  <span className="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mr-0.5">Mat</span>
+                <div className="flex flex-wrap items-center gap-1">
+                  <Layers className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                   {visible.map((material, i) => {
                     const isSearched = searchedMatSet.has(material.toLowerCase());
                     return (
@@ -233,12 +241,12 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
                         name={getDisplayNameFromMaterialKey(material)}
                         type="material"
                         variant={isSearched ? "default" : "outline"}
-                        className={`text-[11px] px-1.5 py-0.5 group-hover:scale-105 transition-transform duration-300 ${isSearched ? 'bg-primary/20 text-primary border border-primary/30 font-medium' : ''}`}
+                        className={`text-xs px-2 py-0.5 ${isSearched ? 'bg-primary/20 text-primary border border-primary/30 font-semibold' : ''}`}
                       />
                     );
                   })}
                   {remaining > 0 && (
-                    <Badge variant="outline" className="text-[10px] px-1.5 py-0.5 group-hover:scale-105 transition-transform duration-300">
+                    <Badge variant="outline" className="text-xs px-2 py-0.5">
                       +{remaining}
                     </Badge>
                   )}
@@ -247,7 +255,7 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
             })()}
           </div>
         </div>
-      </CardHeader>
+      )}
       
       {/* Matched Requirements */}
       {matchedRequirements.length > 0 && (
