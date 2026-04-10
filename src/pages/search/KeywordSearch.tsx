@@ -52,7 +52,7 @@ const KeywordSearch = () => {
 
         // Transform database suppliers to match ParsedSupplier interface
         const loadedSuppliers: ParsedSupplier[] = (data || []).map(supplier => ({
-          id: supplier.id,
+          id: supplier.supplier_id,
           name: supplier.name,
           location: {
             lat: Number(supplier.location_lat) || 0,

@@ -688,16 +688,17 @@ const Search = () => {
       <div className={`transition-all duration-300 ${showNavbar ? 'pt-16 md:pt-20' : 'pt-0'}`}>
         {/* Live Quotes Banner */}
         {quoteData && (
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-3">
-            <div className="flex items-center gap-3 px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-              <Signal className="h-4 w-4 text-emerald-400 flex-shrink-0" />
-              <span className="text-sm text-foreground flex-1">
-                Showing <span className="font-semibold text-emerald-400">{quoteData.length} live quotes</span> for your uploaded file — sorted by price
+          <div className="mx-auto px-4 sm:px-6 lg:px-8 pt-3">
+            <div className="relative flex items-center gap-3 px-4 py-2.5 rounded-lg bg-primary/[0.07] border border-primary/15 overflow-hidden">
+              <div className="absolute left-0 top-0 bottom-0 w-[3px] bg-primary rounded-l-lg" />
+              <Signal className="h-4 w-4 text-primary flex-shrink-0 animate-pulse" />
+              <span className="text-sm text-muted-foreground flex-1">
+                Showing <span className="font-semibold text-primary">{quoteData.length} live quotes</span><span className="hidden sm:inline"> for your uploaded file</span> — sorted by price
               </span>
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 text-xs text-muted-foreground hover:text-destructive"
+                className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive hover:bg-destructive/10 rounded-md"
                 onClick={() => {
                   setQuoteData(null);
                   setSortBy('relevance');
@@ -712,7 +713,7 @@ const Search = () => {
         )}
 
         {/* Results Summary Bar */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex flex-wrap items-center gap-2">
             {/* Results count */}
             <span className="text-sm font-medium text-foreground">
@@ -877,7 +878,7 @@ const Search = () => {
             top: `${showNavbar ? 64 : 0}px` 
           }}
         >
-          <div className="container mx-auto px-4">
+          <div className="mx-auto px-4">
             <div className="flex gap-2 py-1.5">
               <Button
                 variant={mobileView === 'list' ? 'default' : 'outline'}
@@ -902,7 +903,7 @@ const Search = () => {
         </div>
 
         {/* Main Content Layout - Suppliers List + Map */}
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-[1fr,1.8fr] gap-6 lg:mt-6 lg:min-h-screen">
           {/* Left Column: Suppliers List (single column) */}
           <div 

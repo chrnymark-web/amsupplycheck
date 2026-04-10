@@ -130,7 +130,11 @@ function getBestQuotePerVendor(quotes: CraftcloudQuote[]): CraftcloudQuote[] {
 }
 
 // Format materialConfigId into a readable name, e.g. "PA_12_GF" → "PA 12 GF"
+// Returns empty string for UUIDs (Craftcloud sometimes returns UUIDs instead of names)
 function formatMaterialId(id: string): string {
+  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
+    return '';
+  }
   return id
     .replace(/([a-z])([A-Z])/g, '$1 $2')  // camelCase → spaced
     .replace(/[_-]/g, ' ')                  // underscores/hyphens → spaces
@@ -209,7 +213,7 @@ function toQuotes(
     const alternativeQuotes: QuoteOption[] = vendorAlts
       .filter(alt => alt.quoteId !== q.quoteId)
       .map(alt => ({
-        material: alt.materialConfigId,
+        material: formatMaterialId(alt.materialConfigId),
         label: alt.label,
         unitPrice: alt.price,
         totalPrice: alt.price * quantity,
@@ -222,7 +226,7 @@ function toQuotes(
       supplierId: `craftcloud-${q.vendorId}`,
       supplierName: name,
       supplierLogo: getLocalLogoForSupplier(name),
-      material: q.materialConfigId,
+      material: formatMaterialId(q.materialConfigId),
       technology: '',
       unitPrice: q.price,
       totalPrice: q.price * quantity,
