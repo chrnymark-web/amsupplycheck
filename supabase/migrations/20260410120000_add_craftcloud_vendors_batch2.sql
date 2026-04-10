@@ -7,16 +7,15 @@
 -- 1. Add missing countries
 -- ============================================================
 INSERT INTO countries (id, name, code, region, created_at) VALUES
-  ('cc-country-lt', 'Lithuania', 'LT', 'Europe', now()),
-  ('cc-country-sk', 'Slovakia', 'SK', 'Europe', now()),
-  ('cc-country-pl', 'Poland', 'PL', 'Europe', now()),
-  ('cc-country-at', 'Austria', 'AT', 'Europe', now()),
-  ('cc-country-sg', 'Singapore', 'SG', 'Asia-Pacific', now()),
-  ('cc-country-mx', 'Mexico', 'MX', 'North America', now()),
-  ('cc-country-ar', 'Argentina', 'AR', 'South America', now()),
-  ('cc-country-pk', 'Pakistan', 'PK', 'Asia-Pacific', now()),
-  ('cc-country-si', 'Slovenia', 'SI', 'Europe', now()),
-  ('cc-country-hr2', 'Croatia', 'HR', 'Europe', now())
+  ('a1b2c3d4-3001-4000-8000-000000000001', 'Lithuania', 'LT', 'Europe', now()),
+  ('a1b2c3d4-3002-4000-8000-000000000002', 'Slovakia', 'SK', 'Europe', now()),
+  ('a1b2c3d4-3003-4000-8000-000000000003', 'Poland', 'PL', 'Europe', now()),
+  ('a1b2c3d4-3004-4000-8000-000000000004', 'Austria', 'AT', 'Europe', now()),
+  ('a1b2c3d4-3005-4000-8000-000000000005', 'Singapore', 'SG', 'Asia-Pacific', now()),
+  ('a1b2c3d4-3006-4000-8000-000000000006', 'Mexico', 'MX', 'North America', now()),
+  ('a1b2c3d4-3007-4000-8000-000000000007', 'Argentina', 'AR', 'South America', now()),
+  ('a1b2c3d4-3008-4000-8000-000000000008', 'Pakistan', 'PK', 'Asia-Pacific', now()),
+  ('a1b2c3d4-3009-4000-8000-000000000009', 'Slovenia', 'SI', 'Europe', now())
 ON CONFLICT (id) DO NOTHING;
 
 -- ============================================================
