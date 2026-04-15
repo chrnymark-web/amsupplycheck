@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SupplyCheck - Partner Presentation</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              green: '#6B8F3C',
+              greenLight: '#7DA648',
+              greenDark: '#5A7832',
+              dark: '#1a1a1a',
+              darker: '#111111',
+              gray: '#e8e8e8',
+              grayLight: '#f2f2f2',
+            }
+          },
+          fontFamily: {
+            display: ['Playfair Display', 'serif'],
+            body: ['Inter', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Inter', sans-serif; overflow: hidden; background: #111; }
+
+    .slide {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+    }
+    .slide.active { display: flex; flex-direction: column; }
+
+    /* Pitch-deck style header */
+    .slide-header {
+      background: #1a1a1a;
+      display: flex;
+      align-items: center;
+      min-height: 120px;
+      position: relative;
+    }
+    .slide-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 3rem;
+      color: white;
+      padding: 1.5rem 3rem;
+      flex: 1;
+      letter-spacing: -0.03em;
+    }
+    .slide-header .accent-strip {
+      width: 100px;
+      background: #6B8F3C;
+      align-self: stretch;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slide-header .accent-strip .slide-num {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: white;
+    }
+
+    /* Logo bar above header */
+    .logo-bar {
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      background: white;
+    }
+    .logo-bar img {
+      height: 32px;
+    }
+    .logo-text {
+      font-family: 'Inter', sans-serif;
+      font-weight: 800;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
+      color: #1a1a1a;
+    }
+    .logo-text span.am { font-weight: 900; }
+    .logo-text span.supply { font-weight: 900; }
+    .logo-text span.check { font-weight: 400; color: #333; }
+
+    /* Content area */
+    .slide-content {
+      flex: 1;
+      background: linear-gradient(180deg, #e8e8e8 0%, #f2f2f2 100%);
+      padding: 3rem;
+      overflow: hidden;
+    }
+
+    /* Navigation dots */
+    .nav-dots {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 0.5rem;
+      z-index: 50;
+    }
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #ccc;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.2s;
+    }
+    .nav-dot.active {
+      background: #6B8F3C;
+      transform: scale(1.3);
+    }
+
+    /* Arrow hints */
+    .nav-arrows {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 2rem;
+      display: flex;
+      gap: 0.5rem;
+      z-index: 50;
+    }
+    .nav-arrow {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      transition: background 0.2s;
+      color: #555;
+      font-size: 1rem;
+    }
+    .nav-arrow:hover { background: rgba(0,0,0,0.2); }
+
+    /* Flow diagram */
+    .flow-arrow {
+      display: inline-flex;
+      align-items: center;
+      color: #6B8F3C;
+      font-size: 2rem;
+      margin: 0 1rem;
+    }
+
+    /* Benefit cards */
+    .benefit-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      box-shadow: 0 2px 8px rgba(107, 143, 60, 0.08), 0 1px 3px rgba(0,0,0,0.06);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s;
+    }
+    .benefit-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(107, 143, 60, 0.15), 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    /* Pricing placeholder cards */
+    .pricing-card {
+      background: white;
+      border-radius: 16px;
+      padding: 2.5rem 2rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+      text-align: center;
+      position: relative;
+      border: 2px solid transparent;
+    }
+    .pricing-card.featured {
+      border-color: #6B8F3C;
+      box-shadow: 0 4px 20px rgba(107, 143, 60, 0.2);
+    }
+    .pricing-card.featured::before {
+      content: 'Most Popular';
+      position: absolute;
+      top: -14px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #6B8F3C;
+      color: white;
+      padding: 0.25rem 1rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    /* Title slide special */
+    .title-slide {
+      display: none;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+    .title-slide.active { display: flex; }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== SLIDE 1: TITLE ==================== -->
+  <div class="title-slide active" id="slide-1">
+    <!-- Left side: content -->
+    <div style="flex: 2.5; background: linear-gradient(180deg, #f5f5f5 0%, #e0e0e0 100%); display: flex; flex-direction: column; justify-content: center; padding: 5rem;">
+      <div style="margin-bottom: 3rem;">
+        <span style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 3.5rem; letter-spacing: -0.03em; color: #1a1a1a;">AM</span><span style="font-family: 'Inter', sans-serif; font-weight: 900; font-size: 3.5rem; letter-spacing: -0.03em; color: #1a1a1a;">SUPPLY</span><span style="font-family: 'Inter', sans-serif; font-weight: 400; font-size: 3.5rem; letter-spacing: -0.03em; color: #333;">CHECK</span>
+        <svg viewBox="0 0 40 40" width="56" height="56" style="display: inline-block; vertical-align: middle; margin-left: 0.5rem; margin-bottom: 0.5rem;">
+          <polyline points="8,22 16,30 32,10" fill="none" stroke="#6B8F3C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="8,16 16,24 32,4" fill="none" stroke="#6B8F3C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+        </svg>
+      </div>
+      <h1 style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: #1a1a1a; margin-bottom: 1rem; letter-spacing: -0.03em; line-height: 1.2;">
+        Find the right 3D printing supplier
+      </h1>
+      <p style="font-family: 'Inter', sans-serif; font-size: 1.2rem; color: #555; line-height: 1.7;">
+        - Simple, Transparent, Fast and For Free
+      </p>
+    </div>
+    <!-- Right side: image area -->
+    <div style="flex: 1; background: linear-gradient(135deg, #2a2a2a 0%, #1a1a1a 100%); position: relative; overflow: hidden;">
+      <!-- Decorative sparks/industrial feel -->
+      <div style="position: absolute; inset: 0; background: radial-gradient(ellipse at 30% 50%, rgba(107,143,60,0.15) 0%, transparent 70%);"></div>
+      <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;">
+        <svg viewBox="0 0 200 200" width="200" height="200" style="opacity: 0.1;">
+          <circle cx="100" cy="100" r="80" fill="none" stroke="#6B8F3C" stroke-width="2"/>
+          <circle cx="100" cy="100" r="60" fill="none" stroke="#6B8F3C" stroke-width="1"/>
+          <circle cx="100" cy="100" r="40" fill="none" stroke="#6B8F3C" stroke-width="1"/>
+          <line x1="100" y1="20" x2="100" y2="180" stroke="#6B8F3C" stroke-width="0.5"/>
+          <line x1="20" y1="100" x2="180" y2="100" stroke="#6B8F3C" stroke-width="0.5"/>
+        </svg>
+      </div>
+      <div style="position: absolute; bottom: 3rem; left: 2rem; right: 2rem;">
+        <p style="font-family: 'Inter', sans-serif; font-size: 0.9rem; color: rgba(255,255,255,0.4); text-align: center;">
+          Partner Presentation
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 2: WHAT IS SUPPLYCHECK ==================== -->
+  <div class="slide" id="slide-2">
+    <div class="logo-bar">
+      <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <span class="logo-text"><span class="am">AM</span><span class="supply">SUPPLY</span><span class="check">CHECK</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <polyline points="4,13 9,18 20,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="4,9 9,14 20,1" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-header">
+      <h1>What is SupplyCheck?</h1>
+      <div class="accent-strip"><span class="slide-num">2</span></div>
+    </div>
+    <div class="slide-content" style="display: flex; flex-direction: column; gap: 2.5rem; justify-content: center;">
+      <p style="font-family: 'Inter', sans-serif; font-size: 1.3rem; color: #333; max-width: 900px; line-height: 1.7;">
+        A <strong style="color: #6B8F3C;">search engine</strong> that helps engineers and buyers find and compare 3D printing suppliers worldwide &mdash; based on technology, material, location, and price.
+      </p>
+
+      <!-- Flow diagram -->
+      <div style="display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 1rem 0;">
+        <div style="background: white; border-radius: 12px; padding: 1.5rem 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center;">
+          <svg viewBox="0 0 48 48" width="48" height="48" style="margin: 0 auto 0.5rem;">
+            <circle cx="24" cy="16" r="8" fill="none" stroke="#333" stroke-width="2"/>
+            <path d="M8,42 C8,30 40,30 40,42" fill="none" stroke="#333" stroke-width="2"/>
+          </svg>
+          <p style="font-weight: 600; color: #1a1a1a; font-size: 1rem;">Buyer</p>
+          <p style="font-size: 0.8rem; color: #888;">Uploads specs</p>
+        </div>
+
+        <div class="flow-arrow">
+          <svg viewBox="0 0 60 24" width="80" height="24">
+            <line x1="0" y1="12" x2="50" y2="12" stroke="#6B8F3C" stroke-width="3"/>
+            <polygon points="48,6 60,12 48,18" fill="#6B8F3C"/>
+          </svg>
+        </div>
+
+        <div style="background: #1a1a1a; border-radius: 16px; padding: 1.5rem 2.5rem; text-align: center; box-shadow: 0 4px 16px rgba(0,0,0,0.15);">
+          <svg viewBox="0 0 40 40" width="48" height="48" style="margin: 0 auto 0.5rem;">
+            <polyline points="8,22 16,30 32,10" fill="none" stroke="#6B8F3C" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <polyline points="8,16 16,24 32,4" fill="none" stroke="#6B8F3C" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+          </svg>
+          <p style="font-weight: 700; color: white; font-size: 1rem;">SupplyCheck</p>
+          <p style="font-size: 0.8rem; color: rgba(255,255,255,0.6);">Matches & compares</p>
+        </div>
+
+        <div class="flow-arrow">
+          <svg viewBox="0 0 60 24" width="80" height="24">
+            <line x1="0" y1="12" x2="50" y2="12" stroke="#6B8F3C" stroke-width="3"/>
+            <polygon points="48,6 60,12 48,18" fill="#6B8F3C"/>
+          </svg>
+        </div>
+
+        <div style="background: white; border-radius: 12px; padding: 1.5rem 2.5rem; box-shadow: 0 2px 8px rgba(0,0,0,0.06); text-align: center;">
+          <svg viewBox="0 0 48 48" width="48" height="48" style="margin: 0 auto 0.5rem;">
+            <rect x="8" y="8" width="32" height="32" rx="4" fill="none" stroke="#333" stroke-width="2"/>
+            <line x1="8" y1="18" x2="40" y2="18" stroke="#333" stroke-width="2"/>
+            <circle cx="16" cy="30" r="4" fill="none" stroke="#6B8F3C" stroke-width="2"/>
+            <circle cx="32" cy="30" r="4" fill="none" stroke="#6B8F3C" stroke-width="2"/>
+          </svg>
+          <p style="font-weight: 600; color: #1a1a1a; font-size: 1rem;">Supplier</p>
+          <p style="font-size: 0.8rem; color: #888;">Gets the lead</p>
+        </div>
+      </div>
+
+      <!-- Key points -->
+      <div style="display: flex; gap: 1.5rem; margin-top: 0.5rem;">
+        <div class="benefit-card" style="flex: 1;">
+          <p style="font-weight: 700; color: #6B8F3C; font-size: 1.5rem; margin-bottom: 0.3rem;">100+</p>
+          <p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Suppliers listed worldwide</p>
+        </div>
+        <div class="benefit-card" style="flex: 1;">
+          <p style="font-weight: 700; color: #6B8F3C; font-size: 1.5rem; margin-bottom: 0.3rem;">Free</p>
+          <p style="color: #555; font-size: 0.95rem; line-height: 1.6;">For buyers to search & compare</p>
+        </div>
+        <div class="benefit-card" style="flex: 1;">
+          <p style="font-weight: 700; color: #6B8F3C; font-size: 1.5rem; margin-bottom: 0.3rem;">Direct</p>
+          <p style="color: #555; font-size: 0.95rem; line-height: 1.6;">Users go to your website directly</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 3: HOW IT WORKS FOR SUPPLIERS ==================== -->
+  <div class="slide" id="slide-3">
+    <div class="logo-bar">
+      <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <span class="logo-text"><span class="am">AM</span><span class="supply">SUPPLY</span><span class="check">CHECK</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <polyline points="4,13 9,18 20,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="4,9 9,14 20,1" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-header">
+      <h1>How It Works for Suppliers</h1>
+      <div class="accent-strip"><span class="slide-num">3</span></div>
+    </div>
+    <div class="slide-content" style="display: flex; gap: 3rem; align-items: flex-start; justify-content: center; padding-top: 3rem;">
+      <!-- Left: benefits list -->
+      <div style="flex: 1; max-width: 550px;">
+        <p style="font-family: 'Inter', sans-serif; font-size: 1.15rem; color: #333; line-height: 1.7; margin-bottom: 2rem;">
+          We drive <strong style="color: #6B8F3C;">qualified leads</strong> directly to your website. No middleman on the transaction.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem;">
+          <div style="display: flex; align-items: flex-start; gap: 1rem;">
+            <div style="min-width: 40px; height: 40px; background: #6B8F3C; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2.5">
+                <circle cx="11" cy="11" r="7"/><line x1="16" y1="16" x2="22" y2="22"/>
+              </svg>
+            </div>
+            <div>
+              <p style="font-weight: 600; color: #1a1a1a; font-size: 1.05rem;">More Visibility</p>
+              <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">Your company appears when buyers search for your technologies and materials</p>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: flex-start; gap: 1rem;">
+            <div style="min-width: 40px; height: 40px; background: #6B8F3C; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2.5">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+              </svg>
+            </div>
+            <div>
+              <p style="font-weight: 600; color: #1a1a1a; font-size: 1.05rem;">Qualified Leads</p>
+              <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">We match the right customers to your specific capabilities and capacity</p>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: flex-start; gap: 1rem;">
+            <div style="min-width: 40px; height: 40px; background: #6B8F3C; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2.5">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+            </div>
+            <div>
+              <p style="font-weight: 600; color: #1a1a1a; font-size: 1.05rem;">No Transaction Fees</p>
+              <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">We never take a cut of your orders &mdash; the customer is yours from the start</p>
+            </div>
+          </div>
+
+          <div style="display: flex; align-items: flex-start; gap: 1rem;">
+            <div style="min-width: 40px; height: 40px; background: #6B8F3C; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="white" stroke-width="2.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/>
+              </svg>
+            </div>
+            <div>
+              <p style="font-weight: 600; color: #1a1a1a; font-size: 1.05rem;">Performance Dashboard</p>
+              <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">Track impressions, clicks, and leads with detailed analytics</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: visual -->
+      <div style="flex: 0.8; max-width: 420px;">
+        <div style="background: #1a1a1a; border-radius: 16px; padding: 2rem; box-shadow: 0 8px 32px rgba(0,0,0,0.15);">
+          <p style="color: rgba(255,255,255,0.5); font-size: 0.8rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">Supplier Dashboard Preview</p>
+
+          <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+            <div style="flex: 1; background: rgba(107,143,60,0.15); border-radius: 10px; padding: 1rem; text-align: center;">
+              <p style="color: #6B8F3C; font-size: 1.8rem; font-weight: 700;">248</p>
+              <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Impressions</p>
+            </div>
+            <div style="flex: 1; background: rgba(107,143,60,0.15); border-radius: 10px; padding: 1rem; text-align: center;">
+              <p style="color: #6B8F3C; font-size: 1.8rem; font-weight: 700;">34</p>
+              <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem;">Clicks</p>
+            </div>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.05); border-radius: 10px; padding: 1rem;">
+            <p style="color: rgba(255,255,255,0.5); font-size: 0.75rem; margin-bottom: 0.75rem;">Recent Searches Matching You</p>
+            <div style="display: flex; flex-direction: column; gap: 0.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                <span style="color: white; font-size: 0.8rem;">SLS - Nylon PA12</span>
+                <span style="color: #6B8F3C; font-size: 0.75rem;">Sweden</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                <span style="color: white; font-size: 0.8rem;">FDM - ABS</span>
+                <span style="color: #6B8F3C; font-size: 0.75rem;">Denmark</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.5rem; background: rgba(255,255,255,0.05); border-radius: 6px;">
+                <span style="color: white; font-size: 0.8rem;">MJF - Nylon PA11</span>
+                <span style="color: #6B8F3C; font-size: 0.75rem;">Norway</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 4: PRICING ==================== -->
+  <div class="slide" id="slide-4">
+    <div class="logo-bar">
+      <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <span class="logo-text"><span class="am">AM</span><span class="supply">SUPPLY</span><span class="check">CHECK</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <polyline points="4,13 9,18 20,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="4,9 9,14 20,1" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-header">
+      <h1>Pricing</h1>
+      <div class="accent-strip"><span class="slide-num">4</span></div>
+    </div>
+    <div class="slide-content" style="display: flex; align-items: center; justify-content: center;">
+      <div style="display: flex; gap: 2rem; max-width: 1000px; width: 100%;">
+
+        <!-- Free Tier -->
+        <div class="pricing-card" style="flex: 1;">
+          <p style="font-size: 0.85rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">Free</p>
+          <div style="margin-bottom: 1.5rem;">
+            <p style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: #1a1a1a; letter-spacing: -0.03em;">TBD</p>
+          </div>
+          <div style="border-top: 1px solid #eee; padding-top: 1.5rem; text-align: left;">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Basic listing
+              </p>
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Appear in search
+              </p>
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Company profile
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Growth Tier -->
+        <div class="pricing-card featured" style="flex: 1;">
+          <p style="font-size: 0.85rem; font-weight: 600; color: #6B8F3C; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">Growth</p>
+          <div style="margin-bottom: 1.5rem;">
+            <p style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: #1a1a1a; letter-spacing: -0.03em;">TBD</p>
+            <p style="font-size: 0.8rem; color: #888;">per month</p>
+          </div>
+          <div style="border-top: 1px solid #eee; padding-top: 1.5rem; text-align: left;">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Custom profile & logo
+              </p>
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Verified badge
+              </p>
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Website link & analytics
+              </p>
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Price calculator
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Enterprise Tier -->
+        <div class="pricing-card" style="flex: 1;">
+          <p style="font-size: 0.85rem; font-weight: 600; color: #888; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 1rem;">Enterprise</p>
+          <div style="margin-bottom: 1.5rem;">
+            <p style="font-family: 'Playfair Display', serif; font-size: 2.5rem; font-weight: 700; color: #1a1a1a; letter-spacing: -0.03em;">TBD</p>
+            <p style="font-size: 0.8rem; color: #888;">per month</p>
+          </div>
+          <div style="border-top: 1px solid #eee; padding-top: 1.5rem; text-align: left;">
+            <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Everything in Growth
+              </p>
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Priority ranking
+              </p>
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Competitor insights
+              </p>
+              <p style="color: #555; font-size: 0.9rem; display: flex; align-items: center; gap: 0.5rem;">
+                <svg viewBox="0 0 20 20" width="16" height="16"><polyline points="4,10 8,14 16,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round"/></svg>
+                Full analytics & API
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== SLIDE 5: NEXT STEPS ==================== -->
+  <div class="slide" id="slide-5">
+    <div class="logo-bar">
+      <div style="display: flex; align-items: center; gap: 0.4rem;">
+        <span class="logo-text"><span class="am">AM</span><span class="supply">SUPPLY</span><span class="check">CHECK</span></span>
+        <svg viewBox="0 0 24 24" width="22" height="22">
+          <polyline points="4,13 9,18 20,5" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <polyline points="4,9 9,14 20,1" fill="none" stroke="#6B8F3C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.4"/>
+        </svg>
+      </div>
+    </div>
+    <div class="slide-header">
+      <h1>Let's Partner Together</h1>
+      <div class="accent-strip"><span class="slide-num">5</span></div>
+    </div>
+    <div class="slide-content" style="display: flex; align-items: center; justify-content: center;">
+      <div style="text-align: center; max-width: 700px;">
+        <svg viewBox="0 0 80 80" width="100" height="100" style="margin: 0 auto 2rem;">
+          <circle cx="40" cy="40" r="35" fill="none" stroke="#6B8F3C" stroke-width="2"/>
+          <polyline points="22,42 34,54 58,26" fill="none" stroke="#6B8F3C" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+
+        <h2 style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: #1a1a1a; margin-bottom: 1rem; letter-spacing: -0.03em;">
+          Ready to grow your reach?
+        </h2>
+        <p style="font-size: 1.15rem; color: #555; line-height: 1.7; margin-bottom: 2.5rem;">
+          Join 100+ 3D printing suppliers already listed on SupplyCheck and start receiving qualified leads today.
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 1.25rem; align-items: center;">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6B8F3C" stroke-width="2">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>
+            </svg>
+            <a href="mailto:info@supplycheck.io" style="font-size: 1.2rem; color: #6B8F3C; font-weight: 600; text-decoration: none;">info@supplycheck.io</a>
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#6B8F3C" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+            <span style="font-size: 1.2rem; color: #1a1a1a; font-weight: 500;">www.supplycheck.io</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation dots -->
+  <div class="nav-dots">
+    <div class="nav-dot active" onclick="goToSlide(1)"></div>
+    <div class="nav-dot" onclick="goToSlide(2)"></div>
+    <div class="nav-dot" onclick="goToSlide(3)"></div>
+    <div class="nav-dot" onclick="goToSlide(4)"></div>
+    <div class="nav-dot" onclick="goToSlide(5)"></div>
+  </div>
+
+  <!-- Arrow navigation -->
+  <div class="nav-arrows">
+    <div class="nav-arrow" onclick="prevSlide()">&larr;</div>
+    <div class="nav-arrow" onclick="nextSlide()">&rarr;</div>
+  </div>
+
+  <script>
+    const TOTAL = 5;
+    let current = 1;
+
+    function goToSlide(n) {
+      // Hide current
+      const cur = document.getElementById('slide-' + current);
+      if (cur) { cur.classList.remove('active'); }
+
+      current = n;
+
+      // Show new
+      const next = document.getElementById('slide-' + current);
+      if (next) { next.classList.add('active'); }
+
+      // Update dots
+      document.querySelectorAll('.nav-dot').forEach((dot, i) => {
+        dot.classList.toggle('active', i === current - 1);
+      });
+    }
+
+    function nextSlide() {
+      if (current < TOTAL) goToSlide(current + 1);
+    }
+
+    function prevSlide() {
+      if (current > 1) goToSlide(current - 1);
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); nextSlide(); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); prevSlide(); }
+      if (e.key === 'Home') { e.preventDefault(); goToSlide(1); }
+      if (e.key === 'End') { e.preventDefault(); goToSlide(TOTAL); }
+    });
+  </script>
+
+</body>
+</html>
