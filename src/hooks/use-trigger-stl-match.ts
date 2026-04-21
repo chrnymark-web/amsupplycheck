@@ -99,9 +99,21 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
       if (["analyzing", "matching", "ranking"].includes(dbStatus)) {
         setStatus(dbStatus);
         if (data.stl_metrics) setStlMetrics(data.stl_metrics as any);
+
+        // Progressive: matches are written at the start of "ranking" before
+        // Claude finishes explanations. Surface them immediately so the UI can
+        // render cards while explanations fill in on the next poll.
+        if (dbStatus === "ranking" && data.matches) {
+          setResult({
+            requirements: data.extracted_requirements as any,
+            matches: data.matches as any,
+            totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
+            technologyRationale: data.technology_rationale as any,
+          });
+        }
       }
 
-      setTimeout(() => poll(), 1500);
+      setTimeout(() => poll(), 700);
     };
 
     setTimeout(() => poll(), 1000);

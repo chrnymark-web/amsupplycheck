@@ -67,11 +67,57 @@ export const stlSupplierMatch = schemaTask({
         stl_metrics: stlMetrics,
       });
 
-      // Step 2: Matching suppliers
+      // Step 2: Matching suppliers — run Claude requirement extraction and DB fetch in parallel.
+      // They're independent: Claude needs stlMetrics, DB fetch needs nothing from Claude.
       await updateSearchStatus(searchResultId, "matching");
 
-      const allSuppliers = await fetchSuppliers();
-      console.log(`[stl-match] Fetched ${allSuppliers.length} verified suppliers`);
+      const anthropic = new Anthropic();
+      const parallelStart = Date.now();
+      const [allSuppliers, analysisResponse] = await Promise.all([
+        fetchSuppliers(),
+        anthropic.messages.create({
+          model: MODEL,
+          max_tokens: 1024,
+          system: "You are an expert 3D printing consultant. Analyze part specifications and recommend optimal supplier matching criteria.",
+          messages: [{
+            role: "user",
+            content: `Analyze this 3D printed part and extract supplier matching requirements.
+
+PART SPECIFICATIONS:
+- Technology: ${technology}
+- Material: ${material}
+- Volume: ${stlMetrics.volumeCm3.toFixed(2)} cm³
+- Surface area: ${stlMetrics.surfaceAreaCm2.toFixed(2)} cm²
+- Bounding box: ${stlMetrics.boundingBox.x}mm x ${stlMetrics.boundingBox.y}mm x ${stlMetrics.boundingBox.z}mm
+- Triangle count: ${stlMetrics.triangleCount} (complexity indicator)
+- Quantity: ${quantity || 1}
+${preferredRegion ? `- Preferred region: ${preferredRegion}` : ""}
+
+Based on the part size, complexity, and material, what should we look for in a supplier?`,
+          }],
+          tools: [{
+            name: "extract_stl_requirements",
+            description: "Extract requirements based on STL analysis",
+            input_schema: {
+              type: "object" as const,
+              properties: {
+                requiredTechnologies: { type: "array", items: { type: "string" }, description: "Technologies suitable for this part" },
+                requiredMaterials: { type: "array", items: { type: "string" }, description: "Materials suitable for this part" },
+                preferredRegions: { type: "array", items: { type: "string" }, description: "Preferred regions" },
+                requiredCertifications: { type: "array", items: { type: "string" }, description: "Relevant certifications" },
+                isProductionRun: { type: "boolean", description: "Whether quantity suggests production" },
+                requiresMetal: { type: "boolean" },
+                requiresHighPrecision: { type: "boolean" },
+                requiresFlexibility: { type: "boolean" },
+                projectSummary: { type: "string", description: "Brief summary of the part and its requirements" },
+              },
+              required: ["requiredTechnologies", "requiredMaterials", "preferredRegions", "projectSummary"],
+            },
+          }],
+          tool_choice: { type: "tool" as const, name: "extract_stl_requirements" },
+        }),
+      ]);
+      console.log(`[stl-match] Parallel DB+Claude done in ${Date.now() - parallelStart}ms, ${allSuppliers.length} suppliers`);
 
       // Pre-filter suppliers by selected technology and material
       const filteredSuppliers = allSuppliers.filter((s) => {
@@ -106,50 +152,6 @@ export const stlSupplierMatch = schemaTask({
       const filterTier = filteredSuppliers.length > 0 ? "both" : techOnlySuppliers.length > 0 ? "tech-only" : "all";
       console.log(`[stl-match] Pre-filtered to ${suppliersToScore.length} suppliers (tech: ${technology}, mat: ${material}, tier: ${filterTier})`);
 
-      // Use Claude to analyze STL metrics + create requirements for scoring
-      const anthropic = new Anthropic();
-      const analysisResponse = await anthropic.messages.create({
-        model: MODEL,
-        max_tokens: 1024,
-        system: "You are an expert 3D printing consultant. Analyze part specifications and recommend optimal supplier matching criteria.",
-        messages: [{
-          role: "user",
-          content: `Analyze this 3D printed part and extract supplier matching requirements.
-
-PART SPECIFICATIONS:
-- Technology: ${technology}
-- Material: ${material}
-- Volume: ${stlMetrics.volumeCm3.toFixed(2)} cm³
-- Surface area: ${stlMetrics.surfaceAreaCm2.toFixed(2)} cm²
-- Bounding box: ${stlMetrics.boundingBox.x}mm x ${stlMetrics.boundingBox.y}mm x ${stlMetrics.boundingBox.z}mm
-- Triangle count: ${stlMetrics.triangleCount} (complexity indicator)
-- Quantity: ${quantity || 1}
-${preferredRegion ? `- Preferred region: ${preferredRegion}` : ""}
-
-Based on the part size, complexity, and material, what should we look for in a supplier?`,
-        }],
-        tools: [{
-          name: "extract_stl_requirements",
-          description: "Extract requirements based on STL analysis",
-          input_schema: {
-            type: "object" as const,
-            properties: {
-              requiredTechnologies: { type: "array", items: { type: "string" }, description: "Technologies suitable for this part" },
-              requiredMaterials: { type: "array", items: { type: "string" }, description: "Materials suitable for this part" },
-              preferredRegions: { type: "array", items: { type: "string" }, description: "Preferred regions" },
-              requiredCertifications: { type: "array", items: { type: "string" }, description: "Relevant certifications" },
-              isProductionRun: { type: "boolean", description: "Whether quantity suggests production" },
-              requiresMetal: { type: "boolean" },
-              requiresHighPrecision: { type: "boolean" },
-              requiresFlexibility: { type: "boolean" },
-              projectSummary: { type: "string", description: "Brief summary of the part and its requirements" },
-            },
-            required: ["requiredTechnologies", "requiredMaterials", "preferredRegions", "projectSummary"],
-          },
-        }],
-        tool_choice: { type: "tool" as const, name: "extract_stl_requirements" },
-      });
-
       const toolBlock = analysisResponse.content.find((b: any) => b.type === "tool_use");
       if (!toolBlock || toolBlock.type !== "tool_use") {
         throw new Error("Claude did not return requirements extraction");
@@ -175,8 +177,13 @@ Based on the part size, complexity, and material, what should we look for in a s
       const matches = scoreSuppliers(suppliersToScore, requirements, 8);
       console.log(`[stl-match] Found ${matches.length} matches`);
 
-      // Step 3: Ranking
-      await updateSearchStatus(searchResultId, "ranking");
+      // Step 3: Ranking — publish matches now so the frontend can render cards immediately
+      // while Claude writes explanations in the background.
+      await updateSearchStatus(searchResultId, "ranking", {
+        extracted_requirements: requirements,
+        matches,
+        total_suppliers_analyzed: suppliersToScore.length,
+      });
 
       // Generate explanations
       const explanations = await generateExplanations(matches, requirements).catch((e) => {

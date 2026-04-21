@@ -18,13 +18,25 @@ export interface AggregatedPricing {
   estimatedCount: number;
 }
 
-// Fetch live quotes from all enabled API suppliers
+// Fetch live quotes from all enabled API suppliers.
+// Optional onPartial callback fires as vendors report in (currently Craftcloud only),
+// letting the UI render quotes progressively rather than waiting for all polls to finish.
 export async function fetchLiveQuotes(
-  request: QuoteRequest
+  request: QuoteRequest,
+  onPartial?: (quotes: LiveQuote[]) => void
 ): Promise<{ quotes: LiveQuote[]; results: QuoteResult[] }> {
   const results: QuoteResult[] = [];
 
-  const promises: Promise<LiveQuote[]>[] = [getCraftcloudQuotes(request)];
+  const partialHandler = onPartial
+    ? (partial: LiveQuote[]) => {
+        // Run sanity checks on the partial set before emitting so the UI can
+        // dim suspect rows in-flight, matching the final-result behavior.
+        runSanityChecks(partial, request.geometry);
+        onPartial([...partial].sort((a, b) => a.unitPrice - b.unitPrice));
+      }
+    : undefined;
+
+  const promises: Promise<LiveQuote[]>[] = [getCraftcloudQuotes(request, partialHandler)];
 
   if (TREATSTOCK_API_KEY) {
     promises.push(getTreatstockQuotes(request, TREATSTOCK_API_KEY));

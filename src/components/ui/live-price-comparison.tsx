@@ -330,8 +330,8 @@ export function LivePriceComparison({
           </label>
         )}
 
-        {/* Loading */}
-        {isLoading && (
+        {/* Loading — only when no partials have arrived yet */}
+        {isLoading && liveQuotes.length === 0 && (
           <div>
             <p className="text-xs text-muted-foreground mb-2">
               Fetching live prices from 90+ vendors...
@@ -348,14 +348,14 @@ export function LivePriceComparison({
           </div>
         )}
 
-        {/* Live Quotes */}
-        {!isLoading && liveQuotes.length > 0 && (
+        {/* Live Quotes — shown whenever any arrived, even while more are loading */}
+        {liveQuotes.length > 0 && (
           <div>
             {/* Header */}
             <div className="flex items-center gap-2 mb-2">
-              <Signal className="h-3 w-3 text-green-500" />
+              <Signal className={cn('h-3 w-3', isLoading ? 'text-green-500 animate-pulse' : 'text-green-500')} />
               <span className="text-xs font-medium text-foreground">
-                {liveQuotes.length} live quotes
+                {liveQuotes.length} live quotes{isLoading ? ' so far' : ''}
               </span>
               <div className="flex items-center gap-1 ml-auto">
                 {(['price', 'leadTime', 'supplier'] as SortField[]).map((field) => (

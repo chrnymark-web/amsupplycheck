@@ -44,6 +44,10 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
     reset: resetMatch,
   } = useTriggerSTLMatch();
 
+  // "ranking" is the intermediate state where matches are visible but
+  // Claude explanations are still streaming in on subsequent polls.
+  const isRanking = status === 'ranking';
+
   const [file, setFile] = useState<File | null>(null);
   const [metrics, setMetrics] = useState<STLResult | null>(null);
   const [dragActive, setDragActive] = useState(false);
@@ -119,7 +123,8 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
     ? 'Upload your STL and see an interactive 3D preview with live prices from 90+ vendors.'
     : 'Compare live prices from 90+ 3D printing vendors. Upload your STL for instant quotes.';
 
-  // If match-mode result is ready, show the result view
+  // If match-mode result is ready (even during "ranking" when explanations
+  // are still streaming), show the result view.
   if (mode === 'match' && result) {
     return (
       <MatchResultView
@@ -128,6 +133,7 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
         technology={technology}
         material={material}
         quantity={quantity}
+        isRanking={isRanking}
         onNew={handleRemoveFile}
       />
     );
@@ -417,6 +423,7 @@ function MatchResultView({
   technology,
   material,
   quantity,
+  isRanking = false,
   onNew,
 }: {
   result: any;
@@ -424,6 +431,7 @@ function MatchResultView({
   technology: string;
   material: string;
   quantity: number;
+  isRanking?: boolean;
   onNew: () => void;
 }) {
   const estimatedPrices = useMemo(
@@ -469,8 +477,19 @@ function MatchResultView({
         <main className="container mx-auto px-4 py-6">
           <div className="grid lg:grid-cols-[1fr_420px] gap-4">
             <div className="space-y-3">
+              {isRanking && (
+                <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-primary">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Generating match explanations…
+                </div>
+              )}
               {result.matches.map((match: any, i: number) => (
-                <SupplierResultCard key={match.supplier.supplier_id} match={match} rank={i + 1} />
+                <SupplierResultCard
+                  key={match.supplier.supplier_id}
+                  match={match}
+                  rank={i + 1}
+                  isRanking={isRanking}
+                />
               ))}
             </div>
             <aside className="lg:sticky lg:top-4 lg:h-fit">
@@ -490,8 +509,17 @@ function MatchResultView({
   );
 }
 
-function SupplierResultCard({ match, rank }: { match: any; rank: number }) {
+function SupplierResultCard({
+  match,
+  rank,
+  isRanking = false,
+}: {
+  match: any;
+  rank: number;
+  isRanking?: boolean;
+}) {
   const { supplier, score, matchDetails } = match;
+  const hasExplanation = !!matchDetails.overallExplanation;
   return (
     <div
       className={cn(
@@ -527,11 +555,16 @@ function SupplierResultCard({ match, rank }: { match: any; rank: number }) {
             {score}% match
           </Badge>
         </div>
-        {matchDetails.overallExplanation && (
+        {hasExplanation ? (
           <p className="text-xs text-muted-foreground italic mt-1.5 line-clamp-2">
             "{matchDetails.overallExplanation}"
           </p>
-        )}
+        ) : isRanking ? (
+          <div className="mt-1.5 space-y-1">
+            <div className="h-2 w-11/12 rounded bg-muted-foreground/15 animate-pulse" />
+            <div className="h-2 w-7/12 rounded bg-muted-foreground/15 animate-pulse" />
+          </div>
+        ) : null}
         <div className="flex flex-wrap gap-1 mt-2">
           {matchDetails.matchedTechnologies.slice(0, 3).map((tech: string) => (
             <Badge key={tech} variant="secondary" className="text-[10px] px-1.5 py-0">

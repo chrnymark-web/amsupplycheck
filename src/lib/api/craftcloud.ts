@@ -4,8 +4,45 @@
 
 import type { LiveQuote, QuoteOption, QuoteRequest, Currency } from './types';
 import { getLocalLogoForSupplier } from '@/lib/supplierLogos';
+import { supabase } from '@/integrations/supabase/client';
 
 const CRAFTCLOUD_BASE_URL = 'https://api.craftcloud3d.com';
+const CRAFTCLOUD_MARKETPLACE_URL = 'https://craftcloud3d.com';
+
+// Lazy-cached lookup of vendorId → supplier website, populated once per session.
+// Placeholder websites (craftcloud3d.com) are skipped so the marketplace URL
+// fallback kicks in for vendors whose real site we haven't researched yet.
+let vendorWebsitesCache: Promise<Map<string, string>> | null = null;
+
+function loadCraftcloudVendorWebsites(): Promise<Map<string, string>> {
+  if (vendorWebsitesCache) return vendorWebsitesCache;
+  vendorWebsitesCache = (async () => {
+    const map = new Map<string, string>();
+    try {
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('website, metadata')
+        .not('metadata->>craftcloud_vendor_id', 'is', null);
+      if (error) throw error;
+      for (const row of data ?? []) {
+        const website = (row as { website: string | null }).website;
+        if (!website || website === CRAFTCLOUD_MARKETPLACE_URL) continue;
+        const meta = ((row as { metadata: Record<string, unknown> | null }).metadata ?? {}) as Record<string, unknown>;
+        const vid = typeof meta.craftcloud_vendor_id === 'string' ? meta.craftcloud_vendor_id : null;
+        const vidAlt = typeof meta.craftcloud_vendor_id_alt === 'string' ? meta.craftcloud_vendor_id_alt : null;
+        if (vid) map.set(vid, website);
+        if (vidAlt) map.set(vidAlt, website);
+      }
+    } catch (err) {
+      console.warn('[craftcloud] vendor website lookup failed, falling back to marketplace URL:', err);
+    }
+    return map;
+  })();
+  return vendorWebsitesCache;
+}
+
+// Dedupe console.info spam — partials re-run toQuotes many times.
+const loggedUnknownVendors = new Set<string>();
 
 interface CraftcloudModelResponse {
   modelId: string;
@@ -90,12 +127,16 @@ async function requestPrice(
   return data.priceId;
 }
 
-// Poll for price results — Craftcloud calculates async across 97+ vendors
+// Poll for price results — Craftcloud calculates async across 97+ vendors.
+// Emits partial results via onPartial whenever the quote set grows so callers
+// can render incrementally instead of waiting for allComplete.
 async function getPriceResults(
   priceId: string,
-  maxAttempts: number = 6,
-  delayMs: number = 3000
+  onPartial?: (data: CraftcloudPriceResponse) => void,
+  maxAttempts: number = 10,
+  delayMs: number = 1500
 ): Promise<CraftcloudPriceResponse> {
+  let lastQuoteCount = 0;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const response = await fetch(`${CRAFTCLOUD_BASE_URL}/v5/price/${priceId}`);
 
@@ -107,6 +148,16 @@ async function getPriceResults(
 
     if (data.allComplete) {
       return data;
+    }
+
+    // Stream partials as vendors report in
+    if (onPartial && data.quotes.length > lastQuoteCount) {
+      lastQuoteCount = data.quotes.length;
+      try {
+        onPartial(data);
+      } catch {
+        // Partial-handler errors must not abort polling
+      }
     }
 
     await new Promise((resolve) => setTimeout(resolve, delayMs));
@@ -191,7 +242,8 @@ function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, LabeledQu
 // Convert to normalized LiveQuote format
 function toQuotes(
   priceResponse: CraftcloudPriceResponse,
-  quantity: number
+  quantity: number,
+  vendorWebsites: Map<string, string>
 ): LiveQuote[] {
   const shippingByVendor = new Map<string, number>();
   for (const s of priceResponse.shippings) {
@@ -221,6 +273,12 @@ function toQuotes(
         shippingEstimate: shippingByVendor.get(q.vendorId) ?? null,
       }));
 
+    const supplierWebsite = vendorWebsites.get(q.vendorId);
+    if (!supplierWebsite && !loggedUnknownVendors.has(q.vendorId)) {
+      loggedUnknownVendors.add(q.vendorId);
+      console.info('[craftcloud] unknown vendorId (no supplier website):', q.vendorId);
+    }
+
     return {
       type: 'live' as const,
       supplierId: `craftcloud-${q.vendorId}`,
@@ -234,7 +292,7 @@ function toQuotes(
       quantity,
       estimatedLeadTimeDays: q.productionTimeFast,
       shippingEstimate: shippingByVendor.get(q.vendorId) ?? null,
-      quoteUrl: `https://craftcloud3d.com`,
+      quoteUrl: supplierWebsite ?? CRAFTCLOUD_MARKETPLACE_URL,
       fetchedAt: new Date(),
       source: 'craftcloud' as const,
       alternativeQuotes: alternativeQuotes.length > 0 ? alternativeQuotes : undefined,
@@ -254,10 +312,15 @@ function formatVendorName(vendorId: string): string {
     .join(' ');
 }
 
-// Main: upload file → request price → poll → return normalized quotes
+// Main: upload file → request price → poll → return normalized quotes.
+// Optional onPartial callback fires on each poll that yields new quotes.
 export async function getCraftcloudQuotes(
-  request: QuoteRequest
+  request: QuoteRequest,
+  onPartial?: (quotes: LiveQuote[]) => void
 ): Promise<LiveQuote[]> {
+  // Kick off vendor website lookup in parallel with the upload/price flow.
+  const vendorWebsitesPromise = loadCraftcloudVendorWebsites();
+
   const models = await uploadModel(request.file);
   if (models.length === 0) {
     throw new Error('Craftcloud: No models returned from upload');
@@ -270,7 +333,14 @@ export async function getCraftcloudQuotes(
     request.countryCode
   );
 
-  const priceResponse = await getPriceResults(priceId);
+  // Ensure the map is resolved before any toQuotes call runs (partial or final).
+  const vendorWebsites = await vendorWebsitesPromise;
 
-  return toQuotes(priceResponse, request.quantity);
+  const partialBridge = onPartial
+    ? (raw: CraftcloudPriceResponse) => onPartial(toQuotes(raw, request.quantity, vendorWebsites))
+    : undefined;
+
+  const priceResponse = await getPriceResults(priceId, partialBridge);
+
+  return toQuotes(priceResponse, request.quantity, vendorWebsites);
 }
