@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { fetchLiveQuotes } from '@/lib/api';
-import type { QuoteRequest, LiveQuote, QuoteResult, Currency } from '@/lib/api/types';
+import type { QuoteRequest, LiveQuote, QuoteResult, Currency, QuoteGeometry } from '@/lib/api/types';
 
 interface UseLiveQuotesOptions {
   currency?: Currency;
@@ -9,20 +9,21 @@ interface UseLiveQuotesOptions {
 
 export function useLiveQuotes(options: UseLiveQuotesOptions = {}) {
   const mutation = useMutation({
-    mutationFn: async ({ file, quantity }: { file: File; quantity: number }) => {
+    mutationFn: async ({ file, quantity, geometry }: { file: File; quantity: number; geometry?: QuoteGeometry }) => {
       const request: QuoteRequest = {
         file,
         quantity,
         currency: options.currency || 'EUR',
         countryCode: options.countryCode || 'DK',
+        geometry,
       };
       return fetchLiveQuotes(request);
     },
   });
 
   return {
-    getQuotes: (file: File, quantity: number = 1) =>
-      mutation.mutate({ file, quantity }),
+    getQuotes: (file: File, quantity: number = 1, geometry?: QuoteGeometry) =>
+      mutation.mutate({ file, quantity, geometry }),
     liveQuotes: mutation.data?.quotes || [] as LiveQuote[],
     results: mutation.data?.results || [] as QuoteResult[],
     hasErrors: mutation.data?.results.some((r) => r.error) || false,

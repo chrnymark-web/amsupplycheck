@@ -28,6 +28,7 @@ const ProjectMatch = lazy(() => import("./pages/search/ProjectMatch"));
 const STLMatch = lazy(() => import("./pages/search/STLMatch"));
 const CompatibilityMatrix = lazy(() => import("./pages/search/CompatibilityMatrix"));
 const ComparePrices = lazy(() => import("./pages/search/ComparePrices"));
+const InstantQuote = lazy(() => import("./pages/search/InstantQuote"));
 
 // Lazy load pages - guides
 const GuidesIndex = lazy(() => import("./pages/guides/GuidesIndex"));
@@ -115,8 +116,10 @@ const AppRoutes = () => {
             <Route path="/admin/discovered" element={<AdminPage><DiscoveredSuppliers /></AdminPage>} />
             <Route path="/analytics" element={<AdminPage><Analytics /></AdminPage>} />
             <Route path="/match" element={<ProjectMatch />} />
-            <Route path="/stl-match" element={<STLMatch />} />
-            <Route path="/compare-prices" element={<ComparePrices />} />
+            <Route path="/stl-match" element={<InstantQuote mode="match" />} />
+            <Route path="/stl-match-legacy" element={<STLMatch />} />
+            <Route path="/compare-prices" element={<InstantQuote mode="compare" />} />
+            <Route path="/compare-prices-legacy" element={<ComparePrices />} />
             
             <Route path="/knowledge" element={<Knowledge />} />
             <Route path="/knowledge/:type/:slug" element={<KnowledgeDetail />} />

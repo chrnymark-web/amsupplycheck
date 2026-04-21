@@ -1,11 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Upload, ArrowUpDown, ExternalLink, AlertCircle, Clock, Package, Signal, BarChart3 } from 'lucide-react';
+import { Upload, ArrowUpDown, ExternalLink, AlertCircle, AlertTriangle, Clock, Package, Signal, BarChart3 } from 'lucide-react';
 import { useLiveQuotes } from '@/hooks/use-live-quotes';
-import type { LiveQuote, EstimatedPrice, Currency } from '@/lib/api/types';
+import type { LiveQuote, EstimatedPrice, Currency, QuoteGeometry } from '@/lib/api/types';
+import { parseSTL } from '@/lib/stlParser';
 import { cn } from '@/lib/utils';
 
 interface LivePriceComparisonProps {
@@ -14,6 +15,12 @@ interface LivePriceComparisonProps {
   currency?: Currency;
   countryCode?: string;
   className?: string;
+  /** External file — when provided, component will auto-fetch quotes and hide its own dropzone */
+  file?: File | null;
+  /** External quantity — used together with `file` */
+  quantity?: number;
+  /** Hide internal upload UI (used when parent owns the file state) */
+  hideUpload?: boolean;
 }
 
 type SortField = 'price' | 'leadTime' | 'supplier';
@@ -32,66 +39,85 @@ function formatPrice(amount: number, currency: Currency): string {
 }
 
 function LiveQuoteRow({ quote, isLowest }: { quote: LiveQuote; isLowest: boolean }) {
+  const sanity = quote.sanityResult;
+  const isSuspect = sanity && sanity.flag !== 'ok';
+  const isHighConfidence = isSuspect && sanity.confidence === 'high';
+
   return (
     <div
       className={cn(
-        'flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 hover:shadow-sm',
-        isLowest
-          ? 'border-primary/30 bg-primary/5'
-          : 'border-border bg-card hover:border-border/80'
+        'flex flex-col gap-0 rounded-lg border transition-colors duration-200',
+        isSuspect && isHighConfidence && 'opacity-60 border-amber-300 bg-amber-50/50',
+        isSuspect && !isHighConfidence && 'border-border bg-card hover:border-border/80',
+        !isSuspect && isLowest && 'border-primary/30 bg-primary/5',
+        !isSuspect && !isLowest && 'border-border bg-card hover:border-border/80 hover:shadow-sm'
       )}
     >
-      <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <Signal className="h-3 w-3 text-green-500 shrink-0" />
-          <span className="text-sm font-medium text-foreground truncate">
-            {quote.supplierName}
-          </span>
-          {isLowest && (
-            <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0">
-              Lowest
+      <div className="flex items-center gap-3 p-3">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2">
+            <Signal className="h-3 w-3 text-green-500 shrink-0" />
+            <span className="text-sm font-medium text-foreground truncate">
+              {quote.supplierName}
+            </span>
+            {isLowest && !isSuspect && (
+              <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0">
+                Lowest
+              </Badge>
+            )}
+            {isSuspect && !isHighConfidence && (
+              <span title={sanity.reasons.join('; ')} className="shrink-0">
+                <AlertTriangle className="h-3 w-3 text-amber-500" />
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2 mt-0.5 ml-5">
+            <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0', SOURCE_COLORS[quote.source])}>
+              Live
             </Badge>
+            <span className="text-xs text-muted-foreground truncate">
+              via {quote.source === 'craftcloud' ? 'Craftcloud' : 'Treatstock'}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
+          <Clock className="h-3 w-3" />
+          <span>
+            {quote.estimatedLeadTimeDays ? `${quote.estimatedLeadTimeDays}d` : '—'}
+          </span>
+        </div>
+
+        <div className="text-right shrink-0">
+          <div className={cn('text-sm font-semibold', isLowest && !isSuspect ? 'text-primary' : 'text-foreground')}>
+            {formatPrice(quote.unitPrice, quote.currency)}
+          </div>
+          {quote.shippingEstimate !== null && (
+            <div className="text-[10px] text-muted-foreground flex items-center gap-0.5 justify-end">
+              <Package className="h-2.5 w-2.5" />
+              +{formatPrice(quote.shippingEstimate, quote.currency)}
+            </div>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-0.5 ml-5">
-          <Badge variant="outline" className={cn('text-[10px] px-1.5 py-0', SOURCE_COLORS[quote.source])}>
-            Live
-          </Badge>
-          <span className="text-xs text-muted-foreground truncate">
-            via {quote.source === 'craftcloud' ? 'Craftcloud' : 'Treatstock'}
-          </span>
-        </div>
-      </div>
 
-      <div className="flex items-center gap-1 text-xs text-muted-foreground shrink-0">
-        <Clock className="h-3 w-3" />
-        <span>
-          {quote.estimatedLeadTimeDays ? `${quote.estimatedLeadTimeDays}d` : '—'}
-        </span>
-      </div>
-
-      <div className="text-right shrink-0">
-        <div className={cn('text-sm font-semibold', isLowest ? 'text-primary' : 'text-foreground')}>
-          {formatPrice(quote.unitPrice, quote.currency)}
-        </div>
-        {quote.shippingEstimate !== null && (
-          <div className="text-[10px] text-muted-foreground flex items-center gap-0.5 justify-end">
-            <Package className="h-2.5 w-2.5" />
-            +{formatPrice(quote.shippingEstimate, quote.currency)}
-          </div>
+        {quote.quoteUrl && (
+          <a
+            href={quote.quoteUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink className="h-3.5 w-3.5" />
+          </a>
         )}
       </div>
 
-      {quote.quoteUrl && (
-        <a
-          href={quote.quoteUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <ExternalLink className="h-3.5 w-3.5" />
-        </a>
+      {isHighConfidence && sanity.userMessage && (
+        <div className="flex items-center gap-1.5 px-3 pb-2 text-[10px] text-amber-700">
+          <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />
+          {sanity.userMessage}
+        </div>
       )}
     </div>
   );
@@ -158,6 +184,9 @@ export function LivePriceComparison({
   currency = 'EUR',
   countryCode = 'DK',
   className,
+  file: externalFile,
+  quantity: externalQuantity,
+  hideUpload = false,
 }: LivePriceComparisonProps) {
   const { getQuotes, liveQuotes, results, hasErrors, isLoading, error } = useLiveQuotes({
     currency,
@@ -175,6 +204,11 @@ export function LivePriceComparison({
   };
 
   const sortedLive = [...liveQuotes].sort((a, b) => {
+    // Suspect quotes always sort to bottom
+    const aSuspect = a.sanityResult && a.sanityResult.flag !== 'ok' ? 1 : 0;
+    const bSuspect = b.sanityResult && b.sanityResult.flag !== 'ok' ? 1 : 0;
+    if (aSuspect !== bSuspect) return aSuspect - bSuspect;
+
     const dir = sortAsc ? 1 : -1;
     switch (sortField) {
       case 'price': return (a.unitPrice - b.unitPrice) * dir;
@@ -183,19 +217,57 @@ export function LivePriceComparison({
     }
   });
 
-  const lowestPrice = liveQuotes.length > 0
-    ? Math.min(...liveQuotes.map((q) => q.unitPrice))
+  // "Lowest" badge only for the cheapest non-suspect quote
+  const nonSuspectQuotes = liveQuotes.filter((q) => !q.sanityResult || q.sanityResult.flag === 'ok');
+  const lowestPrice = nonSuspectQuotes.length > 0
+    ? Math.min(...nonSuspectQuotes.map((q) => q.unitPrice))
     : null;
 
   const handleFile = useCallback(
-    (file: File) => {
+    async (file: File, quantity: number = 1) => {
       const validExts = ['.stl', '.obj', '.3mf', '.step', '.stp'];
       const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
       if (!validExts.includes(ext)) return;
-      getQuotes(file, 1);
+
+      // Parse STL geometry for sanity checking (only for STL files)
+      let geometry: QuoteGeometry | undefined;
+      if (ext === '.stl') {
+        try {
+          const buffer = await file.arrayBuffer();
+          const result = parseSTL(buffer);
+          geometry = {
+            volumeCm3: result.volumeCm3,
+            boundingBox: result.boundingBox,
+            triangleCount: result.triangleCount,
+          };
+        } catch {
+          // If parsing fails, proceed without geometry — sanity check will use peer comparison only
+        }
+      }
+
+      getQuotes(file, quantity, geometry);
     },
     [getQuotes]
   );
+
+  // When parent owns the file state (externalFile prop), debounce and auto-fetch.
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastFileRef = useRef<File | null>(null);
+  useEffect(() => {
+    if (!externalFile) return;
+    // Skip effect if only other deps changed and we have no file change and no quantity.
+    const fileChanged = lastFileRef.current !== externalFile;
+    lastFileRef.current = externalFile;
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    // Fetch immediately on new file; debounce on quantity changes only.
+    const delay = fileChanged ? 0 : 400;
+    debounceRef.current = setTimeout(() => {
+      handleFile(externalFile, externalQuantity ?? 1);
+    }, delay);
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [externalFile, externalQuantity, handleFile]);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
@@ -226,7 +298,7 @@ export function LivePriceComparison({
 
       <CardContent className="px-4 pb-4">
         {/* Upload Zone */}
-        {liveQuotes.length === 0 && !isLoading && (
+        {!hideUpload && liveQuotes.length === 0 && !isLoading && (
           <label
             className={cn(
               'flex flex-col items-center justify-center gap-2 p-6 rounded-lg border-2 border-dashed cursor-pointer transition-all duration-200',
@@ -329,18 +401,20 @@ export function LivePriceComparison({
             )}
 
             {/* Upload new */}
-            <label className="mt-2 flex items-center justify-center gap-1.5 p-2 rounded-lg border border-dashed border-border hover:border-primary/50 cursor-pointer transition-colors">
-              <Upload className="h-3 w-3 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Upload new file</span>
-              <input
-                type="file"
-                className="hidden"
-                accept=".stl,.obj,.3mf,.step,.stp"
-                onChange={(e) => {
-                  if (e.target.files?.[0]) handleFile(e.target.files[0]);
-                }}
-              />
-            </label>
+            {!hideUpload && (
+              <label className="mt-2 flex items-center justify-center gap-1.5 p-2 rounded-lg border border-dashed border-border hover:border-primary/50 cursor-pointer transition-colors">
+                <Upload className="h-3 w-3 text-muted-foreground" />
+                <span className="text-xs text-muted-foreground">Upload new file</span>
+                <input
+                  type="file"
+                  className="hidden"
+                  accept=".stl,.obj,.3mf,.step,.stp"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) handleFile(e.target.files[0]);
+                  }}
+                />
+              </label>
+            )}
           </div>
         )}
 
@@ -361,7 +435,7 @@ export function LivePriceComparison({
             </button>
             {showEstimates && (
               <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
-                {estimatedPrices.map((price) => (
+                {[...estimatedPrices].sort((a, b) => a.priceRangeLow - b.priceRangeLow).map((price) => (
                   <EstimatedPriceRow key={price.supplierId} price={price} />
                 ))}
               </div>

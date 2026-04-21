@@ -11,7 +11,7 @@ export default function ComparePrices() {
   const navigate = useNavigate();
   const { suppliers } = useSuppliers();
 
-  // Generate estimated prices for all suppliers in the database
+  // Generate estimated prices for all suppliers in the database, sorted by lowest price first
   const estimatedPrices: EstimatedPrice[] = suppliers.slice(0, 20).map((s) =>
     getEstimatedPrice(
       s.name,
@@ -19,7 +19,7 @@ export default function ComparePrices() {
       s.technologies.map((t) => t.name),
       s.logo_url || undefined
     )
-  );
+  ).sort((a, b) => a.priceRangeLow - b.priceRangeLow);
 
   return (
     <>

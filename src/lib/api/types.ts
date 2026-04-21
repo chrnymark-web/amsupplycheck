@@ -2,6 +2,19 @@
 
 export type Currency = 'EUR' | 'USD' | 'GBP' | 'DKK';
 
+export interface QuoteSanityResult {
+  flag: 'ok' | 'suspect-low' | 'suspect-high';
+  confidence: 'high' | 'medium' | 'low';
+  reasons: string[];
+  userMessage?: string;
+}
+
+export interface QuoteGeometry {
+  volumeCm3: number;
+  boundingBox: { x: number; y: number; z: number };
+  triangleCount: number;
+}
+
 export type PriceSource = 'craftcloud' | 'treatstock';
 
 // A single material/finish option from a vendor
@@ -32,6 +45,7 @@ export interface LiveQuote {
   fetchedAt: Date;
   source: PriceSource;
   alternativeQuotes?: QuoteOption[];
+  sanityResult?: QuoteSanityResult;
 }
 
 // An estimated price based on market data / technology index
@@ -58,6 +72,7 @@ export interface QuoteRequest {
   technology?: string;
   currency?: Currency;
   countryCode?: string;
+  geometry?: QuoteGeometry;
 }
 
 export interface QuoteResult {

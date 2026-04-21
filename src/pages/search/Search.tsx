@@ -175,6 +175,13 @@ const Search = () => {
     }
   }, [searchParams]);
 
+  // Auto-switch to price sorting when quote data becomes available
+  useEffect(() => {
+    if (quoteData && quoteData.length > 0) {
+      setSortBy('price');
+    }
+  }, [quoteData]);
+
   // Build quote lookup map: normalized supplier ID → LiveQuote
   const quoteMap = useMemo(() => {
     if (!quoteData) return new Map<string, LiveQuote>();

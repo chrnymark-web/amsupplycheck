@@ -26,6 +26,12 @@ tools/*.pyc
 # Trigger.dev
 .trigger/
 
+# Local dev artifacts
+temporary screenshots/
+screenshot.mjs
+screenshot-upload.mjs
+supabase/.temp/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

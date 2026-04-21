@@ -3,9 +3,9 @@ import { CheckCircle2, Loader2, Circle } from "lucide-react";
 type SearchStatus = "idle" | "pending" | "analyzing" | "matching" | "ranking" | "completed" | "failed";
 
 const STEPS = [
-  { key: "analyzing", label: "Analyserer krav med AI" },
-  { key: "matching", label: "Søger blandt suppliers" },
-  { key: "ranking", label: "Ranker og genererer forklaringer" },
+  { key: "analyzing", label: "Analyzing requirements with AI" },
+  { key: "matching", label: "Searching suppliers" },
+  { key: "ranking", label: "Ranking and generating explanations" },
 ] as const;
 
 const STEP_ORDER: Record<string, number> = {

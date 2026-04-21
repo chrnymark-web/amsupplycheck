@@ -4,6 +4,7 @@ import type { QuoteRequest, QuoteResult, LiveQuote, EstimatedPrice, SupplierPric
 import { getCraftcloudQuotes } from './craftcloud';
 import { getTreatstockQuotes } from './treatstock';
 import { getSupplierPriceTier } from '../supplierPricing';
+import { runSanityChecks } from './quote-sanity';
 
 const TREATSTOCK_API_KEY = import.meta.env.VITE_TREATSTOCK_API_KEY || '';
 
@@ -50,6 +51,9 @@ export async function fetchLiveQuotes(
   const quotes = results
     .flatMap((r) => r.quotes)
     .sort((a, b) => a.unitPrice - b.unitPrice);
+
+  // Run sanity checks on all collected quotes
+  runSanityChecks(quotes, request.geometry);
 
   return { quotes, results };
 }

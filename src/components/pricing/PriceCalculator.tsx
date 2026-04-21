@@ -48,33 +48,19 @@ export function PriceCalculator() {
   const navigate = useNavigate();
 
   const handleFile = useCallback(async (f: File) => {
-    setFile(f);
-    setEstimate(null);
-    setError('');
-    setParseError('');
-
-    if (!f.name.toLowerCase().endsWith('.stl')) {
-      setParseError('Only STL files are supported for instant analysis. Upload an STL file to get volume and dimensions.');
+    const ext = f.name.toLowerCase().slice(f.name.lastIndexOf('.'));
+    const accepted = ['.stl', '.obj', '.3mf', '.step', '.stp'];
+    if (!accepted.includes(ext)) {
+      setParseError('Unsupported file type. Upload STL, OBJ, 3MF or STEP.');
       return;
     }
-
     if (f.size > 100 * 1024 * 1024) {
       setParseError('File too large. Maximum 100MB.');
       return;
     }
-
-    try {
-      const buffer = await f.arrayBuffer();
-      const result = parseSTL(buffer);
-      if (result.triangleCount === 0 || result.volumeCm3 === 0) {
-        setParseError('Could not parse STL file. The file may be corrupted.');
-        return;
-      }
-      setStlData(result);
-    } catch {
-      setParseError('Failed to parse STL file.');
-    }
-  }, []);
+    // Route to the new instant-quote experience (3D preview + configurator + live prices).
+    navigate('/stl-match', { state: { uploadedFile: f } });
+  }, [navigate]);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();
