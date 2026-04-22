@@ -677,6 +677,7 @@ export const countryToAreaMap: Record<string, string> = {
   'China': 'Asia', 'Japan': 'Asia', 'South Korea': 'Asia', 'India': 'Asia',
   'Singapore': 'Asia', 'Taiwan': 'Asia', 'Hong Kong': 'Asia', 'Thailand': 'Asia',
   'Malaysia': 'Asia', 'Philippines': 'Asia', 'Indonesia': 'Asia', 'Vietnam': 'Asia',
+  'Pakistan': 'Asia',
   
   // Oceania
   'Australia': 'Oceania', 'New Zealand': 'Oceania',

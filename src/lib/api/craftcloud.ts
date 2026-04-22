@@ -9,15 +9,21 @@ import { supabase } from '@/integrations/supabase/client';
 const CRAFTCLOUD_BASE_URL = 'https://api.craftcloud3d.com';
 const CRAFTCLOUD_MARKETPLACE_URL = 'https://craftcloud3d.com';
 
-// Lazy-cached lookup of vendorId → supplier website, populated once per session.
-// Placeholder websites (craftcloud3d.com) are skipped so the marketplace URL
-// fallback kicks in for vendors whose real site we haven't researched yet.
-let vendorWebsitesCache: Promise<Map<string, string>> | null = null;
+// Lazy-cached lookup of vendorId → supplier info (website + continent),
+// populated once per session. Website placeholders (craftcloud3d.com itself)
+// are skipped so the marketplace URL fallback kicks in for vendors whose real
+// site we haven't researched yet.
+interface VendorInfo {
+  website?: string;
+  area?: string;
+}
 
-function loadCraftcloudVendorWebsites(): Promise<Map<string, string>> {
-  if (vendorWebsitesCache) return vendorWebsitesCache;
-  vendorWebsitesCache = (async () => {
-    const map = new Map<string, string>();
+let vendorInfoCache: Promise<Map<string, VendorInfo>> | null = null;
+
+function loadCraftcloudVendorInfo(): Promise<Map<string, VendorInfo>> {
+  if (vendorInfoCache) return vendorInfoCache;
+  vendorInfoCache = (async () => {
+    const map = new Map<string, VendorInfo>();
     try {
       const { data, error } = await supabase
         .from('suppliers')
@@ -25,20 +31,22 @@ function loadCraftcloudVendorWebsites(): Promise<Map<string, string>> {
         .not('metadata->>craftcloud_vendor_id', 'is', null);
       if (error) throw error;
       for (const row of data ?? []) {
-        const website = (row as { website: string | null }).website;
-        if (!website || website === CRAFTCLOUD_MARKETPLACE_URL) continue;
+        const rawWebsite = (row as { website: string | null }).website;
+        const website = rawWebsite && rawWebsite !== CRAFTCLOUD_MARKETPLACE_URL ? rawWebsite : undefined;
         const meta = ((row as { metadata: Record<string, unknown> | null }).metadata ?? {}) as Record<string, unknown>;
         const vid = typeof meta.craftcloud_vendor_id === 'string' ? meta.craftcloud_vendor_id : null;
         const vidAlt = typeof meta.craftcloud_vendor_id_alt === 'string' ? meta.craftcloud_vendor_id_alt : null;
-        if (vid) map.set(vid, website);
-        if (vidAlt) map.set(vidAlt, website);
+        const area = typeof meta.area === 'string' ? meta.area : undefined;
+        const info: VendorInfo = { website, area };
+        if (vid) map.set(vid, info);
+        if (vidAlt) map.set(vidAlt, info);
       }
     } catch (err) {
-      console.warn('[craftcloud] vendor website lookup failed, falling back to marketplace URL:', err);
+      console.warn('[craftcloud] vendor info lookup failed, falling back to defaults:', err);
     }
     return map;
   })();
-  return vendorWebsitesCache;
+  return vendorInfoCache;
 }
 
 // Dedupe console.info spam — partials re-run toQuotes many times.
@@ -243,7 +251,7 @@ function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, LabeledQu
 function toQuotes(
   priceResponse: CraftcloudPriceResponse,
   quantity: number,
-  vendorWebsites: Map<string, string>
+  vendorInfo: Map<string, VendorInfo>
 ): LiveQuote[] {
   const shippingByVendor = new Map<string, number>();
   for (const s of priceResponse.shippings) {
@@ -273,10 +281,11 @@ function toQuotes(
         shippingEstimate: shippingByVendor.get(q.vendorId) ?? null,
       }));
 
-    const supplierWebsite = vendorWebsites.get(q.vendorId);
-    if (!supplierWebsite && !loggedUnknownVendors.has(q.vendorId)) {
+    const info = vendorInfo.get(q.vendorId);
+    const supplierWebsite = info?.website;
+    if (!info && !loggedUnknownVendors.has(q.vendorId)) {
       loggedUnknownVendors.add(q.vendorId);
-      console.info('[craftcloud] unknown vendorId (no supplier website):', q.vendorId);
+      console.info('[craftcloud] unknown vendorId (no supplier record):', q.vendorId);
     }
 
     return {
@@ -296,6 +305,7 @@ function toQuotes(
       fetchedAt: new Date(),
       source: 'craftcloud' as const,
       alternativeQuotes: alternativeQuotes.length > 0 ? alternativeQuotes : undefined,
+      supplierArea: info?.area,
     };
   });
 }
@@ -319,8 +329,8 @@ export async function getCraftcloudQuotes(
   request: QuoteRequest,
   onPartial?: (quotes: LiveQuote[]) => void
 ): Promise<LiveQuote[]> {
-  // Kick off vendor website lookup in parallel with the upload/price flow.
-  const vendorWebsitesPromise = loadCraftcloudVendorWebsites();
+  // Kick off vendor info lookup in parallel with the upload/price flow.
+  const vendorInfoPromise = loadCraftcloudVendorInfo();
 
   const models = await uploadModel(request.file);
   if (models.length === 0) {
@@ -335,13 +345,13 @@ export async function getCraftcloudQuotes(
   );
 
   // Ensure the map is resolved before any toQuotes call runs (partial or final).
-  const vendorWebsites = await vendorWebsitesPromise;
+  const vendorInfo = await vendorInfoPromise;
 
   const partialBridge = onPartial
-    ? (raw: CraftcloudPriceResponse) => onPartial(toQuotes(raw, request.quantity, vendorWebsites))
+    ? (raw: CraftcloudPriceResponse) => onPartial(toQuotes(raw, request.quantity, vendorInfo))
     : undefined;
 
   const priceResponse = await getPriceResults(priceId, partialBridge);
 
-  return toQuotes(priceResponse, request.quantity, vendorWebsites);
+  return toQuotes(priceResponse, request.quantity, vendorInfo);
 }

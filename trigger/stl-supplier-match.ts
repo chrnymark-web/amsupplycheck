@@ -8,6 +8,7 @@ import { parseSTL } from "./lib/stl-parser.js";
 import { fetchSuppliers, updateSearchStatus, saveSearchResults } from "./lib/supplier-fetcher.js";
 import { scoreSuppliers, fuzzyMatch } from "./lib/scoring.js";
 import { generateExplanations } from "./lib/claude-client.js";
+import { getAreaForCountry } from "./lib/area.js";
 import Anthropic from "@anthropic-ai/sdk";
 import type { EnrichedSupplier, ExtractedRequirements, MatchResult } from "./lib/types.js";
 
@@ -22,6 +23,7 @@ export const stlSupplierMatch = schemaTask({
     material: z.string().optional().default(''),
     quantity: z.number().optional(),
     preferredRegion: z.string().optional(),
+    area: z.string().optional(),
   }),
   retry: {
     maxAttempts: 3,
@@ -31,7 +33,7 @@ export const stlSupplierMatch = schemaTask({
   },
   run: async (payload) => {
     const startTime = Date.now();
-    const { searchResultId, stlFilePath, technology, material, quantity, preferredRegion } = payload;
+    const { searchResultId, stlFilePath, technology, material, quantity, preferredRegion, area } = payload;
 
     try {
       // Step 1: Analyzing STL file
@@ -166,6 +168,17 @@ Based on the part size, complexity, and material, what should we look for in a s
       }
 
       console.log(`[stl-match] Pre-filtered to ${suppliersToScore.length} suppliers (tech: ${technology || "any"}, mat: ${material || "any"}, tier: ${filterTier})`);
+
+      // Hard area filter: when the user picks a continent, drop suppliers whose
+      // country doesn't resolve to that continent. Suppliers with no country
+      // data are dropped too, so the filter stays meaningful. Skip when "any".
+      if (area) {
+        const beforeArea = suppliersToScore.length;
+        suppliersToScore = suppliersToScore.filter(
+          (s) => getAreaForCountry(s.location_country) === area
+        );
+        console.log(`[stl-match] Area filter (${area}): ${beforeArea} → ${suppliersToScore.length} suppliers`);
+      }
 
       const toolBlock = analysisResponse.content.find((b: any) => b.type === "tool_use");
       if (!toolBlock || toolBlock.type !== "tool_use") {

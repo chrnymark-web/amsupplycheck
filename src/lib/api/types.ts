@@ -46,6 +46,8 @@ export interface LiveQuote {
   source: PriceSource;
   alternativeQuotes?: QuoteOption[];
   sanityResult?: QuoteSanityResult;
+  /** Continent the supplier is headquartered in, e.g. 'Europe'. Undefined if unknown. */
+  supplierArea?: string;
 }
 
 // An estimated price based on market data / technology index

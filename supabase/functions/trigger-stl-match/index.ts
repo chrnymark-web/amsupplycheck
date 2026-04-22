@@ -26,7 +26,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { stlFilePath, technology, material, quantity, preferredRegion } = body;
+    const { stlFilePath, technology, material, quantity, preferredRegion, area } = body;
 
     if (!stlFilePath) {
       return new Response(
@@ -91,6 +91,7 @@ serve(async (req) => {
             material: materialStr,
             quantity: typeof quantity === "number" ? quantity : undefined,
             preferredRegion: typeof preferredRegion === "string" ? preferredRegion.trim() : undefined,
+            area: typeof area === "string" && area.trim().length > 0 ? area.trim() : undefined,
           },
         }),
       }

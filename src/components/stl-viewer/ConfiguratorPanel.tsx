@@ -53,16 +53,27 @@ export const FINISH_OPTIONS = [
   { value: 'dyed', label: 'Dyed' },
 ];
 
+export const AREA_OPTIONS: string[] = [
+  'North America',
+  'Europe',
+  'Asia',
+  'South America',
+  'Africa',
+  'Oceania',
+];
+
 interface ConfiguratorPanelProps {
   technology: string;
   material: string;
   color: string;
   finish: string;
+  area: string;
   quantity: number;
   onTechnologyChange: (v: string) => void;
   onMaterialChange: (v: string) => void;
   onColorChange: (v: string) => void;
   onFinishChange: (v: string) => void;
+  onAreaChange: (v: string) => void;
   onQuantityChange: (v: number) => void;
   className?: string;
 }
@@ -72,11 +83,13 @@ export function ConfiguratorPanel({
   material,
   color,
   finish,
+  area,
   quantity,
   onTechnologyChange,
   onMaterialChange,
   onColorChange,
   onFinishChange,
+  onAreaChange,
   onQuantityChange,
   className,
 }: ConfiguratorPanelProps) {
@@ -197,6 +210,27 @@ export function ConfiguratorPanel({
           </Select>
         </ConfigField>
       </div>
+
+      <ConfigField label="Area">
+        <Select
+          value={area || ANY}
+          onValueChange={(v) => onAreaChange(v === ANY ? '' : v)}
+        >
+          <SelectTrigger className="h-9 text-sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value={ANY} className="text-sm text-muted-foreground">
+              Any area
+            </SelectItem>
+            {AREA_OPTIONS.map((a) => (
+              <SelectItem key={a} value={a} className="text-sm">
+                {a}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </ConfigField>
 
       <ConfigField label="Quantity">
         <div className="flex items-center gap-2">

@@ -22,6 +22,8 @@ interface LivePriceComparisonProps {
   quantity?: number;
   /** Hide internal upload UI (used when parent owns the file state) */
   hideUpload?: boolean;
+  /** Continent filter, e.g. 'Europe'. Empty string = no filter. */
+  area?: string;
 }
 
 type SortField = 'price' | 'leadTime' | 'supplier';
@@ -272,6 +274,7 @@ export function LivePriceComparison({
   file: externalFile,
   quantity: externalQuantity,
   hideUpload = false,
+  area = '',
 }: LivePriceComparisonProps) {
   const { getQuotes, liveQuotes, results, hasErrors, isLoading, error } = useLiveQuotes({
     currency,
@@ -288,7 +291,13 @@ export function LivePriceComparison({
     else { setSortField(field); setSortAsc(true); }
   };
 
-  const sortedLive = [...liveQuotes].sort((a, b) => {
+  // When a specific area is selected, vendors with unknown area are excluded
+  // so the filter is meaningful (matches backend matching behavior).
+  const filteredLive = area
+    ? liveQuotes.filter((q) => q.supplierArea === area)
+    : liveQuotes;
+
+  const sortedLive = [...filteredLive].sort((a, b) => {
     // Suspect quotes always sort to bottom
     const aSuspect = a.sanityResult && a.sanityResult.flag !== 'ok' ? 1 : 0;
     const bSuspect = b.sanityResult && b.sanityResult.flag !== 'ok' ? 1 : 0;
@@ -303,7 +312,7 @@ export function LivePriceComparison({
   });
 
   // "Lowest" badge only for the cheapest non-suspect quote
-  const nonSuspectQuotes = liveQuotes.filter((q) => !q.sanityResult || q.sanityResult.flag === 'ok');
+  const nonSuspectQuotes = filteredLive.filter((q) => !q.sanityResult || q.sanityResult.flag === 'ok');
   const lowestPrice = nonSuspectQuotes.length > 0
     ? Math.min(...nonSuspectQuotes.map((q) => q.unitPrice))
     : null;
@@ -433,14 +442,28 @@ export function LivePriceComparison({
           </div>
         )}
 
+        {/* Area filter excluded every vendor — explain that to the user */}
+        {liveQuotes.length > 0 && filteredLive.length === 0 && area && !isLoading && (
+          <div className="flex items-start gap-2 p-3 rounded-lg border border-border/60 bg-card/30 text-xs text-muted-foreground">
+            <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+            <p>
+              No live quotes from vendors in <span className="font-medium text-foreground">{area}</span>.
+              Try a different area or switch to "Any area".
+            </p>
+          </div>
+        )}
+
         {/* Live Quotes — shown whenever any arrived, even while more are loading */}
-        {liveQuotes.length > 0 && (
+        {filteredLive.length > 0 && (
           <div>
             {/* Header */}
             <div className="flex items-center gap-2 mb-2">
               <Signal className={cn('h-3 w-3', isLoading ? 'text-green-500 animate-pulse' : 'text-green-500')} />
               <span className="text-xs font-medium text-foreground">
-                {liveQuotes.length} live quotes{isLoading ? ' so far' : ''}
+                {filteredLive.length} live quotes{isLoading ? ' so far' : ''}
+                {area && liveQuotes.length > filteredLive.length && (
+                  <span className="text-muted-foreground font-normal"> in {area}</span>
+                )}
               </span>
               <div className="flex items-center gap-1 ml-auto">
                 {(['price', 'leadTime', 'supplier'] as SortField[]).map((field) => (

@@ -23,6 +23,8 @@ interface STLMatchInput {
   material?: string;
   quantity?: number;
   preferredRegion?: string;
+  /** Continent filter, e.g. 'Europe'. Empty = no filter. */
+  area?: string;
 }
 
 interface TriggerSTLMatchReturn {
@@ -146,6 +148,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
             material: input.material ?? '',
             quantity: input.quantity,
             preferredRegion: input.preferredRegion,
+            area: input.area,
           },
         }
       );

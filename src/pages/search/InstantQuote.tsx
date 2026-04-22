@@ -594,7 +594,7 @@ function MatchResultView({
                   {safeMatches.length} suppliers matched
                 </p>
                 <p className="text-[11px] text-muted-foreground truncate">
-                  {[technology || 'Any technology', material || 'Any material', `${quantity} pcs`].join(' · ')}
+                  {[technology || 'Any technology', material || 'Any material', area || 'Any area', `${quantity} pcs`].join(' · ')}
                 </p>
               </div>
             </div>
