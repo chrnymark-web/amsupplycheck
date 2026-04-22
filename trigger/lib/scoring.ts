@@ -116,10 +116,16 @@ export function buildRecommendedCertifications(project: {
   return [...new Set(certs)];
 }
 
+/** Strip non-alphanumerics so "PA-12" and "PA12 Nylon" both reduce to "pa12"-containing keys */
+export function normalizeKey(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
 /** Fuzzy match: check if two tech/material names refer to the same thing */
-function fuzzyMatch(a: string, b: string): boolean {
-  const la = a.toLowerCase().trim();
-  const lb = b.toLowerCase().trim();
+export function fuzzyMatch(a: string, b: string): boolean {
+  const la = normalizeKey(a);
+  const lb = normalizeKey(b);
+  if (!la || !lb) return false;
   return la.includes(lb) || lb.includes(la);
 }
 

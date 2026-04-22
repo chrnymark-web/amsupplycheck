@@ -6,6 +6,18 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Strip non-alphanumerics so "PA-12" and "PA12 Nylon" both reduce to "pa12"-containing keys
+function normalizeKey(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]/g, "");
+}
+
+function fuzzyMatch(a: string, b: string): boolean {
+  const la = normalizeKey(a);
+  const lb = normalizeKey(b);
+  if (!la || !lb) return false;
+  return la.includes(lb) || lb.includes(la);
+}
+
 // Weight factors for matching - certification weight increased
 const WEIGHTS = {
   technology: 0.30,
@@ -397,10 +409,7 @@ Extract the requirements. Prioritize the recommended technologies if they match 
       const matchedTechs: string[] = [];
       if (requirements.requiredTechnologies && requirements.requiredTechnologies.length > 0) {
         for (const reqTech of requirements.requiredTechnologies) {
-          const match = supplierTechs.find((t: string) => 
-            t.toLowerCase().includes(reqTech.toLowerCase()) || 
-            reqTech.toLowerCase().includes(t.toLowerCase())
-          );
+          const match = supplierTechs.find((t: string) => fuzzyMatch(t, reqTech));
           if (match) {
             matchedTechs.push(match);
             techScore += 1 / requirements.requiredTechnologies.length;
@@ -415,10 +424,7 @@ Extract the requirements. Prioritize the recommended technologies if they match 
       const matchedMats: string[] = [];
       if (requirements.requiredMaterials && requirements.requiredMaterials.length > 0) {
         for (const reqMat of requirements.requiredMaterials) {
-          const match = supplierMaterials.find((m: string) => 
-            m.toLowerCase().includes(reqMat.toLowerCase()) || 
-            reqMat.toLowerCase().includes(m.toLowerCase())
-          );
+          const match = supplierMaterials.find((m: string) => fuzzyMatch(m, reqMat));
           if (match) {
             matchedMats.push(match);
             materialScore += 1 / requirements.requiredMaterials.length;
@@ -432,8 +438,7 @@ Extract the requirements. Prioritize the recommended technologies if they match 
       let locationScore = 0;
       if (requirements.preferredRegions && requirements.preferredRegions.length > 0) {
         for (const region of requirements.preferredRegions) {
-          if (supplierRegion.toLowerCase().includes(region.toLowerCase()) ||
-              region.toLowerCase().includes(supplierRegion.toLowerCase())) {
+          if (fuzzyMatch(supplierRegion, region)) {
             locationScore = 1;
             break;
           } else if (supplierRegion === 'Global') {

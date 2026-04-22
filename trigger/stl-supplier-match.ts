@@ -6,7 +6,7 @@ import { z } from "zod";
 import { createClient } from "@supabase/supabase-js";
 import { parseSTL } from "./lib/stl-parser.js";
 import { fetchSuppliers, updateSearchStatus, saveSearchResults } from "./lib/supplier-fetcher.js";
-import { scoreSuppliers } from "./lib/scoring.js";
+import { scoreSuppliers, fuzzyMatch } from "./lib/scoring.js";
 import { generateExplanations } from "./lib/claude-client.js";
 import Anthropic from "@anthropic-ai/sdk";
 import type { EnrichedSupplier, ExtractedRequirements, MatchResult } from "./lib/types.js";
@@ -121,14 +121,8 @@ Based on the part size, complexity, and material, what should we look for in a s
 
       // Pre-filter suppliers by selected technology and material
       const filteredSuppliers = allSuppliers.filter((s) => {
-        const hasTech = s.technologies.some(
-          (t) => t.name.toLowerCase().includes(technology.toLowerCase()) ||
-                 technology.toLowerCase().includes(t.name.toLowerCase())
-        );
-        const hasMat = s.materials.some(
-          (m) => m.name.toLowerCase().includes(material.toLowerCase()) ||
-                 material.toLowerCase().includes(m.name.toLowerCase())
-        );
+        const hasTech = s.technologies.some((t) => fuzzyMatch(t.name, technology));
+        const hasMat = s.materials.some((m) => fuzzyMatch(m.name, material));
         return hasTech && hasMat; // Require both technology AND material
       });
 
@@ -136,10 +130,7 @@ Based on the part size, complexity, and material, what should we look for in a s
       let techOnlySuppliers: typeof allSuppliers = [];
       if (filteredSuppliers.length === 0) {
         techOnlySuppliers = allSuppliers.filter((s) =>
-          s.technologies.some(
-            (t) => t.name.toLowerCase().includes(technology.toLowerCase()) ||
-                   technology.toLowerCase().includes(t.name.toLowerCase())
-          )
+          s.technologies.some((t) => fuzzyMatch(t.name, technology))
         );
       }
 
