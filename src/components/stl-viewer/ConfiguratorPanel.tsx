@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
@@ -14,6 +15,23 @@ export const TECH_MATERIALS: Record<string, string[]> = {
   'Material Jetting': ['Standard Resin', 'Flexible Resin', 'Clear Resin'],
   'Binder Jetting': ['Stainless Steel', 'Aluminum', 'Ceramic'],
 };
+
+export const ALL_MATERIALS: string[] = Array.from(
+  new Set(Object.values(TECH_MATERIALS).flat())
+).sort();
+
+export const MATERIAL_TECHS: Record<string, string[]> = (() => {
+  const map: Record<string, string[]> = {};
+  for (const [tech, mats] of Object.entries(TECH_MATERIALS)) {
+    for (const mat of mats) {
+      if (!map[mat]) map[mat] = [];
+      if (!map[mat].includes(tech)) map[mat].push(tech);
+    }
+  }
+  return map;
+})();
+
+const ANY = 'any';
 
 // Color swatches per typical material category
 export const COLOR_OPTIONS: Array<{ value: string; label: string; hex: string }> = [
@@ -62,8 +80,19 @@ export function ConfiguratorPanel({
   onQuantityChange,
   className,
 }: ConfiguratorPanelProps) {
-  const materials = TECH_MATERIALS[technology] || [];
+  const materialOptions = ALL_MATERIALS;
+  const techOptions = material ? MATERIAL_TECHS[material] || [] : Object.keys(TECH_MATERIALS);
   const selectedColor = COLOR_OPTIONS.find((c) => c.value === color);
+
+  // Clear technology if it's no longer compatible with the chosen material.
+  useEffect(() => {
+    if (!material) return;
+    const compat = MATERIAL_TECHS[material] || [];
+    if (technology && !compat.includes(technology)) {
+      onTechnologyChange('');
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [material]);
 
   return (
     <div
@@ -83,12 +112,18 @@ export function ConfiguratorPanel({
 
       <div className="grid grid-cols-2 gap-3">
         <ConfigField label="Material">
-          <Select value={material} onValueChange={onMaterialChange}>
+          <Select
+            value={material || ANY}
+            onValueChange={(v) => onMaterialChange(v === ANY ? '' : v)}
+          >
             <SelectTrigger className="h-9 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {materials.map((m) => (
+              <SelectItem value={ANY} className="text-sm text-muted-foreground">
+                Any material
+              </SelectItem>
+              {materialOptions.map((m) => (
                 <SelectItem key={m} value={m} className="text-sm">
                   {m}
                 </SelectItem>
@@ -99,18 +134,17 @@ export function ConfiguratorPanel({
 
         <ConfigField label="Technology">
           <Select
-            value={technology}
-            onValueChange={(v) => {
-              onTechnologyChange(v);
-              const next = TECH_MATERIALS[v]?.[0];
-              if (next && !TECH_MATERIALS[v].includes(material)) onMaterialChange(next);
-            }}
+            value={technology || ANY}
+            onValueChange={(v) => onTechnologyChange(v === ANY ? '' : v)}
           >
             <SelectTrigger className="h-9 text-sm">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {Object.keys(TECH_MATERIALS).map((t) => (
+              <SelectItem value={ANY} className="text-sm text-muted-foreground">
+                Any technology
+              </SelectItem>
+              {techOptions.map((t) => (
                 <SelectItem key={t} value={t} className="text-sm">
                   {t}
                 </SelectItem>

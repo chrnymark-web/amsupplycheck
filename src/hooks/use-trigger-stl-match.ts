@@ -19,8 +19,8 @@ const STATUS_MESSAGES: Record<SearchStatus, string> = {
 
 interface STLMatchInput {
   file: File;
-  technology: string;
-  material: string;
+  technology?: string;
+  material?: string;
   quantity?: number;
   preferredRegion?: string;
 }
@@ -142,8 +142,8 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         {
           body: {
             stlFilePath: fileName,
-            technology: input.technology,
-            material: input.material,
+            technology: input.technology ?? '',
+            material: input.material ?? '',
             quantity: input.quantity,
             preferredRegion: input.preferredRegion,
           },

@@ -65,9 +65,9 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
   const [dragActive, setDragActive] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Configurator state
-  const [technology, setTechnology] = useState('SLS');
-  const [material, setMaterial] = useState('PA-12');
+  // Configurator state — empty string = "Any" (no filter)
+  const [technology, setTechnology] = useState('');
+  const [material, setMaterial] = useState('');
   const [color, setColor] = useState('natural');
   const [finish, setFinish] = useState('standard');
   const [quantity, setQuantity] = useState(1);
@@ -575,7 +575,7 @@ function MatchResultView({
                   {safeMatches.length} suppliers matched
                 </p>
                 <p className="text-[11px] text-muted-foreground truncate">
-                  {technology} · {material} · {quantity} pcs
+                  {[technology || 'Any technology', material || 'Any material', `${quantity} pcs`].join(' · ')}
                 </p>
               </div>
             </div>

@@ -18,8 +18,8 @@ export const stlSupplierMatch = schemaTask({
   schema: z.object({
     searchResultId: z.string().uuid(),
     stlFilePath: z.string(),
-    technology: z.string(),
-    material: z.string(),
+    technology: z.string().optional().default(''),
+    material: z.string().optional().default(''),
     quantity: z.number().optional(),
     preferredRegion: z.string().optional(),
   }),
@@ -84,8 +84,8 @@ export const stlSupplierMatch = schemaTask({
             content: `Analyze this 3D printed part and extract supplier matching requirements.
 
 PART SPECIFICATIONS:
-- Technology: ${technology}
-- Material: ${material}
+- Technology: ${technology || "any (user has not specified — recommend based on geometry)"}
+- Material: ${material || "any (user has not specified — recommend based on geometry)"}
 - Volume: ${stlMetrics.volumeCm3.toFixed(2)} cm³
 - Surface area: ${stlMetrics.surfaceAreaCm2.toFixed(2)} cm²
 - Bounding box: ${stlMetrics.boundingBox.x}mm x ${stlMetrics.boundingBox.y}mm x ${stlMetrics.boundingBox.z}mm
@@ -119,29 +119,53 @@ Based on the part size, complexity, and material, what should we look for in a s
       ]);
       console.log(`[stl-match] Parallel DB+Claude done in ${Date.now() - parallelStart}ms, ${allSuppliers.length} suppliers`);
 
-      // Pre-filter suppliers by selected technology and material
-      const filteredSuppliers = allSuppliers.filter((s) => {
-        const hasTech = s.technologies.some((t) => fuzzyMatch(t.name, technology));
-        const hasMat = s.materials.some((m) => fuzzyMatch(m.name, material));
-        return hasTech && hasMat; // Require both technology AND material
-      });
+      // Pre-filter suppliers by selected technology and/or material.
+      // Empty values mean "any" — skip that filter.
+      const hasTechFilter = Boolean(technology);
+      const hasMatFilter = Boolean(material);
 
-      // Tiered fallback: prefer both tech+mat, then tech-only, then all
-      let techOnlySuppliers: typeof allSuppliers = [];
-      if (filteredSuppliers.length === 0) {
-        techOnlySuppliers = allSuppliers.filter((s) =>
+      let suppliersToScore: typeof allSuppliers;
+      let filterTier: "both" | "tech-only" | "material-only" | "all";
+
+      if (!hasTechFilter && !hasMatFilter) {
+        suppliersToScore = allSuppliers;
+        filterTier = "all";
+      } else if (hasTechFilter && hasMatFilter) {
+        const bothMatch = allSuppliers.filter(
+          (s) =>
+            s.technologies.some((t) => fuzzyMatch(t.name, technology)) &&
+            s.materials.some((m) => fuzzyMatch(m.name, material))
+        );
+        if (bothMatch.length > 0) {
+          suppliersToScore = bothMatch;
+          filterTier = "both";
+        } else {
+          const techOnly = allSuppliers.filter((s) =>
+            s.technologies.some((t) => fuzzyMatch(t.name, technology))
+          );
+          if (techOnly.length > 0) {
+            suppliersToScore = techOnly;
+            filterTier = "tech-only";
+          } else {
+            suppliersToScore = allSuppliers;
+            filterTier = "all";
+          }
+        }
+      } else if (hasTechFilter) {
+        const techOnly = allSuppliers.filter((s) =>
           s.technologies.some((t) => fuzzyMatch(t.name, technology))
         );
+        suppliersToScore = techOnly.length > 0 ? techOnly : allSuppliers;
+        filterTier = techOnly.length > 0 ? "tech-only" : "all";
+      } else {
+        const matOnly = allSuppliers.filter((s) =>
+          s.materials.some((m) => fuzzyMatch(m.name, material))
+        );
+        suppliersToScore = matOnly.length > 0 ? matOnly : allSuppliers;
+        filterTier = matOnly.length > 0 ? "material-only" : "all";
       }
 
-      const suppliersToScore = filteredSuppliers.length > 0
-        ? filteredSuppliers
-        : techOnlySuppliers.length > 0
-          ? techOnlySuppliers
-          : allSuppliers;
-
-      const filterTier = filteredSuppliers.length > 0 ? "both" : techOnlySuppliers.length > 0 ? "tech-only" : "all";
-      console.log(`[stl-match] Pre-filtered to ${suppliersToScore.length} suppliers (tech: ${technology}, mat: ${material}, tier: ${filterTier})`);
+      console.log(`[stl-match] Pre-filtered to ${suppliersToScore.length} suppliers (tech: ${technology || "any"}, mat: ${material || "any"}, tier: ${filterTier})`);
 
       const toolBlock = analysisResponse.content.find((b: any) => b.type === "tool_use");
       if (!toolBlock || toolBlock.type !== "tool_use") {
@@ -149,9 +173,19 @@ Based on the part size, complexity, and material, what should we look for in a s
       }
 
       const extractedReqs = toolBlock.input as any;
+      const fallbackTechs = technology ? [technology] : [];
+      const fallbackMats = material ? [material] : [];
+      const summaryFallback =
+        technology && material
+          ? `${technology} part in ${material}`
+          : technology
+          ? `${technology} part`
+          : material
+          ? `Part in ${material}`
+          : "3D-printed part";
       const requirements: ExtractedRequirements = {
-        requiredTechnologies: extractedReqs.requiredTechnologies || [technology],
-        requiredMaterials: extractedReqs.requiredMaterials || [material],
+        requiredTechnologies: extractedReqs.requiredTechnologies || fallbackTechs,
+        requiredMaterials: extractedReqs.requiredMaterials || fallbackMats,
         preferredRegions: extractedReqs.preferredRegions || (preferredRegion ? [preferredRegion] : []),
         requiredCertifications: extractedReqs.requiredCertifications || [],
         isProductionRun: extractedReqs.isProductionRun || (quantity ? quantity >= 100 : false),
@@ -161,7 +195,7 @@ Based on the part size, complexity, and material, what should we look for in a s
         industry: "",
         mechanicalNeeds: [],
         surfaceRequirement: "",
-        projectSummary: extractedReqs.projectSummary || `${technology} part in ${material}`,
+        projectSummary: extractedReqs.projectSummary || summaryFallback,
       };
 
       // Score using the pre-filtered suppliers

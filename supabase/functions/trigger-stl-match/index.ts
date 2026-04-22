@@ -28,12 +28,15 @@ serve(async (req) => {
     const body = await req.json();
     const { stlFilePath, technology, material, quantity, preferredRegion } = body;
 
-    if (!stlFilePath || !technology || !material) {
+    if (!stlFilePath) {
       return new Response(
-        JSON.stringify({ error: "stlFilePath, technology, and material are required" }),
+        JSON.stringify({ error: "stlFilePath is required" }),
         { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
+    const technologyStr = typeof technology === "string" ? technology.trim() : "";
+    const materialStr = typeof material === "string" ? material.trim() : "";
 
     // Create search_results row
     const supabase = createClient(
@@ -47,8 +50,8 @@ serve(async (req) => {
         search_type: "stl",
         status: "pending",
         stl_file_url: stlFilePath,
-        selected_technology: String(technology).trim().slice(0, 100),
-        selected_material: String(material).trim().slice(0, 100),
+        selected_technology: technologyStr.slice(0, 100),
+        selected_material: materialStr.slice(0, 100),
       })
       .select("id")
       .single();
@@ -84,8 +87,8 @@ serve(async (req) => {
           payload: {
             searchResultId,
             stlFilePath: String(stlFilePath).trim(),
-            technology: String(technology).trim(),
-            material: String(material).trim(),
+            technology: technologyStr,
+            material: materialStr,
             quantity: typeof quantity === "number" ? quantity : undefined,
             preferredRegion: typeof preferredRegion === "string" ? preferredRegion.trim() : undefined,
           },
