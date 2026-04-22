@@ -11,17 +11,27 @@ import {
   Box,
   Layers,
   Package,
+  Clock,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LivePriceComparison } from '@/components/ui/live-price-comparison';
+import Map from '@/components/ui/map';
 import { ConfiguratorPanel, TECH_MATERIALS } from '@/components/stl-viewer/ConfiguratorPanel';
 import { ViewerControls } from '@/components/stl-viewer/ViewerControls';
 import { SearchProgress } from '@/components/search/SearchProgress';
 import { useTriggerSTLMatch } from '@/hooks/use-trigger-stl-match';
+import { useLiveQuotes } from '@/hooks/use-live-quotes';
 import { parseSTL, type STLResult } from '@/lib/stlParser';
 import { getEstimatedPrice } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import { formatPrice } from '@/lib/format';
+import {
+  resolvePriceInfo,
+  sortMatchesByPrice,
+  type SupplierPriceInfo,
+} from '@/lib/supplier-price-matcher';
+import { supabase } from '@/integrations/supabase/client';
 
 const STLViewer = lazy(() => import('@/components/stl-viewer/STLViewer'));
 
@@ -420,6 +430,39 @@ function MatchResultView({
   isRanking?: boolean;
   onNew: () => void;
 }) {
+  const { getQuotes, liveQuotes, isLoading: liveLoading } = useLiveQuotes({
+    currency: 'EUR',
+    countryCode: 'DK',
+  });
+
+  // Auto-fetch live quotes when the file/quantity changes (mirrors
+  // LivePriceComparison's internal effect so quotes are available here for
+  // per-supplier pairing — the response is cached inside the hook).
+  useEffect(() => {
+    if (!file) return;
+    let cancelled = false;
+    (async () => {
+      let geometry;
+      if (file.name.toLowerCase().endsWith('.stl')) {
+        try {
+          const buf = await file.arrayBuffer();
+          const g = parseSTL(buf);
+          geometry = {
+            volumeCm3: g.volumeCm3,
+            boundingBox: g.boundingBox,
+            triangleCount: g.triangleCount,
+          };
+        } catch {
+          // fall through without geometry
+        }
+      }
+      if (!cancelled) getQuotes(file, quantity, geometry);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [file, quantity, getQuotes]);
+
   const estimatedPrices = useMemo(
     () =>
       result.matches.map((m: any) =>
@@ -431,6 +474,73 @@ function MatchResultView({
         )
       ),
     [result]
+  );
+
+  const priceInfo = useMemo(
+    () => resolvePriceInfo(result.matches, liveQuotes, estimatedPrices),
+    [result.matches, liveQuotes, estimatedPrices]
+  );
+
+  const sortedMatches = useMemo(
+    () => sortMatchesByPrice(result.matches, priceInfo),
+    [result.matches, priceInfo]
+  );
+
+  // Client-side geo lookup: MatchedSupplier doesn't carry lat/lng, so fetch
+  // them by supplier_id after matches arrive. Avoids touching edge functions
+  // or the Trigger.dev task.
+  const [geoById, setGeoById] = useState<Map<string, { lat: number; lng: number }>>(new Map());
+  useEffect(() => {
+    const ids = result.matches.map((m: any) => m.supplier.supplier_id).filter(Boolean);
+    if (ids.length === 0) return;
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('suppliers')
+        .select('supplier_id, location_lat, location_lng')
+        .in('supplier_id', ids);
+      if (cancelled || error || !data) return;
+      const m = new Map<string, { lat: number; lng: number }>();
+      for (const row of data) {
+        if (row.location_lat != null && row.location_lng != null) {
+          m.set(row.supplier_id, { lat: row.location_lat, lng: row.location_lng });
+        }
+      }
+      setGeoById(m);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [result.matches]);
+
+  const mapSuppliers = useMemo(
+    () =>
+      result.matches
+        .map((m: any) => {
+          const geo = geoById.get(m.supplier.supplier_id);
+          if (!geo) return null;
+          const city = m.supplier.location_city || '';
+          const country = m.supplier.location_country || m.supplier.region || '';
+          return {
+            id: m.supplier.supplier_id,
+            name: m.supplier.name,
+            location: {
+              lat: geo.lat,
+              lng: geo.lng,
+              city,
+              country,
+              fullAddress: [city, country].filter(Boolean).join(', '),
+            },
+            technologies: m.supplier.technologies || [],
+            materials: m.supplier.materials || [],
+            verified: !!m.supplier.verified,
+            rating: 0,
+            website: m.supplier.website || undefined,
+            logoUrl: m.supplier.logo_url || undefined,
+          };
+        })
+        .filter(Boolean) as Array<any>,
+    [result.matches, geoById]
   );
 
   return (
@@ -461,7 +571,7 @@ function MatchResultView({
         </header>
 
         <main className="container mx-auto px-4 py-6">
-          <div className="grid lg:grid-cols-[1fr_420px] gap-4">
+          <div className="grid lg:grid-cols-[1fr_480px] gap-4">
             <div className="space-y-3">
               {isRanking && (
                 <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-primary">
@@ -469,23 +579,28 @@ function MatchResultView({
                   Generating match explanations…
                 </div>
               )}
-              {result.matches.map((match: any, i: number) => (
+              {liveLoading && liveQuotes.length === 0 && (
+                <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-card/30 px-3 py-2 text-xs text-muted-foreground">
+                  <Loader2 className="h-3 w-3 animate-spin" />
+                  Fetching live prices from 90+ vendors…
+                </div>
+              )}
+              {sortedMatches.map((match: any, i: number) => (
                 <SupplierResultCard
                   key={match.supplier.supplier_id}
                   match={match}
                   rank={i + 1}
+                  price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
                   isRanking={isRanking}
                 />
               ))}
             </div>
-            <aside className="lg:sticky lg:top-4 lg:h-fit">
-              <LivePriceComparison
-                file={file}
-                quantity={quantity}
-                hideUpload
-                estimatedPrices={estimatedPrices}
-                currency="EUR"
-                countryCode="DK"
+            <aside className="lg:sticky lg:top-4 lg:h-[calc(100vh-6rem)] min-h-[400px]">
+              <Map
+                suppliers={mapSuppliers}
+                height="100%"
+                className="rounded-xl overflow-hidden"
+                showControls
               />
             </aside>
           </div>
@@ -498,10 +613,12 @@ function MatchResultView({
 function SupplierResultCard({
   match,
   rank,
+  price,
   isRanking = false,
 }: {
   match: any;
   rank: number;
+  price: SupplierPriceInfo;
   isRanking?: boolean;
 }) {
   const { supplier, score, matchDetails } = match;
@@ -526,7 +643,7 @@ function SupplierResultCard({
         {rank}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
             <p className="text-sm font-semibold truncate">{supplier.name}</p>
             <p className="text-[11px] text-muted-foreground truncate">
@@ -534,12 +651,12 @@ function SupplierResultCard({
               {supplier.location_country || supplier.region}
             </p>
           </div>
-          <Badge
-            variant={score >= 70 ? 'default' : score >= 50 ? 'secondary' : 'outline'}
-            className="text-[10px] shrink-0"
-          >
-            {score}% match
-          </Badge>
+          <div className="flex flex-col items-end gap-1 shrink-0">
+            <PriceBlock price={price} />
+            <Badge variant="outline" className="text-[10px]">
+              {score}% match
+            </Badge>
+          </div>
         </div>
         {hasExplanation ? (
           <p className="text-xs text-muted-foreground italic mt-1.5 line-clamp-2">
@@ -565,5 +682,49 @@ function SupplierResultCard({
         </div>
       </div>
     </div>
+  );
+}
+
+function PriceBlock({ price }: { price: SupplierPriceInfo }) {
+  if (price.kind === 'live') {
+    const q = price.quote;
+    return (
+      <div className="text-right">
+        <div className="flex items-center gap-1.5 justify-end">
+          <Badge className="bg-primary/10 text-primary border-primary/20 text-[10px] px-1.5 py-0 hover:bg-primary/15">
+            Live
+          </Badge>
+          <span className="text-sm font-semibold text-primary whitespace-nowrap">
+            {formatPrice(q.unitPrice, q.currency)}
+          </span>
+        </div>
+        <div className="text-[10px] text-muted-foreground flex items-center gap-1 justify-end mt-0.5 whitespace-nowrap">
+          <Clock className="h-2.5 w-2.5" />
+          {q.estimatedLeadTimeDays ? `${q.estimatedLeadTimeDays}d` : '—'} · via{' '}
+          {q.source === 'craftcloud' ? 'Craftcloud' : 'Treatstock'}
+        </div>
+      </div>
+    );
+  }
+  if (price.kind === 'estimate') {
+    const e = price.estimate;
+    return (
+      <div className="text-right">
+        <div className="flex items-center gap-1.5 justify-end">
+          <Badge variant="outline" className="text-[10px] px-1.5 py-0 bg-muted text-muted-foreground">
+            Estimate
+          </Badge>
+          <span className="text-sm font-semibold whitespace-nowrap">{e.priceTier}</span>
+        </div>
+        <div className="text-[10px] text-muted-foreground mt-0.5 whitespace-nowrap">
+          ~{formatPrice(e.priceRangeLow, e.currency)} – {formatPrice(e.priceRangeHigh, e.currency)}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <Badge variant="outline" className="text-[10px] px-1.5 py-0 text-muted-foreground">
+      Request quote
+    </Badge>
   );
 }

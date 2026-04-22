@@ -8,6 +8,7 @@ import { useLiveQuotes } from '@/hooks/use-live-quotes';
 import type { LiveQuote, EstimatedPrice, Currency, QuoteGeometry } from '@/lib/api/types';
 import { parseSTL } from '@/lib/stlParser';
 import { cn } from '@/lib/utils';
+import { formatPrice } from '@/lib/format';
 
 interface LivePriceComparisonProps {
   /** Estimated prices for non-API suppliers (passed from parent) */
@@ -29,14 +30,6 @@ const SOURCE_COLORS: Record<string, string> = {
   craftcloud: 'bg-blue-500/10 text-blue-600 border-blue-200',
   treatstock: 'bg-green-500/10 text-green-600 border-green-200',
 };
-
-function formatPrice(amount: number, currency: Currency): string {
-  return new Intl.NumberFormat('da-DK', {
-    style: 'currency',
-    currency,
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
 
 function LiveQuoteRow({ quote, isLowest }: { quote: LiveQuote; isLowest: boolean }) {
   const sanity = quote.sanityResult;
