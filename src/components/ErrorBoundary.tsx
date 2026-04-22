@@ -2,6 +2,7 @@ import { Component, ErrorInfo, ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
+  fallback?: ReactNode;
 }
 
 interface State {
@@ -22,6 +23,12 @@ class ErrorBoundary extends Component<Props, State> {
 
   render() {
     if (this.state.hasError) {
+      if (this.props.fallback !== undefined) {
+        return this.props.fallback;
+      }
+
+      const isDev = typeof import.meta !== "undefined" && import.meta.env?.DEV;
+
       return (
         <div className="min-h-screen bg-background flex items-center justify-center px-4">
           <div className="text-center max-w-md">
@@ -48,6 +55,15 @@ class ErrorBoundary extends Component<Props, State> {
                 Go Home
               </a>
             </div>
+            {isDev && this.state.error && (
+              <details className="mt-8 text-left text-xs text-muted-foreground">
+                <summary className="cursor-pointer font-mono">Error details (dev only)</summary>
+                <pre className="mt-2 whitespace-pre-wrap break-all rounded-md bg-muted p-3 font-mono">
+                  {this.state.error.message}
+                  {this.state.error.stack ? "\n\n" + this.state.error.stack : ""}
+                </pre>
+              </details>
+            )}
           </div>
         </div>
       );

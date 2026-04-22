@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LivePriceComparison } from '@/components/ui/live-price-comparison';
-import Map from '@/components/ui/map';
+import SupplierMap from '@/components/ui/map';
 import { ConfiguratorPanel, TECH_MATERIALS } from '@/components/stl-viewer/ConfiguratorPanel';
 import { ViewerControls } from '@/components/stl-viewer/ViewerControls';
 import { SearchProgress } from '@/components/search/SearchProgress';
@@ -32,6 +32,7 @@ import {
   type SupplierPriceInfo,
 } from '@/lib/supplier-price-matcher';
 import { supabase } from '@/integrations/supabase/client';
+import ErrorBoundary from '@/components/ErrorBoundary';
 
 const STLViewer = lazy(() => import('@/components/stl-viewer/STLViewer'));
 
@@ -463,27 +464,37 @@ function MatchResultView({
     };
   }, [file, quantity, getQuotes]);
 
-  const estimatedPrices = useMemo(
+  // Rows lacking a supplier or matchDetails block would crash the unguarded
+  // property access below. Partial-ranking polls can briefly produce these.
+  const safeMatches = useMemo(
     () =>
-      result.matches.map((m: any) =>
-        getEstimatedPrice(
-          m.supplier.name,
-          m.supplier.supplier_id,
-          m.matchDetails.matchedTechnologies || [],
-          m.supplier.logo_url || undefined
-        )
-      ),
+      Array.isArray(result?.matches)
+        ? result.matches.filter((m: any) => m?.supplier && m?.matchDetails)
+        : [],
     [result]
   );
 
+  const estimatedPrices = useMemo(
+    () =>
+      safeMatches.map((m: any) =>
+        getEstimatedPrice(
+          m.supplier.name ?? 'Unknown supplier',
+          m.supplier.supplier_id,
+          m.matchDetails.matchedTechnologies ?? [],
+          m.supplier.logo_url || undefined
+        )
+      ),
+    [safeMatches]
+  );
+
   const priceInfo = useMemo(
-    () => resolvePriceInfo(result.matches, liveQuotes, estimatedPrices),
-    [result.matches, liveQuotes, estimatedPrices]
+    () => resolvePriceInfo(safeMatches, liveQuotes, estimatedPrices),
+    [safeMatches, liveQuotes, estimatedPrices]
   );
 
   const sortedMatches = useMemo(
-    () => sortMatchesByPrice(result.matches, priceInfo),
-    [result.matches, priceInfo]
+    () => sortMatchesByPrice(safeMatches, priceInfo),
+    [safeMatches, priceInfo]
   );
 
   // Client-side geo lookup: MatchedSupplier doesn't carry lat/lng, so fetch
@@ -491,31 +502,35 @@ function MatchResultView({
   // or the Trigger.dev task.
   const [geoById, setGeoById] = useState<Map<string, { lat: number; lng: number }>>(new Map());
   useEffect(() => {
-    const ids = result.matches.map((m: any) => m.supplier.supplier_id).filter(Boolean);
+    const ids = safeMatches.map((m: any) => m.supplier.supplier_id).filter(Boolean);
     if (ids.length === 0) return;
     let cancelled = false;
     (async () => {
-      const { data, error } = await supabase
-        .from('suppliers')
-        .select('supplier_id, location_lat, location_lng')
-        .in('supplier_id', ids);
-      if (cancelled || error || !data) return;
-      const m = new Map<string, { lat: number; lng: number }>();
-      for (const row of data) {
-        if (row.location_lat != null && row.location_lng != null) {
-          m.set(row.supplier_id, { lat: row.location_lat, lng: row.location_lng });
+      try {
+        const { data, error } = await supabase
+          .from('suppliers')
+          .select('supplier_id, location_lat, location_lng')
+          .in('supplier_id', ids);
+        if (cancelled || error || !data) return;
+        const m = new Map<string, { lat: number; lng: number }>();
+        for (const row of data) {
+          if (row.location_lat != null && row.location_lng != null) {
+            m.set(row.supplier_id, { lat: row.location_lat, lng: row.location_lng });
+          }
         }
+        setGeoById(m);
+      } catch (err) {
+        if (!cancelled) console.error('geo lookup failed', err);
       }
-      setGeoById(m);
     })();
     return () => {
       cancelled = true;
     };
-  }, [result.matches]);
+  }, [safeMatches]);
 
   const mapSuppliers = useMemo(
     () =>
-      result.matches
+      safeMatches
         .map((m: any) => {
           const geo = geoById.get(m.supplier.supplier_id);
           if (!geo) return null;
@@ -523,7 +538,7 @@ function MatchResultView({
           const country = m.supplier.location_country || m.supplier.region || '';
           return {
             id: m.supplier.supplier_id,
-            name: m.supplier.name,
+            name: m.supplier.name ?? 'Unknown supplier',
             location: {
               lat: geo.lat,
               lng: geo.lng,
@@ -531,8 +546,8 @@ function MatchResultView({
               country,
               fullAddress: [city, country].filter(Boolean).join(', '),
             },
-            technologies: m.supplier.technologies || [],
-            materials: m.supplier.materials || [],
+            technologies: m.supplier.technologies ?? [],
+            materials: m.supplier.materials ?? [],
             verified: !!m.supplier.verified,
             rating: 0,
             website: m.supplier.website || undefined,
@@ -540,7 +555,7 @@ function MatchResultView({
           };
         })
         .filter(Boolean) as Array<any>,
-    [result.matches, geoById]
+    [safeMatches, geoById]
   );
 
   return (
@@ -556,7 +571,7 @@ function MatchResultView({
               <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate">
-                  {result.matches.length} suppliers matched
+                  {safeMatches.length} suppliers matched
                 </p>
                 <p className="text-[11px] text-muted-foreground truncate">
                   {technology} · {material} · {quantity} pcs
@@ -596,12 +611,20 @@ function MatchResultView({
               ))}
             </div>
             <aside className="lg:sticky lg:top-4 lg:h-[calc(100vh-6rem)] min-h-[400px]">
-              <Map
-                suppliers={mapSuppliers}
-                height="100%"
-                className="rounded-xl overflow-hidden"
-                showControls
-              />
+              <ErrorBoundary
+                fallback={
+                  <div className="h-full min-h-[400px] rounded-xl border border-border/60 bg-card/30 flex items-center justify-center p-6 text-sm text-muted-foreground text-center">
+                    Map unavailable
+                  </div>
+                }
+              >
+                <SupplierMap
+                  suppliers={mapSuppliers}
+                  height="100%"
+                  className="rounded-xl overflow-hidden"
+                  showControls
+                />
+              </ErrorBoundary>
             </aside>
           </div>
         </main>
