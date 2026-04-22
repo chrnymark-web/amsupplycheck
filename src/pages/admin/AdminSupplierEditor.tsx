@@ -483,7 +483,7 @@ const AdminSupplierEditor = () => {
                   Validation History
                 </CardTitle>
                 <CardDescription>
-                  Recent AI-scraped data you can apply
+                  Recent scraped data you can apply
                 </CardDescription>
               </CardHeader>
               <CardContent>

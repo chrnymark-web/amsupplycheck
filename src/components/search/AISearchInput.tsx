@@ -517,7 +517,7 @@ const AISearchInput: React.FC<AISearchInputProps> = ({
           <div className="flex items-center justify-between gap-2">
             <div className="flex items-center gap-2 text-sm">
               <Sparkles className="h-4 w-4 text-primary" />
-              <span className="font-medium text-foreground">AI understood:</span>
+              <span className="font-medium text-foreground">Interpreted as:</span>
               <span className="text-muted-foreground">{filters.explanation}</span>
             </div>
             <div className="flex items-center gap-2">
@@ -664,7 +664,7 @@ const AISearchInput: React.FC<AISearchInputProps> = ({
         <div className="bg-primary/5 border border-primary/20 rounded-lg p-3 space-y-3 animate-in fade-in duration-200">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Loader2 className="h-4 w-4 animate-spin text-primary" />
-            <span>AI is analyzing your query...</span>
+            <span>Analyzing your query...</span>
           </div>
           <div className="space-y-2">
             <div className="h-4 w-3/4 bg-muted rounded animate-pulse" />

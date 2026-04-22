@@ -79,7 +79,7 @@ export default function Favorites() {
                 No favorites yet
               </h3>
               <p className="text-sm text-muted-foreground text-center max-w-sm mb-4">
-                Use AI Match to find suppliers and save them as favorites by clicking the heart icon.
+                Use Project Match to find suppliers and save them as favorites by clicking the heart icon.
               </p>
               <Button onClick={() => navigate('/match')}>
                 Find suppliers

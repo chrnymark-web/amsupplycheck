@@ -178,7 +178,7 @@ serve(async (req) => {
     
     if (!LOVABLE_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'AI service not configured' }),
+        JSON.stringify({ error: 'Matching service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -359,13 +359,13 @@ Extract the requirements. Prioritize the recommended technologies if they match 
       }
       if (analysisResponse.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'AI credits exhausted.' }),
+          JSON.stringify({ error: 'Service quota exhausted.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       return new Response(
-        JSON.stringify({ error: 'AI analysis failed' }),
+        JSON.stringify({ error: 'Analysis failed' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

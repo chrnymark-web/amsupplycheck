@@ -270,8 +270,8 @@ export default function ProjectMatch() {
   return (
     <>
       <Helmet>
-        <title>AI Project Matching | AMSupplyCheck</title>
-        <meta name="description" content="Describe your 3D printing project and get AI recommendations for the best suppliers based on your specific requirements." />
+        <title>Project Matching | AMSupplyCheck</title>
+        <meta name="description" content="Describe your 3D printing project and get supplier recommendations tailored to your specific requirements." />
         <meta name="robots" content="noindex, nofollow" />
         <link rel="canonical" href="https://amsupplycheck.com/match" />
       </Helmet>
@@ -287,7 +287,7 @@ export default function ProjectMatch() {
               <div>
                 <h1 className="text-xl font-semibold flex items-center gap-2">
                   <Sparkles className="h-5 w-5 text-primary" />
-                  AI Project Matching
+                  Project Matching
                 </h1>
                 <p className="text-sm text-muted-foreground">
                   Tell us about your needs — we'll find the right suppliers
@@ -521,7 +521,7 @@ export default function ProjectMatch() {
                       <Sparkles className="h-5 w-5 text-primary" />
                     </div>
                   <div>
-                      <h3 className="font-semibold text-lg">AI Technology Recommendation</h3>
+                      <h3 className="font-semibold text-lg">Recommended technology</h3>
                       <p className="text-sm text-muted-foreground">Based on your requirements, we recommend:</p>
                     </div>
                   </div>

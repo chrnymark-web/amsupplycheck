@@ -200,14 +200,14 @@ export const ValidationConfig = () => {
       if (error) throw error;
 
       if (data.success) {
-        toast.success(`✅ Lovable AI connection working! Response: "${data.ai_response}" (${data.duration_ms}ms)`);
+        toast.success(`✅ Validation service connection working! Response: "${data.ai_response}" (${data.duration_ms}ms)`);
       } else {
-        toast.error(`❌ Lovable AI test failed: ${data.error} (Status: ${data.status})`);
+        toast.error(`❌ Validation service test failed: ${data.error} (Status: ${data.status})`);
         console.error('Test failed:', data);
       }
     } catch (error) {
       console.error('Error testing Lovable AI:', error);
-      toast.error('Failed to test Lovable AI connection');
+      toast.error('Failed to test validation service connection');
     } finally {
       setIsTestingAI(false);
     }
@@ -473,13 +473,13 @@ export const ValidationConfig = () => {
             ) : (
               <>
                 <Settings className="mr-2 h-4 w-4" />
-                Test Lovable AI Connection
+                Test Validation Service
               </>
             )}
           </Button>
 
           <p className="text-xs text-muted-foreground">
-            Manual validation processes 1 supplier at a time. Uses 100% Firecrawl (~10 credits) + Lovable AI for analysis.
+            Manual validation processes 1 supplier at a time. Uses 100% Firecrawl (~10 credits) for analysis.
           </p>
           
           {config.validations_this_month >= config.monthly_validation_limit && (

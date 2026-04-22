@@ -214,7 +214,7 @@ const Browse: React.FC = () => {
               Know what you're looking for?
             </h3>
             <p className="text-muted-foreground mb-6">
-              Use our AI-powered search to find suppliers matching your exact requirements.
+              Use our smart search to find suppliers matching your exact requirements.
             </p>
             <Button size="lg" onClick={() => navigate('/search')}>
               Advanced Search <ArrowRight className="h-4 w-4 ml-2" />

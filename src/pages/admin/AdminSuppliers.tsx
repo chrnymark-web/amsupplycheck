@@ -472,7 +472,7 @@ export default function AdminSuppliers() {
     setGeneratingAIData(true);
     const missing = suppliers.filter(s => hasMissingAIData(s));
     
-    toast.info(`Generating AI data for ${missing.length} suppliers...`, {
+    toast.info(`Generating supplier data for ${missing.length} suppliers...`, {
       description: "This may take several minutes. Suppliers with existing data will be skipped.",
     });
 
@@ -492,14 +492,14 @@ export default function AdminSuppliers() {
       const skipped = results.filter((r: any) => r.status === 'skipped').length;
       const failed = results.filter((r: any) => !['success', 'skipped'].includes(r.status)).length;
 
-      toast.success("AI data generation complete!", {
+      toast.success("Supplier data generation complete!", {
         description: `${successful} generated, ${skipped} skipped, ${failed} failed.`,
       });
 
       await fetchSuppliers();
     } catch (error) {
       console.error("Error generating AI data:", error);
-      toast.error("Failed to generate AI data", {
+      toast.error("Failed to generate supplier data", {
         description: error instanceof Error ? error.message : "Unknown error",
       });
     } finally {
@@ -568,7 +568,7 @@ export default function AdminSuppliers() {
           <div className="flex gap-2 flex-wrap">
             <Button onClick={handleGenerateComparisons} variant="outline" disabled={generatingAIData || stats.missingAIData === 0}>
               <Sparkles className={`mr-2 h-4 w-4 ${generatingAIData ? "animate-pulse" : ""}`} />
-              {generatingAIData ? "Generating..." : `Generate AI Data (${stats.missingAIData})`}
+              {generatingAIData ? "Generating..." : `Generate Supplier Data (${stats.missingAIData})`}
             </Button>
             <Button onClick={handleValidateMissingData} variant="outline" disabled={validatingMissingData || stats.missingData === 0}>
               <RefreshCw className={`mr-2 h-4 w-4 ${validatingMissingData ? "animate-spin" : ""}`} />

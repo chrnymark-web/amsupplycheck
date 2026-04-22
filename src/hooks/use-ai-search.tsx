@@ -85,7 +85,7 @@ export function useAISearch(): UseAISearchResult {
       if (data.error) {
         // Handle specific error types
         if (data.fallback) {
-          toast.info('AI search unavailable, using keyword search');
+          toast.info('Smart search unavailable, using keyword search');
           const fallbackFilters: AISearchFilters = {
             technologies: [],
             materials: [],
@@ -169,7 +169,7 @@ export function useAISearch(): UseAISearchResult {
       if (err instanceof Error && err.name === 'AbortError') {
         return null;
       }
-      const errorMessage = err instanceof Error ? err.message : 'AI search failed';
+      const errorMessage = err instanceof Error ? err.message : 'Search failed';
       setError(errorMessage);
       toast.error(errorMessage);
       return null;

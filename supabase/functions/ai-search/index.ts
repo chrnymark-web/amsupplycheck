@@ -84,7 +84,7 @@ serve(async (req) => {
     if (!anthropicKey) {
       console.error('ANTHROPIC_API_KEY not set, falling back to keyword search');
       return new Response(JSON.stringify({
-        error: 'AI not configured',
+        error: 'Smart search not configured',
         fallback: true,
         technologies: [], materials: [], areas: [], certifications: [],
         keywords: query, explanation: 'Keyword search', confidence: 0,
@@ -143,10 +143,10 @@ Respond with ONLY valid JSON, no markdown:
       console.error('Claude API error:', response.status, errText);
       // Fall back to keyword search
       return new Response(JSON.stringify({
-        error: 'AI temporarily unavailable',
+        error: 'Service temporarily unavailable',
         fallback: true,
         technologies: [], materials: [], areas: [], certifications: [],
-        keywords: query, explanation: 'Keyword search (AI unavailable)',
+        keywords: query, explanation: 'Keyword search (smart search unavailable)',
         confidence: 0, originalQuery: query
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }

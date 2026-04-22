@@ -9,7 +9,7 @@ import {
 type SearchStatus = "idle" | "pending" | "analyzing" | "matching" | "ranking" | "completed" | "failed";
 
 const STEPS = [
-  { key: "analyzing", label: "Analyzing requirements with AI" },
+  { key: "analyzing", label: "Analyzing your requirements" },
   { key: "matching", label: "Searching suppliers" },
   { key: "ranking", label: "Ranking and generating explanations" },
 ] as const;
@@ -44,7 +44,7 @@ export function SearchProgress({ status }: SearchProgressProps) {
           <div className="flex items-center gap-2">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
             <DialogTitle className="text-sm font-semibold text-foreground">
-              AI is finding suppliers
+              Finding suppliers
             </DialogTitle>
             <span className="relative ml-auto flex h-2 w-2">
               <span className="absolute inline-flex h-full w-full rounded-full bg-primary/60 animate-ping" />

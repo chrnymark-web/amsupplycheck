@@ -13,11 +13,11 @@ messages = {
 
 I came across 3D Printing Industry's recent coverage of emerging platforms in the AM space, and I thought our story might resonate with your readership.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com), a free, AI-powered platform that helps engineers and designers compare prices and capabilities across 100+ verified 3D printing suppliers worldwide. We pull live quotes from 90+ vendors so users can instantly compare pricing, lead times, and technologies, from FDM to metal AM.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com), a free platform that helps engineers and designers compare prices and capabilities across 100+ verified 3D printing suppliers worldwide. We pull live quotes from 90+ vendors so users can instantly compare pricing, lead times, and technologies, from FDM to metal AM.
 
 We're a Danish startup (founded 2024) on a mission to democratize access to additive manufacturing. We believe finding the right supplier shouldn't require weeks of RFQs.
 
-Would 3D Printing Industry be interested in covering our platform? Perhaps as a startup spotlight or a piece on how AI is reshaping AM procurement?
+Would 3D Printing Industry be interested in covering our platform? Perhaps as a startup spotlight or a piece on how digital procurement is reshaping AM?
 
 Happy to provide a demo, data, or an interview.
 
@@ -30,7 +30,7 @@ amsupplycheck.com""",
 
 As the most established publication in additive manufacturing, covering the industry since 1992, TCT is naturally where serious AM professionals turn for insight. That's exactly why I'm reaching out.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We've built a free platform that uses AI to match engineers with the right AM supplier from a verified network of 100+ providers across 40+ countries. Users can upload STL files and get live price comparisons from 90+ vendors instantly.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We've built a free platform that matches engineers with the right AM supplier from a verified network of 100+ providers across 40+ countries. Users can upload STL files and get live price comparisons from 90+ vendors instantly.
 
 With your audience of industrial AM professionals, I believe a piece on how digital procurement tools are transforming how companies source 3D printing services could be a compelling read.
 
@@ -47,7 +47,7 @@ amsupplycheck.com""",
 
 With 8 million+ readers, All3DP is the go-to resource for anyone exploring 3D printing, from hobbyists to professionals. I'd love to get AMSupplyCheck in front of your audience.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We've built a free price comparison platform for 3D printing services. Think of it as a Skyscanner for 3D printing. Users upload their STL file or describe their project, and our AI matches them with the best supplier from 100+ verified providers, with live quotes from 90+ vendors.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We've built a free price comparison platform for 3D printing services. Think of it as a Skyscanner for 3D printing. Users upload their STL file or describe their project, and we match them with the best supplier from 100+ verified providers, with live quotes from 90+ vendors.
 
 Whether someone needs a single PLA prototype or a batch of metal parts, we make it easy to compare options instantly. No more emailing five different services and waiting days for quotes.
 
@@ -64,7 +64,7 @@ amsupplycheck.com""",
 
 I've been following your business-focused coverage of the AM industry, especially pieces on market strategy and business models in 3D printing. Our story fits right into that narrative.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a Danish startup that built a free, AI-powered supplier matching platform for additive manufacturing. With 100+ verified suppliers across 40+ countries and live pricing from 90+ vendors, we're addressing a real pain point: the fragmented, opaque process of sourcing 3D printing services.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a Danish startup that built a free supplier matching platform for additive manufacturing. With 100+ verified suppliers across 40+ countries and live pricing from 90+ vendors, we're addressing a real pain point: the fragmented, opaque process of sourcing 3D printing services.
 
 The AM market hit $16 billion in 2025, yet finding the right supplier still involves manual RFQs and guesswork. We're changing that.
 
@@ -81,7 +81,7 @@ amsupplycheck.com""",
 
 Your publication's focus on end-use production and functional parts speaks directly to the professionals we serve.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We've developed a free platform that helps engineers find the right AM supplier for production-grade work, matching project requirements with capabilities across 100+ verified providers using AI. From aerospace-certified metal AM to high-volume polymer production, our platform covers it all with live pricing from 90+ vendors.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We've developed a free platform that helps engineers find the right AM supplier for production-grade work, matching project requirements with capabilities across 100+ verified providers. From aerospace-certified metal AM to high-volume polymer production, our platform covers it all with live pricing from 90+ vendors.
 
 As AM moves further into production (aerospace, automotive, medical), efficient supplier selection becomes critical. That's the problem we solve.
 
@@ -115,11 +115,11 @@ amsupplycheck.com""",
 
 With over 1 million monthly visitors and coverage in five languages, 3Dnatives reaches the widest audience in 3D printing media. I'd love to share our story with your readers.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com), a free, AI-powered platform that helps users compare 100+ verified 3D printing suppliers worldwide. From hobbyists looking for the cheapest FDM service to engineers sourcing production-grade SLS or metal parts, we provide live quotes from 90+ vendors in one place.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com), a free platform that helps users compare 100+ verified 3D printing suppliers worldwide. From hobbyists looking for the cheapest FDM service to engineers sourcing production-grade SLS or metal parts, we provide live quotes from 90+ vendors in one place.
 
 As a fellow European company (we're based in Denmark), we share your vision of making 3D printing accessible to everyone, regardless of location or experience level.
 
-Would 3Dnatives be interested in featuring our platform, whether as a startup story, tool review, or piece on AI in AM?
+Would 3Dnatives be interested in featuring our platform, whether as a startup story, tool review, or piece on digital tools in AM?
 
 Happy to provide anything you need.
 
@@ -149,7 +149,7 @@ amsupplycheck.com""",
 
 I follow your coverage of the European AM ecosystem closely, and as a fellow European startup, I think our story would resonate with your audience.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a Danish platform that helps engineers and designers find the right 3D printing supplier from 100+ verified providers worldwide, using AI matching and live pricing from 90+ vendors. It's completely free.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a Danish platform that helps engineers and designers find the right 3D printing supplier from 100+ verified providers worldwide, with smart matching and live pricing from 90+ vendors. It's completely free.
 
 With your Additive Talks conference series and focus on industrial AM adoption, I believe a piece on how digital platforms are reducing friction in AM procurement could be a great fit.
 
@@ -183,7 +183,7 @@ amsupplycheck.com""",
 
 With daily updates covering the full breadth of 3D printing, 3Printr is a go-to source for staying current in the industry.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a Danish startup that built a free, AI-powered platform for comparing 3D printing suppliers. Users get live price quotes from 90+ vendors across 100+ verified providers, covering everything from consumer FDM to industrial metal AM.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a Danish startup that built a free platform for comparing 3D printing suppliers. Users get live price quotes from 90+ vendors across 100+ verified providers, covering everything from consumer FDM to industrial metal AM.
 
 Would 3Printr be interested in covering our launch as a news item or startup feature?
 
@@ -198,7 +198,7 @@ amsupplycheck.com""",
 
 Your 360-degree coverage of additive manufacturing, from technology deep-dives to industry interviews, makes AM Chronicle a valuable resource for the global AM community.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a Danish startup offering a free AI-powered platform that matches engineers with the right AM supplier from 100+ verified providers across 40+ countries. With live pricing from 90+ vendors, we're making supplier selection transparent and data-driven.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a Danish startup offering a free platform that matches engineers with the right AM supplier from 100+ verified providers across 40+ countries. With live pricing from 90+ vendors, we're making supplier selection transparent and data-driven.
 
 With India's growing AM ecosystem, I think your readers would find it valuable to learn about a platform that makes global AM services accessible from anywhere.
 
@@ -213,7 +213,7 @@ amsupplycheck.com""",
 
 As India's leading online 3D printing magazine, MANUFACTUR3D is where engineers, founders, and CXOs turn for AM insights. I'd love to introduce our platform to your audience.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We've built a free platform that helps users compare 100+ verified 3D printing suppliers worldwide using AI-powered matching and live pricing from 90+ vendors.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We've built a free platform that helps users compare 100+ verified 3D printing suppliers worldwide using smart matching and live pricing from 90+ vendors.
 
 For your readers in India, whether startups prototyping their first product or manufacturers looking for global sourcing options, our platform removes the guesswork from finding the right AM service.
 
@@ -230,7 +230,7 @@ amsupplycheck.com""",
 
 Your coverage spanning industry, academia, and public 3D printing projects gives a uniquely broad perspective on how AM impacts different sectors.
 
-I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a free platform that uses AI to match users with the best 3D printing supplier from 100+ verified providers worldwide. With live quotes from 90+ vendors, we serve everyone from university researchers to industrial manufacturers.
+I'm Christian Nymark Groth, CEO of AMSupplyCheck (amsupplycheck.com). We're a free platform that matches users with the best 3D printing supplier from 100+ verified providers worldwide. With live quotes from 90+ vendors, we serve everyone from university researchers to industrial manufacturers.
 
 Would 3DPrinting.com be interested in writing about our platform?
 
@@ -245,7 +245,7 @@ amsupplycheck.com""",
 
 als unabhaengiges deutschsprachiges AM-Magazin erreicht 3Druck.com genau die Community, die wir ansprechen moechten.
 
-Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir sind ein daenisches Startup, das eine kostenlose Plattform entwickelt hat, auf der Ingenieure und Designer 3D-Druck-Dienstleister weltweit vergleichen koennen. Mit KI-gestuetztem Matching und Live-Preisen von ueber 90 Anbietern machen wir die Suche nach dem richtigen Lieferanten transparent und einfach, von FDM ueber SLS bis hin zu Metall-AM.
+Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir sind ein daenisches Startup, das eine kostenlose Plattform entwickelt hat, auf der Ingenieure und Designer 3D-Druck-Dienstleister weltweit vergleichen koennen. Mit intelligentem Matching und Live-Preisen von ueber 90 Anbietern machen wir die Suche nach dem richtigen Lieferanten transparent und einfach, von FDM ueber SLS bis hin zu Metall-AM.
 
 Als skandinavisches Startup mit europaeischen Wurzeln wuerden wir uns freuen, wenn 3Druck.com ueber unsere Plattform berichten wuerde, sei es als Startup-Portrait, Tool-Vorstellung oder Branchennews.
 
@@ -260,7 +260,7 @@ amsupplycheck.com""",
 
 mit dem starken Fokus auf industrielle Anwendungen in der Automobilindustrie, Medizintechnik und Luftfahrt erreicht additive.industrie.de genau die Entscheider, die von unserer Plattform profitieren.
 
-Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir haben eine kostenlose KI-gestuetzte Plattform entwickelt, die Ingenieuren hilft, den passenden AM-Dienstleister aus ueber 100 verifizierten Anbietern in 40+ Laendern zu finden, mit Echtzeit-Preisvergleichen von ueber 90 Anbietern.
+Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir haben eine kostenlose Plattform entwickelt, die Ingenieuren hilft, den passenden AM-Dienstleister aus ueber 100 verifizierten Anbietern in 40+ Laendern zu finden, mit Echtzeit-Preisvergleichen von ueber 90 Anbietern.
 
 Fuer die produzierende Industrie, die zunehmend auf additive Fertigung setzt, loesen wir ein konkretes Problem: die aufwendige und intransparente Lieferantensuche.
 
@@ -277,7 +277,7 @@ amsupplycheck.com""",
 
 euer Magazin bietet einen fantastischen Mix aus News, Tests und Tipps fuer die deutschsprachige 3D-Druck-Community, vom Hobbyisten bis zum Profi.
 
-Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir sind ein daenisches Startup und haben eine kostenlose Plattform gebaut, auf der jeder, ob Maker oder Ingenieur, 3D-Druck-Services vergleichen kann. Einfach STL hochladen, und unsere KI findet den besten Anbieter aus ueber 100 verifizierten Services weltweit, mit Live-Preisen von 90+ Anbietern.
+Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir sind ein daenisches Startup und haben eine kostenlose Plattform gebaut, auf der jeder, ob Maker oder Ingenieur, 3D-Druck-Services vergleichen kann. Einfach STL hochladen, und wir finden den besten Anbieter aus ueber 100 verifizierten Services weltweit, mit Live-Preisen von 90+ Anbietern.
 
 So etwas wie ein Preisvergleichsportal fuer 3D-Druck, kostenlos und herstellerunabhaengig.
 
@@ -294,7 +294,7 @@ amsupplycheck.com""",
 
 als fuehrendes oesterreichisches Fachmedium fuer additive Fertigung sind Sie eine wichtige Stimme im DACH-Raum.
 
-Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir haben in Daenemark eine kostenlose Plattform entwickelt, die Ingenieuren und Unternehmen hilft, den richtigen AM-Dienstleister zu finden. Mit KI-gestuetztem Matching und Echtzeit-Preisen von ueber 90 Anbietern decken wir alle gaengigen Technologien ab, von Polymer bis Metall.
+Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir haben in Daenemark eine kostenlose Plattform entwickelt, die Ingenieuren und Unternehmen hilft, den richtigen AM-Dienstleister zu finden. Mit intelligentem Matching und Echtzeit-Preisen von ueber 90 Anbietern decken wir alle gaengigen Technologien ab, von Polymer bis Metall.
 
 Als europaeisches Startup moechten wir besonders im DACH-Raum bekannter werden. Waere ein Bericht ueber AMSupplyCheck fuer Ihre Leserschaft interessant?
 
@@ -309,7 +309,7 @@ amsupplycheck.com""",
 
 Ihr Portal ist die erste Anlaufstelle fuer Konstrukteure und Entwickler in Deutschland, und additive Fertigung wird ein immer wichtigerer Teil des Engineering-Werkzeugkastens.
 
-Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir haben eine kostenlose Plattform entwickelt, die Konstrukteuren hilft, den passenden 3D-Druck-Dienstleister schnell und datenbasiert zu finden. Statt tagelang Angebote einzuholen, bekommen Ihre Leser Echtzeit-Preise von ueber 90 Anbietern und KI-gestuetzte Empfehlungen aus einem Netzwerk von 100+ verifizierten Services.
+Mein Name ist Christian Nymark Groth, CEO von AMSupplyCheck (amsupplycheck.com). Wir haben eine kostenlose Plattform entwickelt, die Konstrukteuren hilft, den passenden 3D-Druck-Dienstleister schnell und datenbasiert zu finden. Statt tagelang Angebote einzuholen, bekommen Ihre Leser Echtzeit-Preise von ueber 90 Anbietern und datengestuetzte Empfehlungen aus einem Netzwerk von 100+ verifizierten Services.
 
 Gerade fuer Konstrukteure, die AM als Fertigungsoption evaluieren, kann das den Unterschied machen.
 

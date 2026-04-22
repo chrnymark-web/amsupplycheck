@@ -8,7 +8,7 @@ type SearchStatus = "idle" | "pending" | "analyzing" | "matching" | "ranking" | 
 const STATUS_MESSAGES: Record<SearchStatus, string> = {
   idle: "",
   pending: "Starting search...",
-  analyzing: "Analyzing your requirements with AI...",
+  analyzing: "Analyzing your requirements...",
   matching: "Searching through suppliers...",
   ranking: "Ranking and generating explanations...",
   completed: "Done!",

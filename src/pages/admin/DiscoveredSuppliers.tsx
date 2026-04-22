@@ -158,7 +158,7 @@ export default function DiscoveredSuppliers() {
             <div>
               <h1 className="text-2xl font-bold">Supplier Discovery Dashboard</h1>
               <p className="text-muted-foreground">
-                AI-powered discovery and management of 3D printing suppliers
+                Automated discovery and management of 3D printing suppliers
               </p>
             </div>
           </div>

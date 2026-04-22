@@ -378,7 +378,7 @@ function IntentPageContent({ config }: { config: IntentPageConfig }) {
             Ready to Get Started?
           </h2>
           <p className="text-muted-foreground mb-6">
-            Describe your project and let our AI match you with the best suppliers for your specific requirements.
+            Describe your project and we'll match you with the best suppliers for your specific requirements.
           </p>
           <Button
             size="lg"

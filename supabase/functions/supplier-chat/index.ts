@@ -7,7 +7,7 @@ const corsHeaders = {
 };
 
 // System prompt for the chatbot
-const SYSTEM_PROMPT = `You are a friendly and expert AI assistant for AMSupplyCheck, a platform that helps users find 3D printing suppliers.
+const SYSTEM_PROMPT = `You are a friendly and expert assistant for AMSupplyCheck, a platform that helps users find 3D printing suppliers.
 
 YOUR ROLE:
 - Help users find the right supplier for their needs
@@ -278,7 +278,7 @@ serve(async (req) => {
     
     if (!LOVABLE_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'AI service not configured' }),
+        JSON.stringify({ error: 'Chat service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -346,13 +346,13 @@ serve(async (req) => {
       }
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'AI credits exhausted. Please try again later.' }),
+          JSON.stringify({ error: 'Service quota exhausted. Please try again later.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       return new Response(
-        JSON.stringify({ error: 'AI service error' }),
+        JSON.stringify({ error: 'Chat service error' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }

@@ -219,8 +219,8 @@ const KeywordSearch = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>AI-Powered Search | AMSupplyCheck</title>
-        <meta name="description" content="Search for 3D printing suppliers using natural language. Our AI understands your intent and finds the best matches." />
+        <title>Smart Search | AMSupplyCheck</title>
+        <meta name="description" content="Search for 3D printing suppliers using natural language. We understand your intent and find the best matches." />
         <link rel="canonical" href="https://amsupplycheck.com/keywordsearch" />
       </Helmet>
       {(loading || isAISearching) && (
@@ -250,10 +250,10 @@ const KeywordSearch = () => {
             <div>
               <h1 className="text-2xl lg:text-3xl font-bold text-foreground mb-2 flex items-center gap-2">
                 <Sparkles className={`h-6 w-6 lg:h-8 lg:w-8 text-primary ${isAISearching ? 'animate-sparkle-pulse' : ''}`} />
-                AI-Powered Search
+                Smart Search
               </h1>
               <p className="text-sm lg:text-base text-muted-foreground">
-                Search using natural language - our AI understands your intent
+                Search using natural language - we understand your intent
               </p>
             </div>
             
@@ -284,7 +284,7 @@ const KeywordSearch = () => {
           {isAISearching && (
             <div className="flex items-center gap-2 text-muted-foreground mb-4">
               <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Analyzing your query with AI...</span>
+              <span>Analyzing your query...</span>
             </div>
           )}
 

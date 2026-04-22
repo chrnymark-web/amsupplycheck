@@ -49,7 +49,7 @@ export const INTENT_PAGES: Record<string, IntentPageConfig> = {
       },
       {
         question: 'Can I compare quotes from multiple suppliers?',
-        answer: 'Yes! Use our AI Project Matcher to describe your project and get matched with the most suitable suppliers. You can then request quotes from multiple suppliers simultaneously to compare pricing and lead times.',
+        answer: 'Yes! Use our Project Matcher to describe your project and get matched with the most suitable suppliers. You can then request quotes from multiple suppliers simultaneously to compare pricing and lead times.',
       },
     ],
     supplierFilter: 'instant_quote',

@@ -72,7 +72,7 @@ export default function LocationExtractionProgress({
       case 'scraping':
         return 'Scraping website...';
       case 'extracting':
-        return 'Extracting location data with AI...';
+        return 'Extracting location data...';
       case 'success':
         return `✓ Successfully extracted: ${update.extracted?.city || ''}, ${update.extracted?.country || ''}`;
       case 'failed':
@@ -114,7 +114,7 @@ export default function LocationExtractionProgress({
         <DialogHeader>
           <DialogTitle>Location Data Extraction</DialogTitle>
           <DialogDescription>
-            Extracting location data from supplier websites using AI
+            Extracting location data from supplier websites
           </DialogDescription>
         </DialogHeader>
 

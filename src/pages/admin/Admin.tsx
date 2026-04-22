@@ -154,8 +154,8 @@ export default function Admin() {
               <StatCard icon={Globe} label="Countries" value={stats.countries} />
               <StatCard icon={Zap} label="Technologies" value={stats.technologies} />
               <StatCard icon={Star} label="Materials" value={stats.materials} />
-              <StatCard icon={Search} label="Total Searches" value={stats.searches} sub="134 via AI search" />
-              <StatCard icon={BarChart3} label="AI Matches" value={stats.aiMatches} sub="Avg score: 26.5" />
+              <StatCard icon={Search} label="Total Searches" value={stats.searches} sub="134 via smart search" />
+              <StatCard icon={BarChart3} label="Project Matches" value={stats.aiMatches} sub="Avg score: 26.5" />
               <StatCard icon={ArrowRight} label="Applications" value={stats.applications} sub="Real applicants" />
               <StatCard icon={Eye} label="Discovery Runs" value={stats.discoveryRuns} sub={`${stats.newFromDiscovery} new found`} />
             </div>
@@ -253,7 +253,7 @@ export default function Admin() {
                       <span className="font-semibold text-foreground">148</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-muted-foreground">AI-powered searches</span>
+                      <span className="text-muted-foreground">Smart searches</span>
                       <span className="font-semibold text-foreground">134 (91%)</span>
                     </div>
                     <div className="flex justify-between">
@@ -270,7 +270,7 @@ export default function Admin() {
 
               <Card className="bg-card border-border">
                 <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">AI Project Matching</h3>
+                  <h3 className="text-lg font-semibold text-foreground mb-4">Project Matching</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between">
                       <span className="text-muted-foreground">Projects matched</span>

@@ -103,7 +103,7 @@ const AIAnalyticsDashboard = () => {
     const date = new Date().toLocaleDateString();
     
     // Header
-    rows.push('AI Analytics Report');
+    rows.push('Search Analytics Report');
     rows.push(`Generated: ${date}`);
     rows.push('');
     
@@ -113,7 +113,7 @@ const AIAnalyticsDashboard = () => {
     rows.push(`Average Results,${searchAnalytics?.avgResultsCount || 0}`);
     rows.push(`Search Success Rate,${searchAnalytics?.successRate || 0}%`);
     rows.push(`Zero Result Rate,${searchAnalytics?.zeroResultRate || 0}%`);
-    rows.push(`Total AI Matches,${matchAnalytics?.totalMatches || 0}`);
+    rows.push(`Total Project Matches,${matchAnalytics?.totalMatches || 0}`);
     rows.push(`Average Match Score,${matchAnalytics?.avgMatchScore || 0}`);
     rows.push(`Selection Rate,${matchAnalytics?.selectionRate || 0}%`);
     rows.push(`Chat Sessions,${chatAnalytics?.totalSessions || 0}`);
@@ -730,10 +730,10 @@ const AIAnalyticsDashboard = () => {
           <div>
             <h1 className="text-3xl font-bold text-foreground flex items-center gap-3">
               <Brain className="h-8 w-8 text-primary" />
-              AI Analytics Dashboard
+              Search Analytics
             </h1>
             <p className="text-muted-foreground mt-1">
-              Insights from AI-powered search, matching, and chat interactions
+              Insights from smart search, matching, and chat interactions
             </p>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
@@ -864,7 +864,7 @@ const AIAnalyticsDashboard = () => {
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium flex items-center gap-2">
                 <Target className="h-4 w-4 text-green-500" />
-                AI Matches
+                Project Matches
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1040,7 +1040,7 @@ const AIAnalyticsDashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Search Type Distribution</CardTitle>
-                  <CardDescription>Keyword vs AI vs Project Match</CardDescription>
+                  <CardDescription>Keyword vs Smart vs Project Match</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
@@ -1109,7 +1109,7 @@ const AIAnalyticsDashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Daily Match Activity</CardTitle>
-                  <CardDescription>AI project matches per day</CardDescription>
+                  <CardDescription>Project matches per day</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
@@ -1134,7 +1134,7 @@ const AIAnalyticsDashboard = () => {
               <Card>
                 <CardHeader>
                   <CardTitle>Average Match Score Trend</CardTitle>
-                  <CardDescription>AI match quality over time</CardDescription>
+                  <CardDescription>Match quality over time</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
@@ -1213,8 +1213,8 @@ const AIAnalyticsDashboard = () => {
 
               <Card>
                 <CardHeader>
-                  <CardTitle>AI Tool Usage</CardTitle>
-                  <CardDescription>Which AI capabilities are used most</CardDescription>
+                  <CardTitle>Tool Usage</CardTitle>
+                  <CardDescription>Which capabilities are used most</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={300}>
