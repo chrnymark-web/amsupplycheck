@@ -300,15 +300,16 @@ function toQuotes(
   });
 }
 
-// Prettify vendor IDs like "bone3dgroup" → "Bone 3D Group"
+// Prettify vendor IDs like "bone3dgroup" → "Bone 3D Group", "3dcreative" → "3D Creative"
 function formatVendorName(vendorId: string): string {
   return vendorId
     .replace(/([a-z])([A-Z])/g, '$1 $2')
-    .replace(/(\d+)/g, ' $1 ')
+    .replace(/(\d+[dD])([a-z])/g, '$1 $2')
+    .replace(/([a-zA-Z])(\d)/g, '$1 $2')
     .replace(/\s+/g, ' ')
     .trim()
     .split(' ')
-    .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+    .map((w) => (/^\d+[dD]$/.test(w) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)))
     .join(' ');
 }
 
