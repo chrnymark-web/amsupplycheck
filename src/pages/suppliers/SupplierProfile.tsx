@@ -282,13 +282,13 @@ const SupplierProfile: React.FC = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                       {supplier.technologies.map(tech => (
                         <Link key={tech.id} to={`/suppliers?tech=${tech.slug}`}>
-                          <Badge variant="secondary" className="text-sm py-1.5 px-3 hover:bg-primary/20 transition-colors cursor-pointer">
-                            {tech.name}
-                            {tech.category && <span className="ml-1.5 text-xs text-muted-foreground">({tech.category})</span>}
-                          </Badge>
+                          <div className="flex items-center gap-2 p-2 rounded-md border border-border hover:border-primary/40 transition-colors cursor-pointer">
+                            <span className="text-sm text-foreground">{tech.name}</span>
+                            {tech.category && <span className="text-xs text-muted-foreground ml-auto">{tech.category}</span>}
+                          </div>
                         </Link>
                       ))}
                     </div>
