@@ -268,16 +268,11 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
                 </div>
               )}
 
-              {matchLoading && (
-                <div className="rounded-xl border border-border/60 bg-card/60 p-3">
-                  <SearchProgress status={status as any} />
-                </div>
-              )}
+              {matchLoading && <SearchProgress status={status as any} />}
 
-              {mode === 'match' && (
+              {mode === 'match' && !matchLoading && (
                 <Button
                   onClick={handleFindSuppliers}
-                  disabled={matchLoading}
                   size="lg"
                   className={cn(
                     'sticky bottom-0 h-12 text-sm font-semibold',
@@ -285,17 +280,8 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
                     'shadow-[0_8px_30px_hsl(87,20%,45%,0.25)]'
                   )}
                 >
-                  {matchLoading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                      Finding suppliers…
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="h-4 w-4 mr-2" />
-                      Find suppliers for this part
-                    </>
-                  )}
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Find suppliers for this part
                 </Button>
               )}
             </aside>

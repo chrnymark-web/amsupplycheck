@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Upload, ArrowUpDown, ExternalLink, AlertCircle, AlertTriangle, Clock, Package, Signal, BarChart3 } from 'lucide-react';
+import { Upload, ArrowUpDown, ExternalLink, AlertCircle, AlertTriangle, Clock, Package, Signal, BarChart3, ChevronDown } from 'lucide-react';
 import { useLiveQuotes } from '@/hooks/use-live-quotes';
 import type { LiveQuote, EstimatedPrice, Currency, QuoteGeometry } from '@/lib/api/types';
 import { parseSTL } from '@/lib/stlParser';
@@ -42,6 +42,17 @@ function LiveQuoteRow({ quote, isLowest }: { quote: LiveQuote; isLowest: boolean
   const sanity = quote.sanityResult;
   const isSuspect = sanity && sanity.flag !== 'ok';
   const isHighConfidence = isSuspect && sanity.confidence === 'high';
+  const [expanded, setExpanded] = useState(false);
+  const detailsId = `quote-details-${quote.supplierId}`;
+  const alternatives = quote.alternativeQuotes ?? [];
+
+  const toggle = () => setExpanded((v) => !v);
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      toggle();
+    }
+  };
 
   return (
     <div
@@ -53,7 +64,15 @@ function LiveQuoteRow({ quote, isLowest }: { quote: LiveQuote; isLowest: boolean
         !isSuspect && !isLowest && 'border-border bg-card hover:border-border/80 hover:shadow-sm'
       )}
     >
-      <div className="flex items-center gap-3 p-3">
+      <div
+        role="button"
+        tabIndex={0}
+        aria-expanded={expanded}
+        aria-controls={detailsId}
+        onClick={toggle}
+        onKeyDown={handleKey}
+        className="flex items-center gap-3 p-3 cursor-pointer select-none focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
+      >
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
             <Signal className="h-3 w-3 text-green-500 shrink-0" />
@@ -100,23 +119,96 @@ function LiveQuoteRow({ quote, isLowest }: { quote: LiveQuote; isLowest: boolean
           )}
         </div>
 
-        {quote.quoteUrl && (
-          <a
-            href={quote.quoteUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="shrink-0 text-muted-foreground hover:text-primary transition-colors"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <ExternalLink className="h-3.5 w-3.5" />
-          </a>
-        )}
+        <ChevronDown
+          className={cn(
+            'h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200',
+            expanded && 'rotate-180'
+          )}
+          aria-hidden
+        />
       </div>
 
       {isHighConfidence && sanity.userMessage && (
         <div className="flex items-center gap-1.5 px-3 pb-2 text-[10px] text-amber-700">
           <AlertTriangle className="h-3 w-3 text-amber-500 shrink-0" />
           {sanity.userMessage}
+        </div>
+      )}
+
+      {expanded && (
+        <div
+          id={detailsId}
+          className="border-t border-border/60 px-3 py-3 space-y-2 bg-background/40 rounded-b-lg"
+        >
+          {quote.material && (
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">
+                <span className="text-foreground font-medium">{quote.material}</span>
+                <span className="ml-2 text-[10px] uppercase tracking-wider">selected</span>
+              </span>
+              <span className="text-foreground font-semibold">
+                {formatPrice(quote.unitPrice, quote.currency)} <span className="text-muted-foreground font-normal">/ unit</span>
+              </span>
+            </div>
+          )}
+
+          {alternatives.length > 0 ? (
+            <div className="space-y-1.5">
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground">Other options</p>
+              {alternatives.map((alt, i) => (
+                <div
+                  key={`${alt.material}-${i}`}
+                  className="flex items-center justify-between gap-2 text-xs rounded-md border border-border/50 px-2 py-1.5"
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    <span className="text-foreground font-medium truncate">
+                      {alt.material || '—'}
+                    </span>
+                    {alt.label && (
+                      <Badge variant="outline" className="text-[9px] px-1.5 py-0 shrink-0">
+                        {alt.label}
+                      </Badge>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 text-muted-foreground">
+                    {alt.estimatedLeadTimeDays !== null && (
+                      <span className="inline-flex items-center gap-0.5">
+                        <Clock className="h-3 w-3" />
+                        {alt.estimatedLeadTimeDays}d
+                      </span>
+                    )}
+                    <span className="text-foreground font-semibold">
+                      {formatPrice(alt.unitPrice, quote.currency)}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[11px] text-muted-foreground italic">
+              No alternative materials reported for this vendor.
+            </p>
+          )}
+
+          {quote.quoteUrl && (
+            <a
+              href={quote.quoteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className={cn(
+                'mt-1 inline-flex w-full items-center justify-center gap-1.5 rounded-md',
+                'bg-primary/10 text-primary hover:bg-primary/15',
+                'border border-primary/20',
+                'px-3 py-2 text-xs font-medium',
+                'transition-colors duration-150',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40'
+              )}
+            >
+              Open {quote.supplierName} on Craftcloud
+              <ExternalLink className="h-3.5 w-3.5" />
+            </a>
+          )}
         </div>
       )}
     </div>
