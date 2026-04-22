@@ -82,6 +82,21 @@ export function ConfiguratorPanel({
       </div>
 
       <div className="grid grid-cols-2 gap-3">
+        <ConfigField label="Material">
+          <Select value={material} onValueChange={onMaterialChange}>
+            <SelectTrigger className="h-9 text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {materials.map((m) => (
+                <SelectItem key={m} value={m} className="text-sm">
+                  {m}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </ConfigField>
+
         <ConfigField label="Technology">
           <Select
             value={technology}
@@ -98,21 +113,6 @@ export function ConfiguratorPanel({
               {Object.keys(TECH_MATERIALS).map((t) => (
                 <SelectItem key={t} value={t} className="text-sm">
                   {t}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </ConfigField>
-
-        <ConfigField label="Material">
-          <Select value={material} onValueChange={onMaterialChange}>
-            <SelectTrigger className="h-9 text-sm">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {materials.map((m) => (
-                <SelectItem key={m} value={m} className="text-sm">
-                  {m}
                 </SelectItem>
               ))}
             </SelectContent>

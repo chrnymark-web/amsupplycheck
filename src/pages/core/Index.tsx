@@ -1009,7 +1009,7 @@ const Index = () => {
                           {animatedSupplierCount} Verified Suppliers
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent side="bottom">
                         <p>Active and verified 3D printing suppliers in our database</p>
                       </TooltipContent>
                     </Tooltip>
@@ -1021,7 +1021,7 @@ const Index = () => {
                           {animatedCountryCount} Countries
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent side="bottom">
                         <p>Global reach spanning multiple countries worldwide</p>
                       </TooltipContent>
                     </Tooltip>
@@ -1033,7 +1033,7 @@ const Index = () => {
                           {animatedTechnologyCount} Technologies
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent side="bottom">
                         <p>Different 3D printing technologies available</p>
                       </TooltipContent>
                     </Tooltip>
@@ -1045,7 +1045,7 @@ const Index = () => {
                           {animatedMaterialCount} Materials
                         </div>
                       </TooltipTrigger>
-                      <TooltipContent>
+                      <TooltipContent side="bottom">
                         <p>Wide variety of materials offered by our suppliers</p>
                       </TooltipContent>
                     </Tooltip>
