@@ -71,6 +71,7 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
   const [material, setMaterial] = useState('');
   const [color, setColor] = useState('natural');
   const [finish, setFinish] = useState('standard');
+  const [area, setArea] = useState('');
   const [quantity, setQuantity] = useState(1);
 
   // Viewer state
@@ -128,8 +129,8 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
 
   const handleFindSuppliers = useCallback(async () => {
     if (!file) return;
-    await triggerSTLMatch({ file, technology, material, quantity });
-  }, [file, technology, material, quantity, triggerSTLMatch]);
+    await triggerSTLMatch({ file, technology, material, quantity, area });
+  }, [file, technology, material, quantity, area, triggerSTLMatch]);
 
   const pageTitle = mode === 'match' ? 'Find Suppliers — Instant STL Quote' : 'Live Price Comparison — Instant STL Quote';
   const pageDescription = mode === 'match'
@@ -146,6 +147,7 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
         technology={technology}
         material={material}
         quantity={quantity}
+        area={area}
         isRanking={isRanking}
         onNew={handleRemoveFile}
       />
@@ -259,17 +261,20 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
                 material={material}
                 color={color}
                 finish={finish}
+                area={area}
                 quantity={quantity}
                 onTechnologyChange={setTechnology}
                 onMaterialChange={setMaterial}
                 onColorChange={setColor}
                 onFinishChange={setFinish}
+                onAreaChange={setArea}
                 onQuantityChange={setQuantity}
               />
 
               <LivePriceComparison
                 file={file}
                 quantity={quantity}
+                area={area}
                 hideUpload
                 currency="EUR"
                 countryCode="DK"
@@ -422,6 +427,7 @@ function MatchResultView({
   technology,
   material,
   quantity,
+  area,
   isRanking = false,
   onNew,
 }: {
@@ -430,6 +436,7 @@ function MatchResultView({
   technology: string;
   material: string;
   quantity: number;
+  area: string;
   isRanking?: boolean;
   onNew: () => void;
 }) {
@@ -569,8 +576,8 @@ function MatchResultView({
       </Helmet>
       <div className="min-h-screen bg-background">
         <header className="border-b border-border/60 bg-card/50 backdrop-blur-sm">
-          <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4 min-w-0">
+          <div className="container mx-auto px-4 py-3 flex items-center gap-4">
+            <div className="flex-1 flex items-center min-w-0">
               <a
                 href="/"
                 onClick={(e) => { e.preventDefault(); navigate('/'); }}
@@ -579,22 +586,24 @@ function MatchResultView({
               >
                 <img src={logo} alt="AMSupplyCheck" className="h-24 w-auto" />
               </a>
-              <div className="flex items-center gap-3 min-w-0">
-                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold truncate">
-                    {safeMatches.length} suppliers matched
-                  </p>
-                  <p className="text-[11px] text-muted-foreground truncate">
-                    {[technology || 'Any technology', material || 'Any material', `${quantity} pcs`].join(' · ')}
-                  </p>
-                </div>
+            </div>
+            <div className="flex items-center gap-3 min-w-0 shrink-0">
+              <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+              <div className="min-w-0">
+                <p className="text-sm font-semibold truncate">
+                  {safeMatches.length} suppliers matched
+                </p>
+                <p className="text-[11px] text-muted-foreground truncate">
+                  {[technology || 'Any technology', material || 'Any material', `${quantity} pcs`].join(' · ')}
+                </p>
               </div>
             </div>
-            <Button variant="outline" size="sm" onClick={onNew}>
-              <Upload className="h-3.5 w-3.5 mr-1.5" />
-              New upload
-            </Button>
+            <div className="flex-1 flex justify-end">
+              <Button variant="outline" size="sm" onClick={onNew}>
+                <Upload className="h-3.5 w-3.5 mr-1.5" />
+                New upload
+              </Button>
+            </div>
           </div>
         </header>
 
