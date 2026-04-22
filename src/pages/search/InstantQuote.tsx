@@ -34,6 +34,7 @@ import {
 } from '@/lib/supplier-price-matcher';
 import { supabase } from '@/integrations/supabase/client';
 import ErrorBoundary from '@/components/ErrorBoundary';
+import logo from '@/assets/amsupplycheck-logo-white.png';
 
 const STLViewer = lazy(() => import('@/components/stl-viewer/STLViewer'));
 
@@ -432,6 +433,7 @@ function MatchResultView({
   isRanking?: boolean;
   onNew: () => void;
 }) {
+  const navigate = useNavigate();
   const { getQuotes, liveQuotes, isLoading: liveLoading } = useLiveQuotes({
     currency: 'EUR',
     countryCode: 'DK',
@@ -568,15 +570,25 @@ function MatchResultView({
       <div className="min-h-screen bg-background">
         <header className="border-b border-border/60 bg-card/50 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-3 min-w-0">
-              <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
-              <div className="min-w-0">
-                <p className="text-sm font-semibold truncate">
-                  {safeMatches.length} suppliers matched
-                </p>
-                <p className="text-[11px] text-muted-foreground truncate">
-                  {[technology || 'Any technology', material || 'Any material', `${quantity} pcs`].join(' · ')}
-                </p>
+            <div className="flex items-center gap-4 min-w-0">
+              <a
+                href="/"
+                onClick={(e) => { e.preventDefault(); navigate('/'); }}
+                className="flex items-center cursor-pointer flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
+                aria-label="Go to home page"
+              >
+                <img src={logo} alt="AMSupplyCheck" className="h-8 w-auto" />
+              </a>
+              <div className="flex items-center gap-3 min-w-0">
+                <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate">
+                    {safeMatches.length} suppliers matched
+                  </p>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    {[technology || 'Any technology', material || 'Any material', `${quantity} pcs`].join(' · ')}
+                  </p>
+                </div>
               </div>
             </div>
             <Button variant="outline" size="sm" onClick={onNew}>
