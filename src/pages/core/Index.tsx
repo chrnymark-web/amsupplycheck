@@ -37,6 +37,7 @@ import { useKnowledgeData } from '@/hooks/use-knowledge-data';
 import { supabase } from '@/integrations/supabase/client';
 import { trackSearch, trackCTAClick } from '@/lib/analytics';
 import heroImageUrl from '@/assets/hero-background.avif';
+import heroPrintingImageUrl from '@/assets/hero-3d-printing.jpg';
 
 // Map is now directly imported above to avoid WebGL rendering issues with lazy loading
 
@@ -910,7 +911,14 @@ const Index = () => {
       
       {/* Hero Section */}
       <section id="hero" className="relative py-6 lg:py-8 overflow-visible bg-black z-20">
-        <div className="absolute inset-0 bg-black" />
+        <div className="absolute inset-0 overflow-hidden">
+          <img
+            src={heroPrintingImageUrl}
+            alt="3D printing production facility"
+            className="w-full h-full object-cover opacity-25"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/60 to-black" />
+        </div>
         
         <div 
           ref={heroRef}
@@ -919,11 +927,17 @@ const Index = () => {
           }`}
         >
           <div className="max-w-4xl mx-auto">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-3 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
+              <Sparkles className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-semibold tracking-wide text-primary uppercase">
+                Additive Manufacturing &middot; 3D Printing
+              </span>
+            </div>
             <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-1">
               Find suppliers by capability, not by name
             </h1>
             <p className="text-lg md:text-2xl font-semibold bg-gradient-primary bg-clip-text text-transparent mb-4">
-              Search technologies, materials &amp; expertise
+              Search 3D printing technologies, materials &amp; expertise
             </p>
 
             {/* Price Calculator */}
@@ -1067,9 +1081,9 @@ const Index = () => {
           className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8"
         >
           {/* Map Container with Overlay */}
-          <div className="relative bg-gradient-card rounded-xl overflow-hidden shadow-card h-[600px] lg:h-[700px]">
+          <div className="relative bg-gradient-card rounded-xl overflow-hidden shadow-card h-[480px] sm:h-[560px] lg:h-[700px]">
             {/* Title overlay inside map */}
-            <div className="absolute top-4 right-4 z-10 bg-background/80 backdrop-blur-sm rounded-lg px-4 py-3 max-w-xs text-left">
+            <div className="hidden lg:block absolute top-4 right-4 z-10 bg-background/80 backdrop-blur-sm rounded-lg px-4 py-3 max-w-xs text-left">
               <h2 className="text-lg font-bold text-foreground mb-1">Global Supplier Map</h2>
               <p className="text-xs text-muted-foreground">
                 Explore our worldwide network of 3D printing suppliers.
