@@ -129,11 +129,13 @@ export function fuzzyMatch(a: string, b: string): boolean {
   return la.includes(lb) || lb.includes(la);
 }
 
-/** Score and rank suppliers against extracted requirements */
+/** Score and rank suppliers against extracted requirements.
+ *  `maxResults` is optional — omit (or pass `undefined`) to return every
+ *  supplier with a positive score. */
 export function scoreSuppliers(
   suppliers: EnrichedSupplier[],
   requirements: ExtractedRequirements,
-  maxResults = 8
+  maxResults?: number
 ): MatchResult[] {
   const matches: MatchResult[] = [];
 
@@ -209,16 +211,22 @@ export function scoreSuppliers(
       }
     }
 
-    // Weighted total
+    // Weighted total + small trust bonus so verified/premium suppliers win
+    // ties without overpowering the price sort applied client-side.
+    const trustBonus = (supplier.verified ? 0.05 : 0) + (supplier.premium ? 0.05 : 0);
     const totalScore =
       techScore * WEIGHTS.technology +
       materialScore * WEIGHTS.material +
       locationScore * WEIGHTS.location +
       certificationScore * WEIGHTS.certification +
-      capacityScore * WEIGHTS.capacity;
+      capacityScore * WEIGHTS.capacity +
+      trustBonus;
 
-    // Include suppliers with meaningful matches (must match both tech AND material)
-    if (totalScore > 0.35 && matchedTechs.length > 0 && matchedMats.length > 0) {
+    // Include every supplier with a positive score. When the user specifies a
+    // tech/material, the pre-filter in stl-supplier-match.ts already narrows
+    // the pool; a strict overlap check here just drops otherwise-valid
+    // suppliers whenever the user picks "any".
+    if (totalScore > 0) {
       matches.push({
         supplier: {
           supplier_id: supplier.supplier_id,
@@ -250,5 +258,5 @@ export function scoreSuppliers(
   }
 
   matches.sort((a, b) => b.score - a.score);
-  return matches.slice(0, maxResults);
+  return maxResults ? matches.slice(0, maxResults) : matches;
 }

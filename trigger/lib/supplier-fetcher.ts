@@ -16,11 +16,13 @@ function getSupabaseClient() {
 export async function fetchSuppliers(): Promise<EnrichedSupplier[]> {
   const supabase = getSupabaseClient();
 
-  // Fetch verified suppliers
+  // Fetch all suppliers (verified & unverified). The `verified`/`premium`
+  // flags are still used downstream for a small ranking bonus in
+  // scoreSuppliers, so unverified suppliers appear but don't outrank verified
+  // ones at equal prices.
   const { data: suppliers, error: supError } = await supabase
     .from("suppliers")
     .select("id, supplier_id, name, website, description, location_city, location_country, region, verified, premium, logo_url, country_id")
-    .eq("verified", true)
     .order("name");
 
   if (supError) throw new Error(`Failed to fetch suppliers: ${supError.message}`);

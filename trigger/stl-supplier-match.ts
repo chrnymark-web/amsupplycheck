@@ -211,8 +211,10 @@ Based on the part size, complexity, and material, what should we look for in a s
         projectSummary: extractedReqs.projectSummary || summaryFallback,
       };
 
-      // Score using the pre-filtered suppliers
-      const matches = scoreSuppliers(suppliersToScore, requirements, 8);
+      // Score every pre-filtered supplier — return the full ranked list.
+      // Cheapest-first ordering happens client-side once live / estimated
+      // prices resolve (see supplier-price-matcher.ts).
+      const matches = scoreSuppliers(suppliersToScore, requirements);
       console.log(`[stl-match] Found ${matches.length} matches`);
 
       // Step 3: Ranking — publish matches now so the frontend can render cards immediately
@@ -223,8 +225,13 @@ Based on the part size, complexity, and material, what should we look for in a s
         total_suppliers_analyzed: suppliersToScore.length,
       });
 
-      // Generate explanations
-      const explanations = await generateExplanations(matches, requirements).catch((e) => {
+      // Generate explanations for the top 20 only. The Claude call shares a
+      // single 1024-token budget across all matches; sending 250+ would
+      // truncate to a few tokens each and burn API cost. Cards without an
+      // explanation still render cleanly (see InstantQuote SupplierResultCard).
+      const EXPLANATION_CAP = 20;
+      const matchesForExplanation = matches.slice(0, EXPLANATION_CAP);
+      const explanations = await generateExplanations(matchesForExplanation, requirements).catch((e) => {
         console.error("[stl-match] Failed to generate explanations:", e);
         return [] as string[];
       });

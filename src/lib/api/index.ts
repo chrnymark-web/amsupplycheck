@@ -119,9 +119,18 @@ export function getEstimatedPrice(input: EstimatePriceInput): EstimatedPrice {
     ? [normalizeTechKey(selectedTechnology)].filter(Boolean)
     : supplierTechnologies.map(normalizeTechKey).filter(Boolean);
 
+  // When the user picks "Any technology", quote the supplier's CHEAPEST tech —
+  // that's the "best offer" a generalist shop would actually make for a basic
+  // part. Averaging across techs inflates prices for any shop that also
+  // happens to offer expensive metal processes.
   const techIndex = techKeys.length > 0
-    ? techKeys.reduce((sum, k) => sum + (technologyPriceIndex[k] ?? 2.0), 0) / techKeys.length
+    ? Math.min(...techKeys.map((k) => technologyPriceIndex[k] ?? 2.0))
     : 2.0;
+  const cheapestTechKey = !selectedTechnology && techKeys.length > 0
+    ? techKeys.reduce((best, k) =>
+        (technologyPriceIndex[k] ?? 2.0) < (technologyPriceIndex[best] ?? 2.0) ? k : best
+      )
+    : null;
 
   const matIndex = selectedMaterial && materialPriceIndex[selectedMaterial]
     ? materialPriceIndex[selectedMaterial]
@@ -146,8 +155,8 @@ export function getEstimatedPrice(input: EstimatePriceInput): EstimatedPrice {
 
   const basedOn = selectedTechnology
     ? `${selectedTechnology}${selectedMaterial ? ' · ' + selectedMaterial : ''}${geometry ? ' · geometry' : ''}`
-    : techKeys.length > 0
-      ? `${techKeys.slice(0, 3).join(', ')} technologies`
+    : cheapestTechKey
+      ? `${cheapestTechKey} (cheapest of ${techKeys.length} tech${techKeys.length === 1 ? '' : 's'})${geometry ? ' · geometry' : ''}`
       : 'Market data';
 
   return {
