@@ -927,14 +927,8 @@ const Index = () => {
           }`}
         >
           <div className="max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-1.5 px-3 py-1 mb-3 rounded-full bg-primary/10 border border-primary/20 backdrop-blur-sm">
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              <span className="text-xs font-semibold tracking-wide text-primary uppercase">
-                Additive Manufacturing &middot; 3D Printing
-              </span>
-            </div>
             <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-1">
-              Find suppliers by capability, not by name
+              Find AM suppliers by capability, not by name
             </h1>
             <p className="text-lg md:text-2xl font-semibold bg-gradient-primary bg-clip-text text-transparent mb-4">
               Search 3D printing technologies, materials &amp; expertise
