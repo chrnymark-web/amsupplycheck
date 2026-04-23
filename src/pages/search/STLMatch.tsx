@@ -10,11 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Progress } from "@/components/ui/progress";
 import { SearchProgress } from "@/components/search/SearchProgress";
 import { useTriggerSTLMatch } from "@/hooks/use-trigger-stl-match";
-import { LivePriceComparison } from "@/components/ui/live-price-comparison";
-import { getEstimatedPrice } from "@/lib/api";
 import SupplierLogo from "@/components/ui/supplier-logo";
 import type { MatchResult } from "@/hooks/use-supplier-matching";
-import type { EstimatedPrice } from "@/lib/api/types";
 
 const TECH_MATERIALS: Record<string, string[]> = {
   "FDM/FFF": ["PLA", "ABS", "PETG", "Nylon", "TPU", "ASA", "Polycarbonate", "PEEK"],
@@ -327,20 +324,6 @@ export default function STLMatch() {
                   <Button variant="outline" onClick={handleReset}>New search</Button>
                 </div>
               </div>
-
-              {/* Live Price Comparison */}
-              <LivePriceComparison
-                estimatedPrices={result.matches.map((m) =>
-                  getEstimatedPrice(
-                    m.supplier.name,
-                    m.supplier.supplier_id,
-                    m.matchDetails.matchedTechnologies || [],
-                    m.supplier.logo_url || undefined
-                  )
-                )}
-                currency="EUR"
-                countryCode="DK"
-              />
 
               {result.matches.length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
