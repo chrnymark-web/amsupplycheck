@@ -24,6 +24,10 @@ interface LivePriceComparisonProps {
   hideUpload?: boolean;
   /** Continent filter, e.g. 'Europe'. Empty string = no filter. */
   area?: string;
+  /** Canonical technology key (e.g. "SLS"). Empty = Any. */
+  technology?: string;
+  /** Material name substring (case-insensitive). Empty = Any. */
+  material?: string;
 }
 
 type SortField = 'price' | 'leadTime' | 'supplier';
@@ -275,10 +279,14 @@ export function LivePriceComparison({
   quantity: externalQuantity,
   hideUpload = false,
   area = '',
+  technology = '',
+  material = '',
 }: LivePriceComparisonProps) {
   const { getQuotes, liveQuotes, results, hasErrors, isLoading, error } = useLiveQuotes({
     currency,
     countryCode,
+    technology,
+    material,
   });
 
   const [sortField, setSortField] = useState<SortField>('price');
@@ -449,6 +457,20 @@ export function LivePriceComparison({
             <p>
               No live quotes from vendors in <span className="font-medium text-foreground">{area}</span>.
               Try a different area or switch to "Any area".
+            </p>
+          </div>
+        )}
+
+        {/* Tech/material filter excluded every vendor (file was uploaded but no matching quotes) */}
+        {externalFile && liveQuotes.length === 0 && !isLoading && (technology || material) && (
+          <div className="flex items-start gap-2 p-3 rounded-lg border border-border/60 bg-card/30 text-xs text-muted-foreground">
+            <AlertCircle className="h-3.5 w-3.5 text-muted-foreground shrink-0 mt-0.5" />
+            <p>
+              No live quotes match{' '}
+              {technology && <span className="font-medium text-foreground">{technology}</span>}
+              {technology && material && ' · '}
+              {material && <span className="font-medium text-foreground">{material}</span>}
+              . Showing estimates below.
             </p>
           </div>
         )}

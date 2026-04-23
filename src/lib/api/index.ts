@@ -1,10 +1,15 @@
 // API Aggregator — live quotes from API suppliers + estimated prices for the rest
 
-import type { QuoteRequest, QuoteResult, LiveQuote, EstimatedPrice, SupplierPrice, Currency } from './types';
+import type { QuoteRequest, QuoteResult, QuoteGeometry, LiveQuote, EstimatedPrice, SupplierPrice, Currency } from './types';
 import { getCraftcloudQuotes } from './craftcloud';
 import { getTreatstockQuotes } from './treatstock';
-import { getSupplierPriceTier } from '../supplierPricing';
 import { runSanityChecks } from './quote-sanity';
+import {
+  getPriceTier,
+  materialPriceIndex,
+  technologyPriceIndex,
+} from '../technologyMaterialCompatibility';
+import { normalizeTechKey } from '../materialTechClassifier';
 
 const TREATSTOCK_API_KEY = import.meta.env.VITE_TREATSTOCK_API_KEY || '';
 
@@ -70,24 +75,80 @@ export async function fetchLiveQuotes(
   return { quotes, results };
 }
 
-// Generate estimated prices for suppliers without APIs
-export function getEstimatedPrice(
-  supplierName: string,
-  supplierId: string,
-  technologies: string[],
-  logoUrl?: string
-): EstimatedPrice {
-  const tier = getSupplierPriceTier(technologies);
+// Calibration constants — tune against real Craftcloud medians as data accrues.
+const BASE_EUR_PER_CM3 = 0.35;           // FDM/PLA baseline
+const FIXED_SETUP_EUR = 6.0;
+const BBOX_SURCHARGE_PER_CM = 0.15;      // discourages very large prints
+const MIN_UNIT_EUR = 3.5;
+const MAX_UNIT_EUR = 3000;
+const RANGE_SPREAD = 0.35;               // ±35% around central estimate
 
-  // Rough EUR ranges based on price tier for a typical small part
-  const ranges: Record<string, [number, number]> = {
-    '€': [3, 20],
-    '€€': [15, 60],
-    '€€€': [40, 150],
-    '€€€€': [100, 500],
-  };
+export interface EstimatePriceInput {
+  supplierName: string;
+  supplierId: string;
+  /** Capability list from DB. Used when selectedTechnology is empty (takes mean). */
+  supplierTechnologies: string[];
+  /** User-selected technology — when set, the estimate uses only this index. */
+  selectedTechnology?: string;
+  /** User-selected material — scales the estimate by materialPriceIndex if known. */
+  selectedMaterial?: string;
+  /** STL-parsed geometry — primary driver of the estimate when available. */
+  geometry?: QuoteGeometry;
+  /** Part quantity. Defaults to 1. */
+  quantity?: number;
+  logoUrl?: string;
+}
 
-  const [low, high] = ranges[tier.symbol] || [10, 100];
+// Generate an estimated price for a supplier without a live API. Now geometry-
+// and tech-aware: volume + bounding box × technology price index × material
+// multiplier + fixed setup. Falls back to a tech-indexed baseline when no
+// geometry is available.
+export function getEstimatedPrice(input: EstimatePriceInput): EstimatedPrice {
+  const {
+    supplierName,
+    supplierId,
+    supplierTechnologies,
+    selectedTechnology,
+    selectedMaterial,
+    geometry,
+    quantity = 1,
+    logoUrl,
+  } = input;
+
+  const techKeys = selectedTechnology
+    ? [normalizeTechKey(selectedTechnology)].filter(Boolean)
+    : supplierTechnologies.map(normalizeTechKey).filter(Boolean);
+
+  const techIndex = techKeys.length > 0
+    ? techKeys.reduce((sum, k) => sum + (technologyPriceIndex[k] ?? 2.0), 0) / techKeys.length
+    : 2.0;
+
+  const matIndex = selectedMaterial && materialPriceIndex[selectedMaterial]
+    ? materialPriceIndex[selectedMaterial]
+    : 1.0;
+
+  let central: number;
+  if (geometry && geometry.volumeCm3 > 0) {
+    const { volumeCm3, boundingBox } = geometry;
+    // boundingBox is in millimetres; convert to cm for the large-part surcharge.
+    const maxDimCm = Math.max(boundingBox.x, boundingBox.y, boundingBox.z) / 10;
+    central =
+      FIXED_SETUP_EUR +
+      volumeCm3 * BASE_EUR_PER_CM3 * techIndex * matIndex +
+      Math.max(0, maxDimCm - 10) * BBOX_SURCHARGE_PER_CM;
+  } else {
+    // No geometry — tech still drives the baseline.
+    central = FIXED_SETUP_EUR + 12 * techIndex * matIndex;
+  }
+  central = Math.max(MIN_UNIT_EUR, Math.min(MAX_UNIT_EUR, central));
+
+  const tier = getPriceTier(techIndex * matIndex);
+
+  const basedOn = selectedTechnology
+    ? `${selectedTechnology}${selectedMaterial ? ' · ' + selectedMaterial : ''}${geometry ? ' · geometry' : ''}`
+    : techKeys.length > 0
+      ? `${techKeys.slice(0, 3).join(', ')} technologies`
+      : 'Market data';
 
   return {
     type: 'estimated',
@@ -96,12 +157,10 @@ export function getEstimatedPrice(
     supplierLogo: logoUrl,
     priceTier: tier.symbol,
     priceTierLabel: tier.label,
-    priceRangeLow: low,
-    priceRangeHigh: high,
+    priceRangeLow: Math.round(central * (1 - RANGE_SPREAD)) * quantity,
+    priceRangeHigh: Math.round(central * (1 + RANGE_SPREAD)) * quantity,
     currency: 'EUR',
-    basedOn: technologies.length > 0
-      ? `${technologies.slice(0, 3).join(', ')} technologies`
-      : 'Market data',
+    basedOn,
   };
 }
 

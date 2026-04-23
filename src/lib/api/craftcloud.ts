@@ -2,9 +2,10 @@
 // Docs: https://swagger.craftcloud3d.com/ | OpenAPI: https://api.craftcloud3d.com/api-docs.json
 // Tested live 2026-04-07: 97 vendors, 8874 quotes for a 20mm cube
 
-import type { LiveQuote, QuoteOption, QuoteRequest, Currency } from './types';
+import type { LiveQuote, QuoteRequest, Currency } from './types';
 import { getLocalLogoForSupplier } from '@/lib/supplierLogos';
 import { supabase } from '@/integrations/supabase/client';
+import { classifyMaterialConfigId } from '@/lib/materialTechClassifier';
 
 const CRAFTCLOUD_BASE_URL = 'https://api.craftcloud3d.com';
 const CRAFTCLOUD_MARKETPLACE_URL = 'https://craftcloud3d.com';
@@ -176,78 +177,10 @@ async function getPriceResults(
   return response.json();
 }
 
-// Group quotes by vendor and pick cheapest per vendor for cleaner display
-function getBestQuotePerVendor(quotes: CraftcloudQuote[]): CraftcloudQuote[] {
-  const best = new Map<string, CraftcloudQuote>();
-  for (const q of quotes) {
-    const existing = best.get(q.vendorId);
-    if (!existing || q.price < existing.price) {
-      best.set(q.vendorId, q);
-    }
-  }
-  return [...best.values()];
-}
-
-// Format materialConfigId into a readable name, e.g. "PA_12_GF" → "PA 12 GF"
-// Returns empty string for UUIDs (Craftcloud sometimes returns UUIDs instead of names)
-function formatMaterialId(id: string): string {
-  if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) {
-    return '';
-  }
-  return id
-    .replace(/([a-z])([A-Z])/g, '$1 $2')  // camelCase → spaced
-    .replace(/[_-]/g, ' ')                  // underscores/hyphens → spaces
-    .replace(/\s+/g, ' ')
-    .trim();
-}
-
-// Get top 3 distinct quotes per vendor: cheapest, fastest, and a mid-range option
-// Returns quotes with labels explaining why each was picked
-type LabeledQuote = CraftcloudQuote & { label: string };
-function getTopQuotesPerVendor(quotes: CraftcloudQuote[]): Map<string, LabeledQuote[]> {
-  const byVendor = new Map<string, CraftcloudQuote[]>();
-  for (const q of quotes) {
-    if (!byVendor.has(q.vendorId)) byVendor.set(q.vendorId, []);
-    byVendor.get(q.vendorId)!.push(q);
-  }
-
-  const result = new Map<string, LabeledQuote[]>();
-  for (const [vendorId, vendorQuotes] of byVendor) {
-    // Sort by price to find distinct price tiers
-    const sorted = [...vendorQuotes].sort((a, b) => a.price - b.price);
-    const picked: LabeledQuote[] = [{ ...sorted[0], label: 'Cheapest material' }];
-
-    // Find fastest option (different from cheapest)
-    const fastest = [...vendorQuotes].sort((a, b) => a.productionTimeFast - b.productionTimeFast)[0];
-    if (fastest.quoteId !== picked[0].quoteId && fastest.price !== picked[0].price) {
-      picked.push({ ...fastest, label: 'Fastest delivery' });
-    }
-
-    // Find a mid-range option if we have enough variety
-    if (sorted.length > 2) {
-      const midIdx = Math.floor(sorted.length / 2);
-      const mid = sorted[midIdx];
-      if (!picked.some(p => p.quoteId === mid.quoteId) && mid.price !== picked[0].price) {
-        picked.push({ ...mid, label: formatMaterialId(mid.materialConfigId) });
-      }
-    }
-
-    // If we still need options, grab distinct price tiers
-    if (picked.length < 3) {
-      for (const q of sorted) {
-        if (picked.length >= 3) break;
-        if (!picked.some(p => p.quoteId === q.quoteId) && !picked.some(p => Math.abs(p.price - q.price) < 0.5)) {
-          picked.push({ ...q, label: formatMaterialId(q.materialConfigId) });
-        }
-      }
-    }
-
-    result.set(vendorId, picked.slice(0, 3));
-  }
-  return result;
-}
-
-// Convert to normalized LiveQuote format
+// Convert every Craftcloud quote to a normalized LiveQuote (one per vendor × material).
+// Per-vendor cheapest + alternativeQuotes reconstruction happens downstream in
+// the hook, after tech/material filtering. This keeps the raw data available so
+// switching tech in the UI becomes an instant re-filter instead of a re-fetch.
 function toQuotes(
   priceResponse: CraftcloudPriceResponse,
   quantity: number,
@@ -263,26 +196,10 @@ function toQuotes(
     }
   }
 
-  // Show best quote per vendor with alternative options
-  const bestPerVendor = getBestQuotePerVendor(priceResponse.quotes);
-  const topQuotes = getTopQuotesPerVendor(priceResponse.quotes);
-
-  return bestPerVendor.map((q) => {
+  return priceResponse.quotes.map((q) => {
+    const classified = classifyMaterialConfigId(q.materialConfigId);
     const name = formatVendorName(q.vendorId);
-    const vendorAlts = topQuotes.get(q.vendorId) || [];
-    const alternativeQuotes: QuoteOption[] = vendorAlts
-      .filter(alt => alt.quoteId !== q.quoteId)
-      .map(alt => ({
-        material: formatMaterialId(alt.materialConfigId),
-        label: alt.label,
-        unitPrice: alt.price,
-        totalPrice: alt.price * quantity,
-        estimatedLeadTimeDays: alt.productionTimeFast,
-        shippingEstimate: shippingByVendor.get(q.vendorId) ?? null,
-      }));
-
     const info = vendorInfo.get(q.vendorId);
-    const supplierWebsite = info?.website;
     if (!info && !loggedUnknownVendors.has(q.vendorId)) {
       loggedUnknownVendors.add(q.vendorId);
       console.info('[craftcloud] unknown vendorId (no supplier record):', q.vendorId);
@@ -293,18 +210,19 @@ function toQuotes(
       supplierId: `craftcloud-${q.vendorId}`,
       supplierName: name,
       supplierLogo: getLocalLogoForSupplier(name),
-      material: formatMaterialId(q.materialConfigId),
-      technology: '',
+      material: classified.material,
+      materialConfigId: q.materialConfigId,
+      technology: classified.technology,
+      technologyConfidence: classified.confidence,
       unitPrice: q.price,
       totalPrice: q.price * quantity,
       currency: (q.currency as Currency) || 'EUR',
       quantity,
       estimatedLeadTimeDays: q.productionTimeFast,
       shippingEstimate: shippingByVendor.get(q.vendorId) ?? null,
-      quoteUrl: supplierWebsite ?? CRAFTCLOUD_MARKETPLACE_URL,
+      quoteUrl: info?.website ?? CRAFTCLOUD_MARKETPLACE_URL,
       fetchedAt: new Date(),
       source: 'craftcloud' as const,
-      alternativeQuotes: alternativeQuotes.length > 0 ? alternativeQuotes : undefined,
       supplierArea: info?.area,
     };
   });

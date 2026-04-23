@@ -276,6 +276,8 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
                   file={file}
                   quantity={quantity}
                   area={area}
+                  technology={technology}
+                  material={material}
                   hideUpload
                   currency="EUR"
                   countryCode="DK"
@@ -446,7 +448,15 @@ function MatchResultView({
   const { getQuotes, liveQuotes, isLoading: liveLoading } = useLiveQuotes({
     currency: 'EUR',
     countryCode: 'DK',
+    technology,
+    material,
   });
+
+  // Parsed geometry is retained so estimates can size to the actual part, not
+  // fall back to a tier-table baseline.
+  const [geometry, setGeometry] = useState<
+    { volumeCm3: number; boundingBox: { x: number; y: number; z: number }; triangleCount: number } | undefined
+  >(undefined);
 
   // Auto-fetch live quotes when the file/quantity changes (mirrors
   // LivePriceComparison's internal effect so quotes are available here for
@@ -455,21 +465,23 @@ function MatchResultView({
     if (!file) return;
     let cancelled = false;
     (async () => {
-      let geometry;
+      let g: typeof geometry;
       if (file.name.toLowerCase().endsWith('.stl')) {
         try {
           const buf = await file.arrayBuffer();
-          const g = parseSTL(buf);
-          geometry = {
-            volumeCm3: g.volumeCm3,
-            boundingBox: g.boundingBox,
-            triangleCount: g.triangleCount,
+          const parsed = parseSTL(buf);
+          g = {
+            volumeCm3: parsed.volumeCm3,
+            boundingBox: parsed.boundingBox,
+            triangleCount: parsed.triangleCount,
           };
         } catch {
           // fall through without geometry
         }
       }
-      if (!cancelled) getQuotes(file, quantity, geometry);
+      if (cancelled) return;
+      setGeometry(g);
+      getQuotes(file, quantity, g);
     })();
     return () => {
       cancelled = true;
@@ -489,14 +501,18 @@ function MatchResultView({
   const estimatedPrices = useMemo(
     () =>
       safeMatches.map((m: any) =>
-        getEstimatedPrice(
-          m.supplier.name ?? 'Unknown supplier',
-          m.supplier.supplier_id,
-          m.matchDetails.matchedTechnologies ?? [],
-          m.supplier.logo_url || undefined
-        )
+        getEstimatedPrice({
+          supplierName: m.supplier.name ?? 'Unknown supplier',
+          supplierId: m.supplier.supplier_id,
+          supplierTechnologies: m.matchDetails.matchedTechnologies ?? [],
+          selectedTechnology: technology,
+          selectedMaterial: material,
+          geometry,
+          quantity,
+          logoUrl: m.supplier.logo_url || undefined,
+        })
       ),
-    [safeMatches]
+    [safeMatches, technology, material, quantity, geometry]
   );
 
   const priceInfo = useMemo(

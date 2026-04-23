@@ -2,6 +2,7 @@
 // Docs: https://www.treatstock.com/help/article/83-api-documentation
 
 import type { LiveQuote, QuoteRequest, Currency } from './types';
+import { classifyMaterialConfigId } from '@/lib/materialTechClassifier';
 
 const TREATSTOCK_BASE_URL = 'https://www.treatstock.com/api/v2';
 
@@ -84,25 +85,33 @@ async function getCosts(
   return response.json();
 }
 
-// Convert to normalized format
+// Convert to normalized format. One LiveQuote per cost option (vendor × materialGroup);
+// per-vendor cheapest + alternativeQuotes reconstruction happens in the hook after
+// tech/material filtering. `materialGroup` doubles as hint for the classifier since
+// Treatstock only gives us coarse groups like "Nylon" / "Resin".
 function toQuotes(costs: TreatstockCostOption[], quantity: number): LiveQuote[] {
-  return costs.map((c) => ({
-    type: 'live' as const,
-    supplierId: `treatstock-${c.providerId}`,
-    supplierName: c.providerName,
-    supplierLogo: c.providerLogo,
-    material: c.materialGroup,
-    technology: '',
-    unitPrice: c.price,
-    totalPrice: c.price * quantity,
-    currency: (c.currency as Currency) || 'USD',
-    quantity,
-    estimatedLeadTimeDays: c.leadTimeDays ?? null,
-    shippingEstimate: null,
-    quoteUrl: `https://www.treatstock.com`,
-    fetchedAt: new Date(),
-    source: 'treatstock' as const,
-  }));
+  return costs.map((c) => {
+    const classified = classifyMaterialConfigId(c.materialGroup, c.materialGroup);
+    return {
+      type: 'live' as const,
+      supplierId: `treatstock-${c.providerId}`,
+      supplierName: c.providerName,
+      supplierLogo: c.providerLogo,
+      material: classified.material || c.materialGroup,
+      materialConfigId: c.materialGroup,
+      technology: classified.technology,
+      technologyConfidence: classified.confidence,
+      unitPrice: c.price,
+      totalPrice: c.price * quantity,
+      currency: (c.currency as Currency) || 'USD',
+      quantity,
+      estimatedLeadTimeDays: c.leadTimeDays ?? null,
+      shippingEstimate: null,
+      quoteUrl: `https://www.treatstock.com`,
+      fetchedAt: new Date(),
+      source: 'treatstock' as const,
+    };
+  });
 }
 
 // Main function: get quotes from Treatstock
