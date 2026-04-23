@@ -1,35 +1,12 @@
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
-
-export const TECH_MATERIALS: Record<string, string[]> = {
-  'FDM/FFF': ['PLA', 'ABS', 'PETG', 'Nylon', 'TPU', 'ASA', 'Polycarbonate', 'PEEK'],
-  SLS: ['PA-12', 'PA-11', 'PA-12 Glass Filled', 'PA-12 Carbon Filled', 'TPU', 'Polypropylene'],
-  SLA: ['Standard Resin', 'Tough Resin', 'Flexible Resin', 'Clear Resin', 'High Temp Resin'],
-  MJF: ['PA-12', 'PA-12 Glass Filled', 'PA-11', 'TPU', 'Polypropylene'],
-  DMLS: ['Titanium', 'Aluminum AlSi10Mg', 'Stainless Steel 316L', 'Inconel 718'],
-  SLM: ['Titanium', 'Aluminum AlSi10Mg', 'Stainless Steel 316L', 'Inconel 718'],
-  DLP: ['Standard Resin', 'Tough Resin', 'Flexible Resin', 'Castable Resin'],
-  'Material Jetting': ['Standard Resin', 'Flexible Resin', 'Clear Resin'],
-  'Binder Jetting': ['Stainless Steel', 'Aluminum', 'Ceramic'],
-};
-
-export const ALL_MATERIALS: string[] = Array.from(
-  new Set(Object.values(TECH_MATERIALS).flat())
-).sort();
-
-export const MATERIAL_TECHS: Record<string, string[]> = (() => {
-  const map: Record<string, string[]> = {};
-  for (const [tech, mats] of Object.entries(TECH_MATERIALS)) {
-    for (const mat of mats) {
-      if (!map[mat]) map[mat] = [];
-      if (!map[mat].includes(tech)) map[mat].push(tech);
-    }
-  }
-  return map;
-})();
+import {
+  useTechnologyToMaterials,
+  useMaterialToTechnologies,
+} from '@/hooks/use-compatibility-matrix';
 
 const ANY = 'any';
 
@@ -93,19 +70,22 @@ export function ConfiguratorPanel({
   onQuantityChange,
   className,
 }: ConfiguratorPanelProps) {
-  const materialOptions = ALL_MATERIALS;
-  const techOptions = material ? MATERIAL_TECHS[material] || [] : Object.keys(TECH_MATERIALS);
+  const { data: techToMatMap } = useTechnologyToMaterials();
+  const { data: matToTechMap } = useMaterialToTechnologies();
+
+  const materialOptions = useMemo(() => Object.keys(matToTechMap).sort(), [matToTechMap]);
+  const techOptions = material ? matToTechMap[material] ?? [] : Object.keys(techToMatMap).sort();
   const selectedColor = COLOR_OPTIONS.find((c) => c.value === color);
 
   // Clear technology if it's no longer compatible with the chosen material.
   useEffect(() => {
     if (!material) return;
-    const compat = MATERIAL_TECHS[material] || [];
-    if (technology && !compat.includes(technology)) {
+    const compat = matToTechMap[material] || [];
+    if (technology && compat.length > 0 && !compat.includes(technology)) {
       onTechnologyChange('');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [material]);
+  }, [material, matToTechMap]);
 
   return (
     <div

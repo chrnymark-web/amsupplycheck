@@ -8,7 +8,10 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import SupplierLogo from '@/components/ui/supplier-logo';
 import { TECHNOLOGY_GLOSSARY, type TechnologyInfo } from '@/lib/technologyGlossary';
-import { technologyToMaterials, materialToTechnologies } from '@/lib/technologyMaterialCompatibility';
+import {
+  useTechnologyToMaterials,
+  useMaterialToTechnologies,
+} from '@/hooks/use-compatibility-matrix';
 import { ArrowLeft, ExternalLink, Factory, MapPin, Verified, ChevronRight, Cpu, FlaskConical, Zap, Target, AlertTriangle, Layers, Link2 } from 'lucide-react';
 
 type DetailType = 'technology' | 'material';
@@ -51,22 +54,25 @@ const KnowledgeDetail: React.FC = () => {
     ));
   };
 
+  const { data: techToMatMap } = useTechnologyToMaterials();
+  const { data: matToTechMap } = useMaterialToTechnologies();
+
   // Find compatible materials/technologies from the compatibility matrix
   const compatibleItems = useMemo(() => {
     if (!data || !item) return [];
-    
+
     if (isTech) {
       // For technology pages, find compatible materials
-      const techKeys = [item.name, item.name.toUpperCase(), `${item.name}/FFF`, 'FDM/FFF'];
+      const techKeys = [item.name, item.name.toUpperCase()];
       let compatMaterialNames: string[] = [];
-      
+
       for (const key of techKeys) {
-        if (technologyToMaterials[key]) {
-          compatMaterialNames = technologyToMaterials[key];
+        if (techToMatMap[key]) {
+          compatMaterialNames = techToMatMap[key];
           break;
         }
       }
-      
+
       // Match with actual materials in the database using flexible matching
       return data.materials
         .filter(mat => compatMaterialNames.some(name => namesMatch(mat.name, name)))
@@ -74,18 +80,16 @@ const KnowledgeDetail: React.FC = () => {
         .slice(0, 12);
     } else {
       // For material pages, find compatible technologies
-      // Try to find a match in the materialToTechnologies lookup
-      const allMatKeys = Object.keys(materialToTechnologies);
+      const allMatKeys = Object.keys(matToTechMap);
       const matchingKey = allMatKeys.find(key => namesMatch(item.name, key));
-      const compatTechNames = matchingKey ? materialToTechnologies[matchingKey] : [];
-      
-      // Match with actual technologies in the database using flexible matching
+      const compatTechNames = matchingKey ? matToTechMap[matchingKey] : [];
+
       return data.technologies
         .filter(tech => compatTechNames.some(name => namesMatch(tech.name, name)))
         .sort((a, b) => b.supplierCount - a.supplierCount)
         .slice(0, 8);
     }
-  }, [isTech, item, data]);
+  }, [isTech, item, data, techToMatMap, matToTechMap]);
 
   if (isLoading) {
     return (

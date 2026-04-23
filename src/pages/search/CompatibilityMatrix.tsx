@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Check, X, Info } from 'lucide-react';
 import { getAllMaterials, getAllTechnologies } from '@/lib/supplierData';
-import { technologyToMaterials } from '@/lib/technologyMaterialCompatibility';
+import { useTechnologyToMaterials } from '@/hooks/use-compatibility-matrix';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const CompatibilityMatrix = () => {
@@ -14,10 +14,11 @@ const CompatibilityMatrix = () => {
 
   const technologies = getAllTechnologies();
   const materials = getAllMaterials();
+  const { data: techToMatMap } = useTechnologyToMaterials();
 
   // Check if a combination is compatible
   const isCompatible = (technology: string, material: string): boolean => {
-    const compatibleMaterials = technologyToMaterials[technology] || [];
+    const compatibleMaterials = techToMatMap[technology] || [];
     return compatibleMaterials.includes(material);
   };
 

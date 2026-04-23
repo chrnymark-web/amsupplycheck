@@ -3,9 +3,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { getAllMaterials, getAllTechnologies, getAllAreas } from '@/lib/supplierData';
-import { 
-  getCompatibleMaterials, 
-  getCompatibleTechnologies,
+import {
   technologyCategories,
   materialCategories,
   technologyPriceIndex,
@@ -13,8 +11,14 @@ import {
   getPriceTier,
   requirementToTechnologies,
   requirementToMaterials,
-  type SearchRequirement
+  type SearchRequirement,
 } from '@/lib/technologyMaterialCompatibility';
+import {
+  useTechnologyToMaterials,
+  useMaterialToTechnologies,
+  getCompatibleMaterialsFromMap,
+  getCompatibleTechnologiesFromMap,
+} from '@/hooks/use-compatibility-matrix';
 import { X } from 'lucide-react';
 import MultiSelect from '@/components/ui/multi-select';
 import GroupedMultiSelect from '@/components/ui/grouped-multi-select';
@@ -58,13 +62,17 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   const allTechnologies = getAllTechnologies();
   const areas = getAllAreas();
 
+  // Compatibility matrix (DB-backed, cached by React Query)
+  const { data: techToMatMap } = useTechnologyToMaterials();
+  const { data: matToTechMap } = useMaterialToTechnologies();
+
   // Filter materials based on selected technologies AND requirements
   const availableMaterials = useMemo(() => {
     let result = allMaterials;
-    
+
     // Filter by technologies
     if (filters.technologies.length > 0) {
-      const compatible = getCompatibleMaterials(filters.technologies);
+      const compatible = getCompatibleMaterialsFromMap(techToMatMap, filters.technologies);
       result = result.filter(material => compatible.includes(material));
     }
     
@@ -79,15 +87,15 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     }
     
     return result;
-  }, [filters.technologies, filters.requirements, allMaterials]);
+  }, [filters.technologies, filters.requirements, allMaterials, techToMatMap]);
 
   // Filter technologies based on selected materials AND requirements
   const availableTechnologies = useMemo(() => {
     let result = allTechnologies;
-    
+
     // Filter by materials
     if (filters.materials.length > 0) {
-      const compatible = getCompatibleTechnologies(filters.materials);
+      const compatible = getCompatibleTechnologiesFromMap(matToTechMap, filters.materials);
       result = result.filter(tech => compatible.includes(tech));
     }
     
@@ -102,7 +110,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
     }
     
     return result;
-  }, [filters.materials, filters.requirements, allTechnologies]);
+  }, [filters.materials, filters.requirements, allTechnologies, matToTechMap]);
 
   // Generate filter info messages
   const materialsFilterInfo = useMemo(() => {

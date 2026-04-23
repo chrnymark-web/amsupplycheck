@@ -10,7 +10,32 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "13.0.5"
+    PostgrestVersion: "14.4"
+  }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
   }
   public: {
     Tables: {
@@ -161,6 +186,241 @@ export type Database = {
         }
         Relationships: []
       }
+      crm_activity_log: {
+        Row: {
+          action: string
+          created_at: string
+          deal_id: string
+          details: Json | null
+          id: string
+          user_id: string | null
+        }
+        Insert: {
+          action: string
+          created_at?: string
+          deal_id: string
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Update: {
+          action?: string
+          created_at?: string
+          deal_id?: string
+          details?: Json | null
+          id?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_activity_log_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_comments: {
+        Row: {
+          body: string
+          created_at: string
+          deal_id: string
+          id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          deal_id: string
+          id?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          deal_id?: string
+          id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_comments_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_deal_labels: {
+        Row: {
+          deal_id: string
+          label_id: string
+        }
+        Insert: {
+          deal_id: string
+          label_id: string
+        }
+        Update: {
+          deal_id?: string
+          label_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_deal_labels_deal_id_fkey"
+            columns: ["deal_id"]
+            isOneToOne: false
+            referencedRelation: "crm_deals"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deal_labels_label_id_fkey"
+            columns: ["label_id"]
+            isOneToOne: false
+            referencedRelation: "crm_labels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_deals: {
+        Row: {
+          archived: boolean
+          assigned_to: string | null
+          contact_email: string
+          contact_name: string
+          created_at: string
+          deal_value: number | null
+          due_date: string | null
+          id: string
+          material: string | null
+          position: number
+          project_description: string | null
+          quote_request_id: string | null
+          source_page: string | null
+          stage_id: string
+          supplier_context: string | null
+          technology: string | null
+          title: string
+          updated_at: string
+          volume: string | null
+        }
+        Insert: {
+          archived?: boolean
+          assigned_to?: string | null
+          contact_email: string
+          contact_name: string
+          created_at?: string
+          deal_value?: number | null
+          due_date?: string | null
+          id?: string
+          material?: string | null
+          position?: number
+          project_description?: string | null
+          quote_request_id?: string | null
+          source_page?: string | null
+          stage_id: string
+          supplier_context?: string | null
+          technology?: string | null
+          title: string
+          updated_at?: string
+          volume?: string | null
+        }
+        Update: {
+          archived?: boolean
+          assigned_to?: string | null
+          contact_email?: string
+          contact_name?: string
+          created_at?: string
+          deal_value?: number | null
+          due_date?: string | null
+          id?: string
+          material?: string | null
+          position?: number
+          project_description?: string | null
+          quote_request_id?: string | null
+          source_page?: string | null
+          stage_id?: string
+          supplier_context?: string | null
+          technology?: string | null
+          title?: string
+          updated_at?: string
+          volume?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crm_deals_quote_request_id_fkey"
+            columns: ["quote_request_id"]
+            isOneToOne: false
+            referencedRelation: "quote_requests"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "crm_deals_stage_id_fkey"
+            columns: ["stage_id"]
+            isOneToOne: false
+            referencedRelation: "crm_pipeline_stages"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crm_labels: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          name: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      crm_pipeline_stages: {
+        Row: {
+          color: string
+          created_at: string
+          id: string
+          is_loss: boolean
+          is_win: boolean
+          name: string
+          position: number
+          slug: string
+        }
+        Insert: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_loss?: boolean
+          is_win?: boolean
+          name: string
+          position?: number
+          slug: string
+        }
+        Update: {
+          color?: string
+          created_at?: string
+          id?: string
+          is_loss?: boolean
+          is_win?: boolean
+          name?: string
+          position?: number
+          slug?: string
+        }
+        Relationships: []
+      }
       discovered_suppliers: {
         Row: {
           created_at: string
@@ -307,30 +567,50 @@ export type Database = {
       }
       materials: {
         Row: {
+          canonical_id: string | null
           category: string | null
           created_at: string
           description: string | null
+          family: string | null
+          hidden: boolean
           id: string
+          is_category: boolean
           name: string
           slug: string
         }
         Insert: {
+          canonical_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
+          family?: string | null
+          hidden?: boolean
           id?: string
+          is_category?: boolean
           name: string
           slug: string
         }
         Update: {
+          canonical_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
+          family?: string | null
+          hidden?: boolean
           id?: string
+          is_category?: boolean
           name?: string
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "materials_canonical_id_fkey"
+            columns: ["canonical_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_signups: {
         Row: {
@@ -434,30 +714,6 @@ export type Database = {
         }
         Relationships: []
       }
-      scrape_cache: {
-        Row: {
-          created_at: string
-          html: string
-          id: string
-          key: string
-          visible_text: string | null
-        }
-        Insert: {
-          created_at?: string
-          html: string
-          id?: string
-          key: string
-          visible_text?: string | null
-        }
-        Update: {
-          created_at?: string
-          html?: string
-          id?: string
-          key?: string
-          visible_text?: string | null
-        }
-        Relationships: []
-      }
       search_analytics: {
         Row: {
           clicked_supplier_ids: string[] | null
@@ -506,6 +762,69 @@ export type Database = {
           search_type?: string | null
           session_id?: string | null
           user_corrections?: Json | null
+        }
+        Relationships: []
+      }
+      search_results: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          extracted_requirements: Json | null
+          id: string
+          matches: Json | null
+          project_requirements: Json | null
+          search_type: Database["public"]["Enums"]["search_type"]
+          selected_material: string | null
+          selected_technology: string | null
+          status: Database["public"]["Enums"]["search_status"]
+          stl_file_url: string | null
+          stl_metrics: Json | null
+          technology_rationale: Json | null
+          total_suppliers_analyzed: number | null
+          trigger_run_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          extracted_requirements?: Json | null
+          id?: string
+          matches?: Json | null
+          project_requirements?: Json | null
+          search_type: Database["public"]["Enums"]["search_type"]
+          selected_material?: string | null
+          selected_technology?: string | null
+          status?: Database["public"]["Enums"]["search_status"]
+          stl_file_url?: string | null
+          stl_metrics?: Json | null
+          technology_rationale?: Json | null
+          total_suppliers_analyzed?: number | null
+          trigger_run_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          extracted_requirements?: Json | null
+          id?: string
+          matches?: Json | null
+          project_requirements?: Json | null
+          search_type?: Database["public"]["Enums"]["search_type"]
+          selected_material?: string | null
+          selected_technology?: string | null
+          status?: Database["public"]["Enums"]["search_status"]
+          stl_file_url?: string | null
+          stl_metrics?: Json | null
+          technology_rationale?: Json | null
+          total_suppliers_analyzed?: number | null
+          trigger_run_id?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
@@ -688,6 +1007,7 @@ export type Database = {
           has_instant_quote: boolean | null
           has_rush_service: boolean | null
           id: string
+          is_3d_printing_provider: boolean | null
           last_validated_at: string | null
           last_validation_confidence: number | null
           lead_time_indicator: string | null
@@ -722,6 +1042,7 @@ export type Database = {
           has_instant_quote?: boolean | null
           has_rush_service?: boolean | null
           id?: string
+          is_3d_printing_provider?: boolean | null
           last_validated_at?: string | null
           last_validation_confidence?: number | null
           lead_time_indicator?: string | null
@@ -756,6 +1077,7 @@ export type Database = {
           has_instant_quote?: boolean | null
           has_rush_service?: boolean | null
           id?: string
+          is_3d_printing_provider?: boolean | null
           last_validated_at?: string | null
           last_validation_confidence?: number | null
           lead_time_indicator?: string | null
@@ -780,15 +1102,7 @@ export type Database = {
           verified?: boolean | null
           website?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "suppliers_country_id_fkey"
-            columns: ["country_id"]
-            isOneToOne: false
-            referencedRelation: "countries"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       tags: {
         Row: {
@@ -816,30 +1130,128 @@ export type Database = {
       }
       technologies: {
         Row: {
+          canonical_id: string | null
           category: string | null
           created_at: string
           description: string | null
+          hidden: boolean
           id: string
           name: string
           slug: string
         }
         Insert: {
+          canonical_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
+          hidden?: boolean
           id?: string
           name: string
           slug: string
         }
         Update: {
+          canonical_id?: string | null
           category?: string | null
           created_at?: string
           description?: string | null
+          hidden?: boolean
           id?: string
           name?: string
           slug?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "technologies_canonical_id_fkey"
+            columns: ["canonical_id"]
+            isOneToOne: false
+            referencedRelation: "technologies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technology_children: {
+        Row: {
+          child_technology_id: string
+          created_at: string
+          id: string
+          parent_technology_id: string
+        }
+        Insert: {
+          child_technology_id: string
+          created_at?: string
+          id?: string
+          parent_technology_id: string
+        }
+        Update: {
+          child_technology_id?: string
+          created_at?: string
+          id?: string
+          parent_technology_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technology_children_child_technology_id_fkey"
+            columns: ["child_technology_id"]
+            isOneToOne: false
+            referencedRelation: "technologies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technology_children_parent_technology_id_fkey"
+            columns: ["parent_technology_id"]
+            isOneToOne: false
+            referencedRelation: "technologies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      technology_materials: {
+        Row: {
+          created_at: string
+          id: string
+          material_id: string
+          modality: string | null
+          notes: string | null
+          source_citation: string | null
+          technology_id: string
+          tier: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          material_id: string
+          modality?: string | null
+          notes?: string | null
+          source_citation?: string | null
+          technology_id: string
+          tier: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          material_id?: string
+          modality?: string | null
+          notes?: string | null
+          source_citation?: string | null
+          technology_id?: string
+          tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "technology_materials_material_id_fkey"
+            columns: ["material_id"]
+            isOneToOne: false
+            referencedRelation: "materials"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "technology_materials_technology_id_fkey"
+            columns: ["technology_id"]
+            isOneToOne: false
+            referencedRelation: "technologies"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {
@@ -871,6 +1283,8 @@ export type Database = {
           created_at: string | null
           enabled: boolean | null
           id: string
+          last_pause_at: string | null
+          last_pause_reason: string | null
           monthly_validation_limit: number | null
           updated_at: string | null
           validation_paused: boolean | null
@@ -885,6 +1299,8 @@ export type Database = {
           created_at?: string | null
           enabled?: boolean | null
           id?: string
+          last_pause_at?: string | null
+          last_pause_reason?: string | null
           monthly_validation_limit?: number | null
           updated_at?: string | null
           validation_paused?: boolean | null
@@ -899,6 +1315,8 @@ export type Database = {
           created_at?: string | null
           enabled?: boolean | null
           id?: string
+          last_pause_at?: string | null
+          last_pause_reason?: string | null
           monthly_validation_limit?: number | null
           updated_at?: string | null
           validation_paused?: boolean | null
@@ -1005,7 +1423,18 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      technology_materials_resolved: {
+        Row: {
+          inherited_from_child: boolean | null
+          material_id: string | null
+          modality: string | null
+          notes: string | null
+          source_citation: string | null
+          technology_id: string | null
+          tier: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
@@ -1020,6 +1449,14 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      search_status:
+        | "pending"
+        | "analyzing"
+        | "matching"
+        | "ranking"
+        | "completed"
+        | "failed"
+      search_type: "requirement" | "stl"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -1145,9 +1582,21 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      search_status: [
+        "pending",
+        "analyzing",
+        "matching",
+        "ranking",
+        "completed",
+        "failed",
+      ],
+      search_type: ["requirement", "stl"],
     },
   },
 } as const

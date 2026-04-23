@@ -8,18 +8,7 @@ import type { LiveQuote } from '@/lib/api/types';
 import SupplierLogo from '@/components/ui/supplier-logo';
 import { useNavigate } from 'react-router-dom';
 import { slugifyVendorName } from '@/lib/utils';
-
-const TECH_MATERIALS: Record<string, string[]> = {
-  'FDM/FFF': ['PLA', 'ABS', 'PETG', 'Nylon', 'TPU', 'ASA', 'Polycarbonate', 'PEEK', 'PEI/Ultem'],
-  'SLS': ['PA-12', 'PA-11', 'PA-12 Glass Filled', 'PA-12 Carbon Filled', 'TPU', 'Polypropylene'],
-  'SLA': ['Standard Resin', 'Tough Resin', 'Flexible Resin', 'Clear Resin', 'High Temp Resin', 'Castable Resin', 'Dental Resin'],
-  'MJF': ['PA-12', 'PA-12 Glass Filled', 'PA-11', 'TPU', 'Polypropylene'],
-  'DMLS': ['Titanium', 'Aluminum AlSi10Mg', 'Stainless Steel 316L', 'Inconel 718', 'Cobalt Chrome', 'Maraging Steel'],
-  'SLM': ['Titanium', 'Aluminum AlSi10Mg', 'Stainless Steel 316L', 'Inconel 718', 'Cobalt Chrome', 'Maraging Steel'],
-  'DLP': ['Standard Resin', 'Tough Resin', 'Flexible Resin', 'Castable Resin', 'Dental Resin', 'Biocompatible Resin'],
-  'Material Jetting': ['Standard Resin', 'Flexible Resin', 'Clear Resin', 'Biocompatible Resin'],
-  'Binder Jetting': ['Stainless Steel', 'Aluminum', 'Ceramic'],
-};
+import { useTechnologyToMaterials } from '@/hooks/use-compatibility-matrix';
 
 interface PriceEstimate {
   lowEstimate: number;
@@ -30,10 +19,11 @@ interface PriceEstimate {
 }
 
 export function PriceCalculator() {
+  const { data: techToMatMap } = useTechnologyToMaterials();
   const [isExpanded, setIsExpanded] = useState(false);
   const [file, setFile] = useState<File | null>(null);
   const [stlData, setStlData] = useState<STLResult | null>(null);
-  const [technology, setTechnology] = useState('FDM/FFF');
+  const [technology, setTechnology] = useState('FDM');
   const [material, setMaterial] = useState('PLA');
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -133,7 +123,8 @@ export function PriceCalculator() {
     setExpandedVendor(null);
   };
 
-  const materials = TECH_MATERIALS[technology] || [];
+  const materials = techToMatMap[technology] || [];
+  const technologyOptions = Object.keys(techToMatMap).sort();
 
   return (
     <div className="max-w-5xl mx-auto mb-3">
@@ -214,12 +205,12 @@ export function PriceCalculator() {
                       value={technology}
                       onChange={(e) => {
                         setTechnology(e.target.value);
-                        const mats = TECH_MATERIALS[e.target.value] || [];
+                        const mats = techToMatMap[e.target.value] || [];
                         setMaterial(mats[0] || '');
                       }}
                       className="w-full text-sm rounded-md border border-border/30 bg-background px-2 py-1.5"
                     >
-                      {Object.keys(TECH_MATERIALS).map((t) => (
+                      {technologyOptions.map((t) => (
                         <option key={t} value={t}>{t}</option>
                       ))}
                     </select>

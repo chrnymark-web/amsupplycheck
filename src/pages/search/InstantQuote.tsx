@@ -18,7 +18,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { LivePriceComparison } from '@/components/ui/live-price-comparison';
 import SupplierMap from '@/components/ui/map';
-import { ConfiguratorPanel, TECH_MATERIALS } from '@/components/stl-viewer/ConfiguratorPanel';
+import { ConfiguratorPanel } from '@/components/stl-viewer/ConfiguratorPanel';
 import { ViewerControls } from '@/components/stl-viewer/ViewerControls';
 import { SearchProgress } from '@/components/search/SearchProgress';
 import { useTriggerSTLMatch } from '@/hooks/use-trigger-stl-match';

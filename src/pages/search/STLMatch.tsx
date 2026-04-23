@@ -12,18 +12,7 @@ import { SearchProgress } from "@/components/search/SearchProgress";
 import { useTriggerSTLMatch } from "@/hooks/use-trigger-stl-match";
 import SupplierLogo from "@/components/ui/supplier-logo";
 import type { MatchResult } from "@/hooks/use-supplier-matching";
-
-const TECH_MATERIALS: Record<string, string[]> = {
-  "FDM/FFF": ["PLA", "ABS", "PETG", "Nylon", "TPU", "ASA", "Polycarbonate", "PEEK"],
-  SLS: ["PA-12", "PA-11", "PA-12 Glass Filled", "PA-12 Carbon Filled", "TPU", "Polypropylene"],
-  SLA: ["Standard Resin", "Tough Resin", "Flexible Resin", "Clear Resin", "High Temp Resin"],
-  MJF: ["PA-12", "PA-12 Glass Filled", "PA-11", "TPU", "Polypropylene"],
-  DMLS: ["Titanium", "Aluminum AlSi10Mg", "Stainless Steel 316L", "Inconel 718"],
-  SLM: ["Titanium", "Aluminum AlSi10Mg", "Stainless Steel 316L", "Inconel 718"],
-  DLP: ["Standard Resin", "Tough Resin", "Flexible Resin", "Castable Resin"],
-  "Material Jetting": ["Standard Resin", "Flexible Resin", "Clear Resin"],
-  "Binder Jetting": ["Stainless Steel", "Aluminum", "Ceramic"],
-};
+import { useTechnologyToMaterials } from "@/hooks/use-compatibility-matrix";
 
 const REGIONS = [
   { value: "", label: "No preference" },
@@ -112,9 +101,10 @@ export default function STLMatch() {
   const navigate = useNavigate();
   const { triggerSTLMatch, status, isLoading, error, result, stlMetrics, reset } = useTriggerSTLMatch();
 
+  const { data: techToMatMap } = useTechnologyToMaterials();
   const [file, setFile] = useState<File | null>(null);
   const [technology, setTechnology] = useState("SLS");
-  const [material, setMaterial] = useState("PA-12");
+  const [material, setMaterial] = useState("PA12 Nylon");
   const [quantity, setQuantity] = useState(1);
   const [preferredRegion, setPreferredRegion] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -141,7 +131,8 @@ export default function STLMatch() {
     setFile(null);
   };
 
-  const materials = TECH_MATERIALS[technology] || [];
+  const materials = techToMatMap[technology] || [];
+  const technologyOptions = Object.keys(techToMatMap).sort();
 
   return (
     <>
@@ -240,10 +231,10 @@ export default function STLMatch() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label>Technology</Label>
-                      <Select value={technology} onValueChange={(v) => { setTechnology(v); setMaterial(TECH_MATERIALS[v]?.[0] || ""); }}>
+                      <Select value={technology} onValueChange={(v) => { setTechnology(v); setMaterial(techToMatMap[v]?.[0] || ""); }}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
-                          {Object.keys(TECH_MATERIALS).map((t) => (
+                          {technologyOptions.map((t) => (
                             <SelectItem key={t} value={t}>{t}</SelectItem>
                           ))}
                         </SelectContent>
