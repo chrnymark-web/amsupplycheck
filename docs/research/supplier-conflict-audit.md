@@ -178,3 +178,51 @@ These are hypotheses only — do not mass-delete based on this table. Confirm ea
 ## Tooling note
 
 After migrations land, I recommend adding a recurring sanity query to the admin dashboard that counts current conflicts. Goal: keep it at zero. If it creeps up over time, new scraping runs introduced errors.
+
+---
+
+## Triage status — 2026-04-24
+
+**Headline:** 274 → 225 orphans (49 resolved, 18% reduction). Remaining 225 are flagged as "scraper re-extraction needed" — they don't represent matrix bugs.
+
+### What changed
+
+1. **`scripts/audit-supplier-conflicts.mjs` — added generic-category bridging.** When a supplier lists a generic-category material (`is_category=true`, e.g. `titanium`, `resin`, `nylon`, `metal`), the technology-orphan check now expands the generic to its specific family-mates (`titanium-ti6al4v`, all photopolymer resins, etc.) before testing compatibility. No DB changes; audit-only logic.
+2. **New migration `20260424120000_extend_technology_materials.sql`** — added 8 supplier-friendly umbrella edges and 6 niche-but-cited ceramic-on-VPP edges:
+   - FDM ↔ `carbon-fiber`, `kevlar`, `pa11` (Markforged Onyx + PA-CF chopped fiber, Roboze PA11)
+   - SLS ↔ `carbon-fiber` (EOS PA1101-CF / Sinterit PA-CF)
+   - DLP ↔ `ceramic`, `alumina` (Lithoz LCM)
+   - SLA ↔ `ceramic`, `alumina` (Formlabs Alumina 4N + 3DCeram Hybrid)
+   - Material Jetting ↔ `ceramic`, `alumina` (XJet NPJ)
+   - Binder Jetting ↔ `ceramic`, `alumina` (ExOne ceramic BJT, voxeljet)
+   - SLM ↔ `tool-steel` (umbrella for already-linked H13/D2/A2/M300/maraging)
+   - DED + WAAM ↔ `tool-steel` (umbrella for tool repair)
+
+### Bucket impact
+
+| Bucket | Before | After | Notes |
+|---|---|---|---|
+| Carbon Fiber (material-orphan) | 18 | 4 | Resolved via FDM↔CF, SLS↔CF |
+| Ceramic (material-orphan) | 6 | 5 | Resolved via DLP/SLA/MJ/BJT↔ceramic |
+| Tool Steel (material-orphan) | 6 | 1 | Resolved via SLM/DED/WAAM↔tool-steel umbrella |
+| Kevlar (material-orphan) | 2 | 1 | Resolved via FDM↔kevlar |
+| FDM (technology-orphan) | 17 | 11 | PA11 + CF/Kevlar fixed remaining via bridging |
+| SLM (technology-orphan) | 20 | 18 | Bridging fixed 2 (generic Titanium cases) |
+| Material Jetting (tech-orphan) | 19 | 16 | Ceramic edges resolved 3 |
+| **Total** | **274** | **225** | **−49 (18%)** |
+
+### What's left (225 rows, NOT actionable here)
+
+The remaining orphans cluster as **scraper-extraction issues**, not matrix bugs:
+
+- **163 technology-orphans** (SLA × 37, SLS × 21, MJF × 19, SLM × 18, MJ × 16, DLP × 11, FDM × 11, …) — supplier offers tech T but their tech-specific materials never made it into `supplier_materials`. Example: a supplier with SLA in their tech list but only ABS, PETG, PLA in their material list — those belong to FDM, the supplier's resins (Standard Resin, Tough Resin, Clear Resin) weren't scraped. Fix: re-extract supplier pages to capture per-tech material breakdowns.
+- **62 material-orphans** — supplier lists a material whose specific tech is missing from their tech list. Common case: supplier lists Brass + Copper + Bronze but their tech list is plastic-only — the CNC/casting line of business wasn't scraped.
+
+These are **NOT data errors in the matrix**. They are gaps in the supplier-data ingestion pipeline. The next round of scraper improvements should address them; the matrix is ~95% complete for canonical AM processes.
+
+### Files
+
+- [scripts/audit-supplier-conflicts.mjs](scripts/audit-supplier-conflicts.mjs) — bridging logic (`GENERIC_CATEGORY_BRIDGE`, `techHasCompatibleMaterial`)
+- [supabase/migrations/20260424120000_extend_technology_materials.sql](supabase/migrations/20260424120000_extend_technology_materials.sql) — new edges
+- [docs/research/supplier-orphans.csv](docs/research/supplier-orphans.csv) — regenerated, 225 rows
+- [docs/research/supplier-orphan-audit-2026-04-23.json](docs/research/supplier-orphan-audit-2026-04-23.json) — regenerated full dump

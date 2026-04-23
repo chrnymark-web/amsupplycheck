@@ -70,6 +70,56 @@ const supById = new Map(suppliers.map((s) => [s.id, s]));
 // Set of valid (tech, material) pairs per the new compatibility matrix
 const validPairs = new Set(tmr.map((r) => `${r.technology_id}|${r.material_id}`));
 
+// Generic-category bridging: when a supplier lists a generic category material
+// (is_category=true, e.g. "Titanium", "Resin", "Nylon"), treat them as also having
+// every specific material in that category for the technology-orphan check.
+// Without this, a supplier with SLM + generic "Titanium" gets flagged as a
+// technology-orphan even though SLM↔titanium-ti6al4v is in the matrix.
+const GENERIC_CATEGORY_BRIDGE = {
+  'titanium': (m) => m.family === 'Metal / Titanium' || m.family === 'Metal / Intermetallic',
+  'inconel': (m) => m.family === 'Metal / Nickel Superalloy',
+  'nickel': (m) => m.family === 'Metal / Nickel Superalloy',
+  'nickel-alloys': (m) => m.family === 'Metal / Nickel Superalloy',
+  'cobalt-alloys': (m) => m.family === 'Metal / Cobalt' || /cobalt/i.test(m.name ?? ''),
+  'stainless-steel': (m) => m.family === 'Metal / Stainless',
+  'aluminum': (m) => m.family === 'Metal / Aluminum' || m.family === 'Metal / AM Aluminum'
+                  || m.family === 'Metal / Wrought Aluminum' || m.family === 'Metal / Die-cast Aluminum',
+  'metal': (m) => m.category === 'Metal',
+  'metal-alloys': (m) => m.category === 'Metal',
+  'nylon': (m) => m.family === 'Nylon' || m.family === 'Polymer / Nylon',
+  'resin': (m) => m.family === 'Photopolymer',
+  'thermoplastic': (m) => m.category === 'Polymer' && m.family !== 'Photopolymer',
+  'composites': (m) => m.category === 'Composite',
+  'technical-polymers': (m) => m.family === 'Polymer / Engineering' || m.family === 'Polymer / High Performance',
+  'sustainable-materials': (m) => m.family === 'Sustainable' || m.family === 'Recycled Polymer',
+  'recycled-materials': (m) => m.family === 'Recycled Polymer',
+};
+
+const specificMats = mats.filter((m) => !m.hidden && !m.is_category);
+const genericExpansion = new Map(); // generic_material_id → Set<specific_material_id>
+for (const generic of mats) {
+  if (!generic.is_category || generic.hidden) continue;
+  const predicate = GENERIC_CATEGORY_BRIDGE[generic.slug];
+  if (!predicate) continue;
+  const ids = new Set(specificMats.filter(predicate).map((m) => m.id));
+  if (ids.size > 0) genericExpansion.set(generic.id, ids);
+}
+
+// Returns true if (techId, matId-or-any-of-its-bridged-specifics) has a valid pair
+function techHasCompatibleMaterial(techId, matId) {
+  const mat = matById.get(matId);
+  if (!mat || mat.hidden) return false;
+  if (mat.is_category) {
+    const expanded = genericExpansion.get(matId);
+    if (!expanded) return false;
+    for (const specificId of expanded) {
+      if (validPairs.has(`${techId}|${specificId}`)) return true;
+    }
+    return false;
+  }
+  return validPairs.has(`${techId}|${matId}`);
+}
+
 // Group supplier → techs, materials
 const supplierTechs = new Map();
 for (const r of st) {
@@ -122,11 +172,7 @@ for (const [supId, techSet] of supplierTechs.entries()) {
     const tech = techById.get(techId);
     if (!tech || tech.hidden) continue;
     if (isServiceTech(tech)) continue; // services have no material mapping by design
-    const hasCompatibleMat = [...matSet].some((matId) => {
-      const mat = matById.get(matId);
-      if (!mat || mat.hidden || mat.is_category) return false;
-      return validPairs.has(`${techId}|${matId}`);
-    });
+    const hasCompatibleMat = [...matSet].some((matId) => techHasCompatibleMaterial(techId, matId));
     if (!hasCompatibleMat) {
       orphans.push({
         kind: 'technology-orphan',
