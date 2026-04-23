@@ -71,8 +71,19 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
   // Watchdog: surface a user-visible error instead of spinning forever when
   // the backend or network hangs silently. Cleared on every status transition,
   // so a healthy run renews the deadline as it progresses.
+  //
+  // Ranking-with-matches gets a softer path: we already have 300+ usable
+  // results rendered, so a stuck explanations phase shouldn't wipe them out
+  // with a hard failure. Silent-complete after 30s instead.
+  const hasResult = !!result;
   useEffect(() => {
     if (status === "idle" || status === "completed" || status === "failed") return;
+
+    if (status === "ranking" && hasResult) {
+      const t = setTimeout(() => setStatus("completed"), 30_000);
+      return () => clearTimeout(t);
+    }
+
     const startPhase = status === "uploading" || status === "pending";
     const timeoutMs = startPhase ? 45_000 : 180_000;
     const message = startPhase
@@ -83,7 +94,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
       setError(message);
     }, timeoutMs);
     return () => clearTimeout(timer);
-  }, [status]);
+  }, [status, hasResult]);
 
   const pollStatus = useCallback(async (id: string) => {
     // Only "completed" and "failed" are terminal. For any other result

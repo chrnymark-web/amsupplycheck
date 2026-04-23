@@ -73,7 +73,7 @@ export const stlSupplierMatch = schemaTask({
       // They're independent: Claude needs stlMetrics, DB fetch needs nothing from Claude.
       await updateSearchStatus(searchResultId, "matching");
 
-      const anthropic = new Anthropic();
+      const anthropic = new Anthropic({ timeout: 30_000, maxRetries: 1 });
       const parallelStart = Date.now();
       const [allSuppliers, analysisResponse] = await Promise.all([
         fetchSuppliers(),

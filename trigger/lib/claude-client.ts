@@ -7,7 +7,10 @@ import type { ExtractedRequirements, MatchResult, TechnologyRationale, ProjectRe
 const MODEL = "claude-sonnet-4-20250514";
 
 function getClient(): Anthropic {
-  return new Anthropic(); // reads ANTHROPIC_API_KEY from env automatically
+  // 30s per-request timeout bounds hanging Claude API calls. Without this the
+  // SDK default (10 min) lets a silent hang block the Trigger.dev task long
+  // enough to strand the UI (see use-trigger-stl-match watchdog).
+  return new Anthropic({ timeout: 30_000, maxRetries: 1 });
 }
 
 /** Extract structured requirements from project description using Claude tool_use */
