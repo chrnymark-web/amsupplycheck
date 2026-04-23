@@ -271,14 +271,16 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
                 onQuantityChange={setQuantity}
               />
 
-              <LivePriceComparison
-                file={file}
-                quantity={quantity}
-                area={area}
-                hideUpload
-                currency="EUR"
-                countryCode="DK"
-              />
+              {mode === 'compare' && (
+                <LivePriceComparison
+                  file={file}
+                  quantity={quantity}
+                  area={area}
+                  hideUpload
+                  currency="EUR"
+                  countryCode="DK"
+                />
+              )}
 
               {matchError && (
                 <div className="rounded-lg border border-destructive/40 bg-destructive/10 px-3 py-2 text-xs text-destructive">
