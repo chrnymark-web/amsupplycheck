@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   ArrowLeft,
+  ArrowRight,
   Upload,
   Sparkles,
   Loader2,
@@ -709,32 +710,12 @@ function SupplierResultCard({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex items-center gap-1.5">
-            <div className="min-w-0">
-              <p className="text-sm font-semibold truncate">{supplier.name}</p>
-              <p className="text-[11px] text-muted-foreground truncate">
-                {supplier.location_city ? `${supplier.location_city}, ` : ''}
-                {supplier.location_country || supplier.region}
-              </p>
-            </div>
-            {supplier.website && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  e.preventDefault();
-                  window.open(supplier.website, '_blank', 'noopener,noreferrer');
-                }}
-                aria-label={`Visit ${supplier.name} website`}
-                className={cn(
-                  'shrink-0 p-1 rounded-md text-muted-foreground',
-                  'hover:text-primary hover:bg-primary/10',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary'
-                )}
-              >
-                <ExternalLink className="h-3.5 w-3.5" />
-              </button>
-            )}
+          <div className="min-w-0">
+            <p className="text-sm font-semibold truncate">{supplier.name}</p>
+            <p className="text-[11px] text-muted-foreground truncate">
+              {supplier.location_city ? `${supplier.location_city}, ` : ''}
+              {supplier.location_country || supplier.region}
+            </p>
           </div>
           <div className="flex flex-col items-end gap-1 shrink-0">
             <PriceBlock price={price} />
@@ -764,6 +745,35 @@ function SupplierResultCard({
               {mat}
             </Badge>
           ))}
+        </div>
+        <div className="mt-3 pt-3 border-t border-border/40 flex items-center justify-end gap-2">
+          <span
+            className={cn(
+              'inline-flex items-center justify-center gap-1',
+              'h-8 px-3 text-xs font-medium',
+              'rounded-md border border-border bg-transparent',
+              'text-foreground hover:bg-accent hover:text-accent-foreground',
+              'transition-colors'
+            )}
+          >
+            Visit Supplier Page
+            <ArrowRight className="h-3 w-3" />
+          </span>
+          {supplier.website && (
+            <Button
+              variant="default"
+              size="sm"
+              className="h-8 text-xs"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(supplier.website, '_blank', 'noopener,noreferrer');
+              }}
+            >
+              Contact Directly
+              <ExternalLink className="ml-1 h-3 w-3" />
+            </Button>
+          )}
         </div>
       </div>
     </Link>
