@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { supabase } from "@/integrations/supabase/client";
 import type { MatchingResult, ProjectRequirements } from "./use-supplier-matching";
@@ -52,48 +52,73 @@ export function useTriggerSupplierMatch(): TriggerSupplierMatchReturn {
     },
   });
 
+  // Watchdog: surface a user-visible error instead of spinning forever when
+  // the backend or network hangs silently. Cleared on every status transition,
+  // so a healthy run renews the deadline as it progresses.
+  useEffect(() => {
+    if (status === "idle" || status === "completed" || status === "failed") return;
+    const startPhase = status === "pending";
+    const timeoutMs = startPhase ? 45_000 : 180_000;
+    const message = startPhase
+      ? "Couldn't start the search — please try again"
+      : "Search is taking longer than expected — please try again";
+    const timer = setTimeout(() => {
+      setStatus("failed");
+      setError(message);
+    }, timeoutMs);
+    return () => clearTimeout(timer);
+  }, [status]);
+
   // Poll search_results status for step-by-step updates
-  // (Trigger.dev realtime gives run-level status, but our task updates the DB with granular steps)
+  // (Trigger.dev realtime gives run-level status, but our task updates the DB with granular steps).
+  // Only "completed" and "failed" are terminal. For any other result
+  // (including transient errors, missing row, unknown status) we keep
+  // polling — the watchdog effect above guarantees we don't spin forever.
   const pollStatus = useCallback(
     async (id: string) => {
       const poll = async () => {
-        const { data } = await supabase
-          .from("search_results")
-          .select("status, matches, extracted_requirements, technology_rationale, total_suppliers_analyzed, error_message")
-          .eq("id", id)
-          .single();
+        try {
+          const { data, error } = await supabase
+            .from("search_results")
+            .select("status, matches, extracted_requirements, technology_rationale, total_suppliers_analyzed, error_message")
+            .eq("id", id)
+            .single();
 
-        if (!data) return;
+          if (error || !data) {
+            setTimeout(() => poll(), 1500);
+            return;
+          }
 
-        const dbStatus = data.status as SearchStatus;
+          const dbStatus = data.status as SearchStatus;
 
-        if (dbStatus === "completed" && data.matches) {
-          setStatus("completed");
-          setResult({
-            requirements: data.extracted_requirements as any,
-            matches: data.matches as any,
-            totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
-            technologyRationale: data.technology_rationale as any,
-          });
-          return; // Stop polling
+          if (dbStatus === "completed" && data.matches) {
+            setStatus("completed");
+            setResult({
+              requirements: data.extracted_requirements as any,
+              matches: data.matches as any,
+              totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
+              technologyRationale: data.technology_rationale as any,
+            });
+            return;
+          }
+
+          if (dbStatus === "failed") {
+            setStatus("failed");
+            setError(data.error_message || "Search failed");
+            return;
+          }
+
+          if (["analyzing", "matching", "ranking"].includes(dbStatus)) {
+            setStatus(dbStatus);
+          }
+
+          setTimeout(() => poll(), 1500);
+        } catch (err) {
+          console.warn("[pollStatus] transient error, retrying:", err);
+          setTimeout(() => poll(), 1500);
         }
-
-        if (dbStatus === "failed") {
-          setStatus("failed");
-          setError(data.error_message || "Search failed");
-          return; // Stop polling
-        }
-
-        // Update status for progress indicator
-        if (["analyzing", "matching", "ranking"].includes(dbStatus)) {
-          setStatus(dbStatus);
-        }
-
-        // Continue polling
-        setTimeout(() => poll(), 1500);
       };
 
-      // Start polling after a short delay
       setTimeout(() => poll(), 1000);
     },
     []

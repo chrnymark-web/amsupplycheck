@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { supabase } from "@/integrations/supabase/client";
 import type { MatchingResult } from "./use-supplier-matching";
@@ -68,54 +68,82 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
     },
   });
 
+  // Watchdog: surface a user-visible error instead of spinning forever when
+  // the backend or network hangs silently. Cleared on every status transition,
+  // so a healthy run renews the deadline as it progresses.
+  useEffect(() => {
+    if (status === "idle" || status === "completed" || status === "failed") return;
+    const startPhase = status === "uploading" || status === "pending";
+    const timeoutMs = startPhase ? 45_000 : 180_000;
+    const message = startPhase
+      ? "Couldn't start the search — please try again"
+      : "Search is taking longer than expected — please try again";
+    const timer = setTimeout(() => {
+      setStatus("failed");
+      setError(message);
+    }, timeoutMs);
+    return () => clearTimeout(timer);
+  }, [status]);
+
   const pollStatus = useCallback(async (id: string) => {
+    // Only "completed" and "failed" are terminal. For any other result
+    // (including transient errors, missing row, unknown status) we keep
+    // polling — the watchdog effect above guarantees we don't spin forever.
     const poll = async () => {
-      const { data } = await supabase
-        .from("search_results")
-        .select("status, matches, extracted_requirements, technology_rationale, total_suppliers_analyzed, stl_metrics, error_message")
-        .eq("id", id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from("search_results")
+          .select("status, matches, extracted_requirements, technology_rationale, total_suppliers_analyzed, stl_metrics, error_message")
+          .eq("id", id)
+          .single();
 
-      if (!data) return;
+        if (error || !data) {
+          setTimeout(() => poll(), 700);
+          return;
+        }
 
-      const dbStatus = data.status as SearchStatus;
+        const dbStatus = data.status as SearchStatus;
 
-      if (dbStatus === "completed" && data.matches) {
-        setStatus("completed");
-        setResult({
-          requirements: data.extracted_requirements as any,
-          matches: data.matches as any,
-          totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
-          technologyRationale: data.technology_rationale as any,
-        });
-        if (data.stl_metrics) setStlMetrics(data.stl_metrics as any);
-        return;
-      }
-
-      if (dbStatus === "failed") {
-        setStatus("failed");
-        setError(data.error_message || "Search failed");
-        return;
-      }
-
-      if (["analyzing", "matching", "ranking"].includes(dbStatus)) {
-        setStatus(dbStatus);
-        if (data.stl_metrics) setStlMetrics(data.stl_metrics as any);
-
-        // Progressive: matches are written at the start of "ranking" before
-        // Claude finishes explanations. Surface them immediately so the UI can
-        // render cards while explanations fill in on the next poll.
-        if (dbStatus === "ranking" && data.matches) {
+        if (dbStatus === "completed" && data.matches) {
+          setStatus("completed");
           setResult({
             requirements: data.extracted_requirements as any,
             matches: data.matches as any,
             totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
             technologyRationale: data.technology_rationale as any,
           });
+          if (data.stl_metrics) setStlMetrics(data.stl_metrics as any);
+          return;
         }
-      }
 
-      setTimeout(() => poll(), 700);
+        if (dbStatus === "failed") {
+          setStatus("failed");
+          setError(data.error_message || "Search failed");
+          return;
+        }
+
+        if (["analyzing", "matching", "ranking"].includes(dbStatus)) {
+          setStatus(dbStatus);
+          if (data.stl_metrics) setStlMetrics(data.stl_metrics as any);
+
+          // Progressive: matches are written at the start of "ranking" before
+          // Claude finishes explanations. Surface them immediately so the UI can
+          // render cards while explanations fill in on the next poll.
+          if (dbStatus === "ranking" && data.matches) {
+            setResult({
+              requirements: data.extracted_requirements as any,
+              matches: data.matches as any,
+              totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
+              technologyRationale: data.technology_rationale as any,
+            });
+          }
+        }
+
+        setTimeout(() => poll(), 700);
+      } catch (err) {
+        console.warn("[pollStatus] transient error, retrying:", err);
+        setTimeout(() => poll(), 700);
+      }
     };
 
     setTimeout(() => poll(), 1000);
