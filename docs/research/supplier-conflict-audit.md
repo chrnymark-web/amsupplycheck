@@ -1,6 +1,31 @@
 # Supplier Conflict Audit — Plan & Tooling
 
-**Status:** Phase 5 deliverable. Ready to run *after* the three migrations land on the live Supabase DB.
+**Status:** Phase 5 deliverable. Tooling is live; migrations have been applied (2026-04-23). First audit run produced 274 "orphans" — see below.
+
+## Quick start (re-run the audit any time)
+
+```bash
+# Text summary:
+node scripts/audit-supplier-conflicts.mjs
+
+# JSON export (includes every orphan row with supplier website):
+node scripts/audit-supplier-conflicts.mjs --json > docs/research/supplier-orphan-audit-latest.json
+
+# Spreadsheet-friendly CSV (import into Google Sheets / Excel to triage):
+node scripts/audit-orphans-to-csv.mjs > docs/research/supplier-orphans-latest.csv
+```
+
+## First audit run — what it found (2026-04-23)
+
+- **274 orphans** (revised interpretation — see below).
+- **84 material-orphans** = supplier lists a material whose family no supplier-listed tech can actually process. Top offenders: Carbon Fiber (18), Brass (9), Copper (6), Ceramic (6), Tool Steel (6), Bronze (5), ABS (5).
+- **190 technology-orphans** = supplier lists a technology, but none of their materials is compatible with it. Top offenders: SLA (37), SLS (23), SLM (21), Material Jetting (19), MJF (19), FDM (17).
+
+**Important interpretation:** the compatibility matrix does NOT claim the supplier's listed pair is invalid — suppliers have *independent* tech and material lists. An "orphan" means the supplier's list is internally inconsistent (e.g. they list SLA as a tech but have no resins in their material list). This is almost always a scraping gap, not a supplier lying. **The fix is usually to augment the supplier's other list**, not delete the orphaned item.
+
+Current audit files (committed 2026-04-23):
+- `docs/research/supplier-orphan-audit-2026-04-23.json` — full dump
+- `docs/research/supplier-orphans.csv` — triage-friendly
 
 **Purpose:** Some suppliers have `(technology, material)` combinations that the new compatibility matrix says shouldn't exist. Don't auto-delete these — some will be legitimate niche offerings, some will be scraping errors from the initial data ingest. Case-by-case: research the supplier, confirm, then act.
 

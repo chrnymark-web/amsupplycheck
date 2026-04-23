@@ -1,0 +1,3798 @@
+{
+  "total": 274,
+  "buckets": [
+    {
+      "kind": "technology-orphan",
+      "item": "SLA",
+      "count": 37
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "SLS",
+      "count": 23
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "SLM",
+      "count": 21
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "Material Jetting",
+      "count": 19
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "MJF",
+      "count": 19
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Carbon Fiber",
+      "count": 18
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "FDM",
+      "count": 17
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "DLP",
+      "count": 11
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Brass",
+      "count": 9
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "Binder Jetting",
+      "count": 9
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Copper",
+      "count": 6
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "Injection Molding",
+      "count": 6
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Ceramic",
+      "count": 6
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Tool Steel",
+      "count": 6
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Bronze",
+      "count": 5
+    },
+    {
+      "kind": "material-orphan",
+      "item": "ABS",
+      "count": 5
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "Die Casting",
+      "count": 5
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "WAAM",
+      "count": 5
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "EBM",
+      "count": 4
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Silicone",
+      "count": 4
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "SAF",
+      "count": 3
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Aluminum 6061",
+      "count": 3
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "CNC Machining",
+      "count": 3
+    },
+    {
+      "kind": "material-orphan",
+      "item": "PC (Polycarbonate)",
+      "count": 2
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Kevlar",
+      "count": 2
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Tungsten",
+      "count": 2
+    },
+    {
+      "kind": "material-orphan",
+      "item": "TPU",
+      "count": 2
+    },
+    {
+      "kind": "material-orphan",
+      "item": "PEEK",
+      "count": 2
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "CNC Milling",
+      "count": 2
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "CNC Turning",
+      "count": 2
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Cobalt Chrome",
+      "count": 2
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Polyurethane",
+      "count": 2
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Aluminum AlSi10Mg",
+      "count": 1
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Inconel 718",
+      "count": 1
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Aluminum 7075",
+      "count": 1
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "Sheet Metal",
+      "count": 1
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "DED",
+      "count": 1
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "LCD",
+      "count": 1
+    },
+    {
+      "kind": "material-orphan",
+      "item": "ASA",
+      "count": 1
+    },
+    {
+      "kind": "material-orphan",
+      "item": "PPS",
+      "count": 1
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Alumina",
+      "count": 1
+    },
+    {
+      "kind": "material-orphan",
+      "item": "Inconel 625",
+      "count": 1
+    },
+    {
+      "kind": "technology-orphan",
+      "item": "DMP",
+      "count": 1
+    },
+    {
+      "kind": "material-orphan",
+      "item": "PETG",
+      "count": 1
+    }
+  ],
+  "orphans": [
+    {
+      "kind": "technology-orphan",
+      "supplierId": "f3d14ef9-0d1c-400d-aaf4-5c1630c49fed",
+      "supplierName": "Direct 3D Printing – Industrial 3D Printing & Manufacturing",
+      "supplierWebsite": "https://www.direct3dprinting.com.au/",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "Cobalt Chrome",
+        "PC (Polycarbonate)",
+        "PEI (Ultem)",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "f3d14ef9-0d1c-400d-aaf4-5c1630c49fed",
+      "supplierName": "Direct 3D Printing – Industrial 3D Printing & Manufacturing",
+      "supplierWebsite": "https://www.direct3dprinting.com.au/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "Cobalt Chrome",
+        "PC (Polycarbonate)",
+        "PEI (Ultem)",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "f3d14ef9-0d1c-400d-aaf4-5c1630c49fed",
+      "supplierName": "Direct 3D Printing – Industrial 3D Printing & Manufacturing",
+      "supplierWebsite": "https://www.direct3dprinting.com.au/",
+      "orphanedItem": "SAF",
+      "orphanedItemId": "8bc3a085-b637-4f97-b948-c87d0da0408d",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "Cobalt Chrome",
+        "PC (Polycarbonate)",
+        "PEI (Ultem)",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "f3d14ef9-0d1c-400d-aaf4-5c1630c49fed",
+      "supplierName": "Direct 3D Printing – Industrial 3D Printing & Manufacturing",
+      "supplierWebsite": "https://www.direct3dprinting.com.au/",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "Cobalt Chrome",
+        "PC (Polycarbonate)",
+        "PEI (Ultem)",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e6db73d6-ca15-4e2e-983f-a58a17c33870",
+      "supplierName": "Materialise OnSite",
+      "supplierWebsite": "https://manufacturing.materialise.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e6db73d6-ca15-4e2e-983f-a58a17c33870",
+      "supplierName": "Materialise OnSite",
+      "supplierWebsite": "https://manufacturing.materialise.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e6db73d6-ca15-4e2e-983f-a58a17c33870",
+      "supplierName": "Materialise OnSite",
+      "supplierWebsite": "https://manufacturing.materialise.com",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "TPU"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "b06b7492-1c4b-4505-844a-b88ffa5f0390",
+      "supplierName": "i.materialise – Online 3D Printing Service",
+      "supplierWebsite": "https://i.materialise.com",
+      "orphanedItem": "Brass",
+      "orphanedItemId": "84a9403b-010f-4e61-b83d-08c10f073a3b",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "b06b7492-1c4b-4505-844a-b88ffa5f0390",
+      "supplierName": "i.materialise – Online 3D Printing Service",
+      "supplierWebsite": "https://i.materialise.com",
+      "orphanedItem": "Aluminum AlSi10Mg",
+      "orphanedItemId": "9b4d1155-a23b-4a88-9ad8-3e38bc83b940",
+      "family": "Metal / Aluminum",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "b06b7492-1c4b-4505-844a-b88ffa5f0390",
+      "supplierName": "i.materialise – Online 3D Printing Service",
+      "supplierWebsite": "https://i.materialise.com",
+      "orphanedItem": "Inconel 718",
+      "orphanedItemId": "bd34bd18-a4ee-45bf-8d23-7520685f7066",
+      "family": "Metal / Nickel Superalloy",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b06b7492-1c4b-4505-844a-b88ffa5f0390",
+      "supplierName": "i.materialise – Online 3D Printing Service",
+      "supplierWebsite": "https://i.materialise.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "Aluminum AlSi10Mg",
+        "Brass",
+        "Inconel 718",
+        "TPU",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "Aluminum 6061",
+      "orphanedItemId": "b48f76af-599d-4a4a-ad3f-739ab0f5cfe7",
+      "family": "Metal / Aluminum",
+      "supplierTechs": [
+        "DLP",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "Aluminum 7075",
+      "orphanedItemId": "7e8460c7-9048-47c9-b19c-afda4a0bc586",
+      "family": "Metal / Aluminum",
+      "supplierTechs": [
+        "DLP",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "Brass",
+      "orphanedItemId": "84a9403b-010f-4e61-b83d-08c10f073a3b",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "DLP",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "Bronze",
+      "orphanedItemId": "8fdd1347-e3e7-49fd-ba6e-bda479582d21",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "DLP",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "Copper",
+      "orphanedItemId": "159dda4e-16c1-4402-8876-904a8d97fd54",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "DLP",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "ABS",
+      "orphanedItemId": "89094852-bbb9-441f-baa7-fb0df7a57b9b",
+      "family": "Polymer / Engineering",
+      "supplierTechs": [
+        "DLP",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "PC (Polycarbonate)",
+      "orphanedItemId": "9d6d5ff3-e04d-46b4-8272-c8bde69605bc",
+      "family": "Polymer / Engineering",
+      "supplierTechs": [
+        "DLP",
+        "MJF",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "Aluminum 6061",
+        "Aluminum 7075",
+        "Brass",
+        "Bronze",
+        "Copper",
+        "PC (Polycarbonate)",
+        "PEEK"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "ABS",
+        "Aluminum 6061",
+        "Aluminum 7075",
+        "Brass",
+        "Bronze",
+        "Copper",
+        "PC (Polycarbonate)",
+        "PEEK"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "922e07af-9a20-43c7-a53b-f8287a57d762",
+      "supplierName": "Machinified – Additive Manufacturing & Digital Production Pl",
+      "supplierWebsite": "https://www.machinified.com/",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "ABS",
+        "Aluminum 6061",
+        "Aluminum 7075",
+        "Brass",
+        "Bronze",
+        "Copper",
+        "PC (Polycarbonate)",
+        "PEEK"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "ae811dfd-af2f-4381-96e5-5025587c978b",
+      "supplierName": "Proto3000",
+      "supplierWebsite": "https://proto3000.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "ae811dfd-af2f-4381-96e5-5025587c978b",
+      "supplierName": "Proto3000",
+      "supplierWebsite": "https://proto3000.com",
+      "orphanedItem": "Binder Jetting",
+      "orphanedItemId": "b6abe667-b884-4117-a168-404ef8563454",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "ae811dfd-af2f-4381-96e5-5025587c978b",
+      "supplierName": "Proto3000",
+      "supplierWebsite": "https://proto3000.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "ae811dfd-af2f-4381-96e5-5025587c978b",
+      "supplierName": "Proto3000",
+      "supplierWebsite": "https://proto3000.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "57ebb37b-0d2a-4116-9487-6a2295a29909",
+      "supplierName": "HLH Prototypes",
+      "supplierWebsite": "https://www.hlhprototypes.com",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "CNC Machining",
+        "Die Casting",
+        "Injection Molding",
+        "Rapid Tooling",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "57ebb37b-0d2a-4116-9487-6a2295a29909",
+      "supplierName": "HLH Prototypes",
+      "supplierWebsite": "https://www.hlhprototypes.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Carbon Fiber"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "57ebb37b-0d2a-4116-9487-6a2295a29909",
+      "supplierName": "HLH Prototypes",
+      "supplierWebsite": "https://www.hlhprototypes.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Carbon Fiber"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "57ebb37b-0d2a-4116-9487-6a2295a29909",
+      "supplierName": "HLH Prototypes",
+      "supplierWebsite": "https://www.hlhprototypes.com",
+      "orphanedItem": "CNC Machining",
+      "orphanedItemId": "713812d7-084b-457e-8a5a-fa1a7fbe6b69",
+      "supplierMats": [
+        "Carbon Fiber"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "57ebb37b-0d2a-4116-9487-6a2295a29909",
+      "supplierName": "HLH Prototypes",
+      "supplierWebsite": "https://www.hlhprototypes.com",
+      "orphanedItem": "Injection Molding",
+      "orphanedItemId": "2872606a-f31f-4ccb-857d-9b42746dccb6",
+      "supplierMats": [
+        "Carbon Fiber"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "57ebb37b-0d2a-4116-9487-6a2295a29909",
+      "supplierName": "HLH Prototypes",
+      "supplierWebsite": "https://www.hlhprototypes.com",
+      "orphanedItem": "Die Casting",
+      "orphanedItemId": "148e8964-5643-4bbc-b532-e68193c6a7e6",
+      "supplierMats": [
+        "Carbon Fiber"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "9c02358d-6463-48e0-ad37-2323af2a1a2a",
+      "supplierName": "in3Dtec",
+      "supplierWebsite": "https://in3dtec.com",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "Binder Jetting",
+        "DLP",
+        "FDM",
+        "MJF",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "9c02358d-6463-48e0-ad37-2323af2a1a2a",
+      "supplierName": "in3Dtec",
+      "supplierWebsite": "https://in3dtec.com",
+      "orphanedItem": "Aluminum 6061",
+      "orphanedItemId": "b48f76af-599d-4a4a-ad3f-739ab0f5cfe7",
+      "family": "Metal / Aluminum",
+      "supplierTechs": [
+        "Binder Jetting",
+        "DLP",
+        "FDM",
+        "MJF",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "6929af49-c9ee-4fe6-8045-bd05e137b581",
+      "supplierName": "JLC3DP – Online 3D Printing Service",
+      "supplierWebsite": "https://jlc3dp.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "PA11 Nylon",
+        "PA12 Nylon",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "6929af49-c9ee-4fe6-8045-bd05e137b581",
+      "supplierName": "JLC3DP – Online 3D Printing Service",
+      "supplierWebsite": "https://jlc3dp.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "PA11 Nylon",
+        "PA12 Nylon",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "6929af49-c9ee-4fe6-8045-bd05e137b581",
+      "supplierName": "JLC3DP – Online 3D Printing Service",
+      "supplierWebsite": "https://jlc3dp.com",
+      "orphanedItem": "Binder Jetting",
+      "orphanedItemId": "b6abe667-b884-4117-a168-404ef8563454",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "PA11 Nylon",
+        "PA12 Nylon",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "49af0085-6e50-4f8d-bbeb-9e330c979957",
+      "supplierName": "Prototal Denmark – Industrial 3D Printing Service",
+      "supplierWebsite": "https://prototal.dk",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "Aluminum AlSi10Mg",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "49af0085-6e50-4f8d-bbeb-9e330c979957",
+      "supplierName": "Prototal Denmark – Industrial 3D Printing Service",
+      "supplierWebsite": "https://prototal.dk",
+      "orphanedItem": "SAF",
+      "orphanedItemId": "8bc3a085-b637-4f97-b948-c87d0da0408d",
+      "supplierMats": [
+        "ABS",
+        "Aluminum AlSi10Mg",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "49af0085-6e50-4f8d-bbeb-9e330c979957",
+      "supplierName": "Prototal Denmark – Industrial 3D Printing Service",
+      "supplierWebsite": "https://prototal.dk",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS",
+        "Aluminum AlSi10Mg",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "3630901a-f01d-4578-a719-a63cb5338e4f",
+      "supplierName": "PROTIQ – Digital Manufacturing Marketplace & 3D Printing Sol",
+      "supplierWebsite": "https://www.protiq.com/",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Ceramic",
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "3630901a-f01d-4578-a719-a63cb5338e4f",
+      "supplierName": "PROTIQ – Digital Manufacturing Marketplace & 3D Printing Sol",
+      "supplierWebsite": "https://www.protiq.com/",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Ceramic",
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "3630901a-f01d-4578-a719-a63cb5338e4f",
+      "supplierName": "PROTIQ – Digital Manufacturing Marketplace & 3D Printing Sol",
+      "supplierWebsite": "https://www.protiq.com/",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "Ceramic",
+        "Copper"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "6717df62-91b1-4cc6-a9b4-48cb4b248b21",
+      "supplierName": "Robot faber",
+      "supplierWebsite": "https://robotfaber.com",
+      "orphanedItem": "Ceramic",
+      "orphanedItemId": "3b0129a0-c169-49d6-92f8-1bfcb8cfa302",
+      "family": "Ceramic",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "6717df62-91b1-4cc6-a9b4-48cb4b248b21",
+      "supplierName": "Robot faber",
+      "supplierWebsite": "https://robotfaber.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "98ae14c1-e40e-4320-a54f-29472dabda7d",
+      "supplierName": "BigRep Partlab",
+      "supplierWebsite": "https://bigrep.com",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c1c3e80a-f2ea-4524-a029-f422aac384c4",
+      "supplierName": "toolcraft AG",
+      "supplierWebsite": "https://www.toolcraft.de/en/",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Titanium",
+        "Tool Steel"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c1c3e80a-f2ea-4524-a029-f422aac384c4",
+      "supplierName": "toolcraft AG",
+      "supplierWebsite": "https://www.toolcraft.de/en/",
+      "orphanedItem": "Injection Molding",
+      "orphanedItemId": "2872606a-f31f-4ccb-857d-9b42746dccb6",
+      "supplierMats": [
+        "Titanium",
+        "Tool Steel"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "d4934d0a-f3c6-4fa1-8f72-79e91ac5cb4a",
+      "supplierName": "EXL PROTOTYPES CO LTD",
+      "supplierWebsite": "http://www.exlprototypes.com",
+      "orphanedItem": "ABS",
+      "orphanedItemId": "89094852-bbb9-441f-baa7-fb0df7a57b9b",
+      "family": "Polymer / Engineering",
+      "supplierTechs": [
+        "Material Jetting",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d4934d0a-f3c6-4fa1-8f72-79e91ac5cb4a",
+      "supplierName": "EXL PROTOTYPES CO LTD",
+      "supplierWebsite": "http://www.exlprototypes.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d4934d0a-f3c6-4fa1-8f72-79e91ac5cb4a",
+      "supplierName": "EXL PROTOTYPES CO LTD",
+      "supplierWebsite": "http://www.exlprototypes.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d4934d0a-f3c6-4fa1-8f72-79e91ac5cb4a",
+      "supplierName": "EXL PROTOTYPES CO LTD",
+      "supplierWebsite": "http://www.exlprototypes.com",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d4934d0a-f3c6-4fa1-8f72-79e91ac5cb4a",
+      "supplierName": "EXL PROTOTYPES CO LTD",
+      "supplierWebsite": "http://www.exlprototypes.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "7d3ebc7f-2804-4bd3-bc63-eb2bb135b7be",
+      "supplierName": "Treddy",
+      "supplierWebsite": "https://treddy.it",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "MJF",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "7d3ebc7f-2804-4bd3-bc63-eb2bb135b7be",
+      "supplierName": "Treddy",
+      "supplierWebsite": "https://treddy.it",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Carbon Fiber",
+        "PA12 Nylon"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "42322d5b-930a-4af5-b84a-c267e48af747",
+      "supplierName": "Foremost AddiTech",
+      "supplierWebsite": "https://foremost3d.com",
+      "orphanedItem": "Tool Steel",
+      "orphanedItemId": "72367b0b-f6cd-4e2a-bcf2-45da69eb9c93",
+      "family": "Metal / Tool Steel",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "42322d5b-930a-4af5-b84a-c267e48af747",
+      "supplierName": "Foremost AddiTech",
+      "supplierWebsite": "https://foremost3d.com",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "42322d5b-930a-4af5-b84a-c267e48af747",
+      "supplierName": "Foremost AddiTech",
+      "supplierWebsite": "https://foremost3d.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "Aluminum AlSi10Mg",
+        "Carbon Fiber",
+        "Cobalt Chrome",
+        "Copper",
+        "Inconel 718",
+        "PEEK",
+        "PETG",
+        "PLA",
+        "PPS",
+        "TPU",
+        "Tool Steel"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "0fa22345-ea0b-408d-b953-0ea8564ad96b",
+      "supplierName": "FIT Additive Manufacturing Group",
+      "supplierWebsite": "https://fit.technology",
+      "orphanedItem": "Tool Steel",
+      "orphanedItemId": "72367b0b-f6cd-4e2a-bcf2-45da69eb9c93",
+      "family": "Metal / Tool Steel",
+      "supplierTechs": [
+        "DLP",
+        "EBM",
+        "SLA",
+        "SLM",
+        "SLS",
+        "WAAM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "0fa22345-ea0b-408d-b953-0ea8564ad96b",
+      "supplierName": "FIT Additive Manufacturing Group",
+      "supplierWebsite": "https://fit.technology",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Ceramic",
+        "Copper",
+        "Titanium",
+        "Tool Steel"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "0fa22345-ea0b-408d-b953-0ea8564ad96b",
+      "supplierName": "FIT Additive Manufacturing Group",
+      "supplierWebsite": "https://fit.technology",
+      "orphanedItem": "WAAM",
+      "orphanedItemId": "ee274731-e9d8-4bbf-961f-798a0311901d",
+      "supplierMats": [
+        "Ceramic",
+        "Copper",
+        "Titanium",
+        "Tool Steel"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "0fa22345-ea0b-408d-b953-0ea8564ad96b",
+      "supplierName": "FIT Additive Manufacturing Group",
+      "supplierWebsite": "https://fit.technology",
+      "orphanedItem": "EBM",
+      "orphanedItemId": "15c7cd32-20e5-491d-b8a2-f082a0272d0e",
+      "supplierMats": [
+        "Ceramic",
+        "Copper",
+        "Titanium",
+        "Tool Steel"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b4b30f06-4db1-4b5a-989b-e45c4057c9aa",
+      "supplierName": "Prosilas (Prototal Prosilas)",
+      "supplierWebsite": "https://www.prosilas.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "PA11 Nylon"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b4b30f06-4db1-4b5a-989b-e45c4057c9aa",
+      "supplierName": "Prosilas (Prototal Prosilas)",
+      "supplierWebsite": "https://www.prosilas.com",
+      "orphanedItem": "Injection Molding",
+      "orphanedItemId": "2872606a-f31f-4ccb-857d-9b42746dccb6",
+      "supplierMats": [
+        "PA11 Nylon"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "70df7136-671d-4bcc-a14c-d254e1945e78",
+      "supplierName": "K3D – Masters in 3D Metal Printing",
+      "supplierWebsite": "https://k3d.nl/en/",
+      "orphanedItem": "Tool Steel",
+      "orphanedItemId": "72367b0b-f6cd-4e2a-bcf2-45da69eb9c93",
+      "family": "Metal / Tool Steel",
+      "supplierTechs": [
+        "SLM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "53c84a0a-2d29-4f97-bbdf-9ab4de2b6bfd",
+      "supplierName": "3D Makers Zone",
+      "supplierWebsite": "https://3dmz.nl",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "Binder Jetting",
+        "DLP",
+        "EBM",
+        "FDM",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "53c84a0a-2d29-4f97-bbdf-9ab4de2b6bfd",
+      "supplierName": "3D Makers Zone",
+      "supplierWebsite": "https://3dmz.nl",
+      "orphanedItem": "Kevlar",
+      "orphanedItemId": "8dd5fae8-6527-45e2-b2e8-605e42d4a8de",
+      "family": "Composite",
+      "supplierTechs": [
+        "Binder Jetting",
+        "DLP",
+        "EBM",
+        "FDM",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "53c84a0a-2d29-4f97-bbdf-9ab4de2b6bfd",
+      "supplierName": "3D Makers Zone",
+      "supplierWebsite": "https://3dmz.nl",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Ceramic",
+        "Kevlar"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "53c84a0a-2d29-4f97-bbdf-9ab4de2b6bfd",
+      "supplierName": "3D Makers Zone",
+      "supplierWebsite": "https://3dmz.nl",
+      "orphanedItem": "Binder Jetting",
+      "orphanedItemId": "b6abe667-b884-4117-a168-404ef8563454",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Ceramic",
+        "Kevlar"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "53c84a0a-2d29-4f97-bbdf-9ab4de2b6bfd",
+      "supplierName": "3D Makers Zone",
+      "supplierWebsite": "https://3dmz.nl",
+      "orphanedItem": "EBM",
+      "orphanedItemId": "15c7cd32-20e5-491d-b8a2-f082a0272d0e",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Ceramic",
+        "Kevlar"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c1588a55-cd74-463a-a3f2-8e15cae47a90",
+      "supplierName": "Forecast 3D – Industrial 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.forecast3d.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "PC (Polycarbonate)",
+        "PP (Polypropylene)",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c1588a55-cd74-463a-a3f2-8e15cae47a90",
+      "supplierName": "Forecast 3D – Industrial 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.forecast3d.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "ABS",
+        "PC (Polycarbonate)",
+        "PP (Polypropylene)",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c1588a55-cd74-463a-a3f2-8e15cae47a90",
+      "supplierName": "Forecast 3D – Industrial 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.forecast3d.com",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS",
+        "PC (Polycarbonate)",
+        "PP (Polypropylene)",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "394a5668-390d-42ce-9814-9c06d4b1951e",
+      "supplierName": "Holit",
+      "supplierWebsite": "https://holit.nl",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "PETG",
+        "PLA",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "394a5668-390d-42ce-9814-9c06d4b1951e",
+      "supplierName": "Holit",
+      "supplierWebsite": "https://holit.nl",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "ABS",
+        "PETG",
+        "PLA",
+        "TPU"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "30464f60-1b17-4e8c-8a59-bdb637539357",
+      "supplierName": "WayKen",
+      "supplierWebsite": "https://waykenrm.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "30464f60-1b17-4e8c-8a59-bdb637539357",
+      "supplierName": "WayKen",
+      "supplierWebsite": "https://waykenrm.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "30464f60-1b17-4e8c-8a59-bdb637539357",
+      "supplierName": "WayKen",
+      "supplierWebsite": "https://waykenrm.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "30464f60-1b17-4e8c-8a59-bdb637539357",
+      "supplierName": "WayKen",
+      "supplierWebsite": "https://waykenrm.com",
+      "orphanedItem": "Sheet Metal",
+      "orphanedItemId": "dc7a5410-8be9-4508-9bef-cb462bd195a2",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "30464f60-1b17-4e8c-8a59-bdb637539357",
+      "supplierName": "WayKen",
+      "supplierWebsite": "https://waykenrm.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "c779355f-455d-4f62-a6b4-0c437554a6f3",
+      "supplierName": "Polyproducts B.V./ENLARG3D",
+      "supplierWebsite": "https://www.polyproducts.nl",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c779355f-455d-4f62-a6b4-0c437554a6f3",
+      "supplierName": "Polyproducts B.V./ENLARG3D",
+      "supplierWebsite": "https://www.polyproducts.nl",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Carbon Fiber"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "dea9911e-81e0-4108-90f0-6ab4dfb7b1d9",
+      "supplierName": "HabitAdd",
+      "supplierWebsite": "https://habitadd.bg",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "dea9911e-81e0-4108-90f0-6ab4dfb7b1d9",
+      "supplierName": "HabitAdd",
+      "supplierWebsite": "https://habitadd.bg",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "dea9911e-81e0-4108-90f0-6ab4dfb7b1d9",
+      "supplierName": "HabitAdd",
+      "supplierWebsite": "https://habitadd.bg",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "dea9911e-81e0-4108-90f0-6ab4dfb7b1d9",
+      "supplierName": "HabitAdd",
+      "supplierWebsite": "https://habitadd.bg",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "dea9911e-81e0-4108-90f0-6ab4dfb7b1d9",
+      "supplierName": "HabitAdd",
+      "supplierWebsite": "https://habitadd.bg",
+      "orphanedItem": "DED",
+      "orphanedItemId": "05f47ee0-8b99-4334-9277-67012180bb5d",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "dea9911e-81e0-4108-90f0-6ab4dfb7b1d9",
+      "supplierName": "HabitAdd",
+      "supplierWebsite": "https://habitadd.bg",
+      "orphanedItem": "Binder Jetting",
+      "orphanedItemId": "b6abe667-b884-4117-a168-404ef8563454",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b1113130-d469-4d2a-8060-cfd21104b71d",
+      "supplierName": "Printerior",
+      "supplierWebsite": "https://printeriordesigns.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "PETG",
+        "PLA"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b1113130-d469-4d2a-8060-cfd21104b71d",
+      "supplierName": "Printerior",
+      "supplierWebsite": "https://printeriordesigns.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "PETG",
+        "PLA"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "9793df47-6730-4b17-b06d-c053090477c0",
+      "supplierName": "LaMáquina",
+      "supplierWebsite": "https://lamaquina.io",
+      "orphanedItem": "Ceramic",
+      "orphanedItemId": "3b0129a0-c169-49d6-92f8-1bfcb8cfa302",
+      "family": "Ceramic",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "103247e7-ac5f-4097-879f-b13779fbdc68",
+      "supplierName": "Shapeways",
+      "supplierWebsite": "https://www.shapeways.com/",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "PC (Polycarbonate)",
+        "PETG"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "103247e7-ac5f-4097-879f-b13779fbdc68",
+      "supplierName": "Shapeways",
+      "supplierWebsite": "https://www.shapeways.com/",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "PC (Polycarbonate)",
+        "PETG"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "103247e7-ac5f-4097-879f-b13779fbdc68",
+      "supplierName": "Shapeways",
+      "supplierWebsite": "https://www.shapeways.com/",
+      "orphanedItem": "Binder Jetting",
+      "orphanedItemId": "b6abe667-b884-4117-a168-404ef8563454",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "PC (Polycarbonate)",
+        "PETG"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "103247e7-ac5f-4097-879f-b13779fbdc68",
+      "supplierName": "Shapeways",
+      "supplierWebsite": "https://www.shapeways.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "PC (Polycarbonate)",
+        "PETG"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e7272ef9-b285-4938-9f10-2555107cb19c",
+      "supplierName": "Imaginarium",
+      "supplierWebsite": "https://imaginarium.io",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "PC (Polycarbonate)"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e7272ef9-b285-4938-9f10-2555107cb19c",
+      "supplierName": "Imaginarium",
+      "supplierWebsite": "https://imaginarium.io",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "ABS",
+        "PC (Polycarbonate)"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e7272ef9-b285-4938-9f10-2555107cb19c",
+      "supplierName": "Imaginarium",
+      "supplierWebsite": "https://imaginarium.io",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "ABS",
+        "PC (Polycarbonate)"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e7272ef9-b285-4938-9f10-2555107cb19c",
+      "supplierName": "Imaginarium",
+      "supplierWebsite": "https://imaginarium.io",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS",
+        "PC (Polycarbonate)"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "d85992a8-c5c0-4a86-a4bb-de474579d21b",
+      "supplierName": "Wenext Technology Co., Ltd",
+      "supplierWebsite": "https://www.wenext.com",
+      "orphanedItem": "Tool Steel",
+      "orphanedItemId": "72367b0b-f6cd-4e2a-bcf2-45da69eb9c93",
+      "family": "Metal / Tool Steel",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d85992a8-c5c0-4a86-a4bb-de474579d21b",
+      "supplierName": "Wenext Technology Co., Ltd",
+      "supplierWebsite": "https://www.wenext.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "Copper",
+        "PP (Polypropylene)",
+        "TPU",
+        "Titanium",
+        "Tool Steel"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "e9e23c3c-eb42-4188-b4b6-cb2ca086b01c",
+      "supplierName": "NanoFract UG",
+      "supplierWebsite": "https://www.nanofract.com",
+      "orphanedItem": "Ceramic",
+      "orphanedItemId": "3b0129a0-c169-49d6-92f8-1bfcb8cfa302",
+      "family": "Ceramic",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "e9e23c3c-eb42-4188-b4b6-cb2ca086b01c",
+      "supplierName": "NanoFract UG",
+      "supplierWebsite": "https://www.nanofract.com",
+      "orphanedItem": "Tool Steel",
+      "orphanedItemId": "72367b0b-f6cd-4e2a-bcf2-45da69eb9c93",
+      "family": "Metal / Tool Steel",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "e9e23c3c-eb42-4188-b4b6-cb2ca086b01c",
+      "supplierName": "NanoFract UG",
+      "supplierWebsite": "https://www.nanofract.com",
+      "orphanedItem": "Brass",
+      "orphanedItemId": "84a9403b-010f-4e61-b83d-08c10f073a3b",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e9e23c3c-eb42-4188-b4b6-cb2ca086b01c",
+      "supplierName": "NanoFract UG",
+      "supplierWebsite": "https://www.nanofract.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Brass",
+        "Ceramic",
+        "Tool Steel"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "f115bb46-26d8-4823-8b1e-1f43452e084c",
+      "supplierName": "Plus Manufact GmbH",
+      "supplierWebsite": "https://plusmanufact.de",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "f115bb46-26d8-4823-8b1e-1f43452e084c",
+      "supplierName": "Plus Manufact GmbH",
+      "supplierWebsite": "https://plusmanufact.de",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "5591f74f-f757-4c65-b190-7be2d0c77294",
+      "supplierName": "3DR TECH",
+      "supplierWebsite": "http://3drtech.it",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "d0cea5ca-2586-4ad7-85cb-4effbd02213a",
+      "supplierName": "Geomiq",
+      "supplierWebsite": "https://geomiq.com",
+      "orphanedItem": "Silicone",
+      "orphanedItemId": "e16630be-f6ec-4cfc-9f54-08e4cbaa6bc5",
+      "family": "Elastomer",
+      "supplierTechs": [
+        "CNC Machining",
+        "Die Casting",
+        "FDM",
+        "MJF",
+        "Material Jetting",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d0cea5ca-2586-4ad7-85cb-4effbd02213a",
+      "supplierName": "Geomiq",
+      "supplierWebsite": "https://geomiq.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d0cea5ca-2586-4ad7-85cb-4effbd02213a",
+      "supplierName": "Geomiq",
+      "supplierWebsite": "https://geomiq.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d0cea5ca-2586-4ad7-85cb-4effbd02213a",
+      "supplierName": "Geomiq",
+      "supplierWebsite": "https://geomiq.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d0cea5ca-2586-4ad7-85cb-4effbd02213a",
+      "supplierName": "Geomiq",
+      "supplierWebsite": "https://geomiq.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d0cea5ca-2586-4ad7-85cb-4effbd02213a",
+      "supplierName": "Geomiq",
+      "supplierWebsite": "https://geomiq.com",
+      "orphanedItem": "CNC Machining",
+      "orphanedItemId": "713812d7-084b-457e-8a5a-fa1a7fbe6b69",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d0cea5ca-2586-4ad7-85cb-4effbd02213a",
+      "supplierName": "Geomiq",
+      "supplierWebsite": "https://geomiq.com",
+      "orphanedItem": "Die Casting",
+      "orphanedItemId": "148e8964-5643-4bbc-b532-e68193c6a7e6",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d0cea5ca-2586-4ad7-85cb-4effbd02213a",
+      "supplierName": "Geomiq",
+      "supplierWebsite": "https://geomiq.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d0cea5ca-2586-4ad7-85cb-4effbd02213a",
+      "supplierName": "Geomiq",
+      "supplierWebsite": "https://geomiq.com",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "Silicone",
+      "orphanedItemId": "e16630be-f6ec-4cfc-9f54-08e4cbaa6bc5",
+      "family": "Elastomer",
+      "supplierTechs": [
+        "Binder Jetting",
+        "DLP",
+        "EBM",
+        "FDM",
+        "MJF",
+        "Material Jetting",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "EBM",
+      "orphanedItemId": "15c7cd32-20e5-491d-b8a2-f082a0272d0e",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "812a97b5-2db5-4b51-88c0-e3f0d8d4ff07",
+      "supplierName": "3Diligent",
+      "supplierWebsite": "https://www.3diligent.com",
+      "orphanedItem": "Binder Jetting",
+      "orphanedItemId": "b6abe667-b884-4117-a168-404ef8563454",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "d67422ef-7779-49d0-a9e9-bdecfc0203c1",
+      "supplierName": "3DCeram",
+      "supplierWebsite": "https://3dceram.com",
+      "orphanedItem": "Copper",
+      "orphanedItemId": "159dda4e-16c1-4402-8876-904a8d97fd54",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "FDM",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d67422ef-7779-49d0-a9e9-bdecfc0203c1",
+      "supplierName": "3DCeram",
+      "supplierWebsite": "https://3dceram.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Ceramic",
+        "Copper"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "e0e7b6de-40c4-4420-b7bf-d9ec8bd28ee5",
+      "supplierName": "WAAM3D",
+      "supplierWebsite": "http://waam3d.com",
+      "orphanedItem": "Bronze",
+      "orphanedItemId": "8fdd1347-e3e7-49fd-ba6e-bda479582d21",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "WAAM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "e0e7b6de-40c4-4420-b7bf-d9ec8bd28ee5",
+      "supplierName": "WAAM3D",
+      "supplierWebsite": "http://waam3d.com",
+      "orphanedItem": "Tungsten",
+      "orphanedItemId": "b3ee3efd-f506-49a6-a2c6-1a1387eddae6",
+      "family": "Metal / Refractory",
+      "supplierTechs": [
+        "WAAM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e0e7b6de-40c4-4420-b7bf-d9ec8bd28ee5",
+      "supplierName": "WAAM3D",
+      "supplierWebsite": "http://waam3d.com",
+      "orphanedItem": "WAAM",
+      "orphanedItemId": "ee274731-e9d8-4bbf-961f-798a0311901d",
+      "supplierMats": [
+        "Bronze",
+        "Titanium",
+        "Tungsten"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c7d7ba5d-ec07-4c8d-8ea5-07e8d512f367",
+      "supplierName": "RapidDirect",
+      "supplierWebsite": "https://www.rapiddirect.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c7d7ba5d-ec07-4c8d-8ea5-07e8d512f367",
+      "supplierName": "RapidDirect",
+      "supplierWebsite": "https://www.rapiddirect.com/",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c7d7ba5d-ec07-4c8d-8ea5-07e8d512f367",
+      "supplierName": "RapidDirect",
+      "supplierWebsite": "https://www.rapiddirect.com/",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c7d7ba5d-ec07-4c8d-8ea5-07e8d512f367",
+      "supplierName": "RapidDirect",
+      "supplierWebsite": "https://www.rapiddirect.com/",
+      "orphanedItem": "Injection Molding",
+      "orphanedItemId": "2872606a-f31f-4ccb-857d-9b42746dccb6",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "c7d7ba5d-ec07-4c8d-8ea5-07e8d512f367",
+      "supplierName": "RapidDirect",
+      "supplierWebsite": "https://www.rapiddirect.com/",
+      "orphanedItem": "Die Casting",
+      "orphanedItemId": "148e8964-5643-4bbc-b532-e68193c6a7e6",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "47f54c99-098b-47a7-b9f2-b5189c68808c",
+      "supplierName": "SGD 3D",
+      "supplierWebsite": "https://sgd3d.co.uk",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "47f54c99-098b-47a7-b9f2-b5189c68808c",
+      "supplierName": "SGD 3D",
+      "supplierWebsite": "https://sgd3d.co.uk",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "Carbon Fiber",
+        "PEEK"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "01090d08-7ecb-429b-9fa6-c0cd69eb8a83",
+      "supplierName": "Fab.Pub",
+      "supplierWebsite": "https://fabpub.com",
+      "orphanedItem": "Ceramic",
+      "orphanedItemId": "3b0129a0-c169-49d6-92f8-1bfcb8cfa302",
+      "family": "Ceramic",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "36a72efd-3b62-4e6e-b401-3fc878f6f210",
+      "supplierName": "Sculpteo – On-Demand 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.sculpteo.com",
+      "orphanedItem": "Brass",
+      "orphanedItemId": "84a9403b-010f-4e61-b83d-08c10f073a3b",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "Binder Jetting",
+        "DLP",
+        "FDM",
+        "LCD",
+        "MJF",
+        "Material Jetting",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "36a72efd-3b62-4e6e-b401-3fc878f6f210",
+      "supplierName": "Sculpteo – On-Demand 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.sculpteo.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Brass",
+        "Bronze",
+        "PA11 Nylon"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "36a72efd-3b62-4e6e-b401-3fc878f6f210",
+      "supplierName": "Sculpteo – On-Demand 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.sculpteo.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Brass",
+        "Bronze",
+        "PA11 Nylon"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "36a72efd-3b62-4e6e-b401-3fc878f6f210",
+      "supplierName": "Sculpteo – On-Demand 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.sculpteo.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Brass",
+        "Bronze",
+        "PA11 Nylon"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "36a72efd-3b62-4e6e-b401-3fc878f6f210",
+      "supplierName": "Sculpteo – On-Demand 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.sculpteo.com",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "Brass",
+        "Bronze",
+        "PA11 Nylon"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "36a72efd-3b62-4e6e-b401-3fc878f6f210",
+      "supplierName": "Sculpteo – On-Demand 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.sculpteo.com",
+      "orphanedItem": "LCD",
+      "orphanedItemId": "0da17235-e664-4f80-b264-53bf6b0c4993",
+      "supplierMats": [
+        "Brass",
+        "Bronze",
+        "PA11 Nylon"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "36a72efd-3b62-4e6e-b401-3fc878f6f210",
+      "supplierName": "Sculpteo – On-Demand 3D Printing & Digital Manufacturing",
+      "supplierWebsite": "https://www.sculpteo.com",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "Brass",
+        "Bronze",
+        "PA11 Nylon"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "208baa7f-0fca-473e-917a-db478c3a988a",
+      "supplierName": "3D Printing Services",
+      "supplierWebsite": "https://3dprintingservices.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "ABS",
+        "Castable Resin",
+        "Clear Resin",
+        "Dental Resin",
+        "Flexible Resin",
+        "High-Temp Resin",
+        "PETG",
+        "PLA",
+        "Standard Resin",
+        "Tough Resin"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "208baa7f-0fca-473e-917a-db478c3a988a",
+      "supplierName": "3D Printing Services",
+      "supplierWebsite": "https://3dprintingservices.com",
+      "orphanedItem": "Binder Jetting",
+      "orphanedItemId": "b6abe667-b884-4117-a168-404ef8563454",
+      "supplierMats": [
+        "ABS",
+        "Castable Resin",
+        "Clear Resin",
+        "Dental Resin",
+        "Flexible Resin",
+        "High-Temp Resin",
+        "PETG",
+        "PLA",
+        "Standard Resin",
+        "Tough Resin"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "208baa7f-0fca-473e-917a-db478c3a988a",
+      "supplierName": "3D Printing Services",
+      "supplierWebsite": "https://3dprintingservices.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "ABS",
+        "Castable Resin",
+        "Clear Resin",
+        "Dental Resin",
+        "Flexible Resin",
+        "High-Temp Resin",
+        "PETG",
+        "PLA",
+        "Standard Resin",
+        "Tough Resin"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "94ab9b84-f4c5-4f13-917d-8316c543f9aa",
+      "supplierName": "Makexyz",
+      "supplierWebsite": "https://www.makexyz.com/",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS",
+        "Ceramic",
+        "PC (Polycarbonate)",
+        "PETG",
+        "PLA",
+        "TPU",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "06637a03-2f55-467f-b9af-afbe99fbf149",
+      "supplierName": "3D Systems",
+      "supplierWebsite": "https://www.3dsystems.com/",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Titanium",
+        "Wax"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "06637a03-2f55-467f-b9af-afbe99fbf149",
+      "supplierName": "3D Systems",
+      "supplierWebsite": "https://www.3dsystems.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Titanium",
+        "Wax"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "06637a03-2f55-467f-b9af-afbe99fbf149",
+      "supplierName": "3D Systems",
+      "supplierWebsite": "https://www.3dsystems.com/",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Titanium",
+        "Wax"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "06637a03-2f55-467f-b9af-afbe99fbf149",
+      "supplierName": "3D Systems",
+      "supplierWebsite": "https://www.3dsystems.com/",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "Titanium",
+        "Wax"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "06637a03-2f55-467f-b9af-afbe99fbf149",
+      "supplierName": "3D Systems",
+      "supplierWebsite": "https://www.3dsystems.com/",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Titanium",
+        "Wax"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "a64b2574-8f01-41db-bd12-c9743d74faa4",
+      "supplierName": "Guaranteed",
+      "supplierWebsite": "https://www.guaranteed.be",
+      "orphanedItem": "Bronze",
+      "orphanedItemId": "8fdd1347-e3e7-49fd-ba6e-bda479582d21",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "WAAM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "a64b2574-8f01-41db-bd12-c9743d74faa4",
+      "supplierName": "Guaranteed",
+      "supplierWebsite": "https://www.guaranteed.be",
+      "orphanedItem": "WAAM",
+      "orphanedItemId": "ee274731-e9d8-4bbf-961f-798a0311901d",
+      "supplierMats": [
+        "Bronze",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "3a818965-397b-4302-808f-972d79c03655",
+      "supplierName": "So Concrete",
+      "supplierWebsite": "https://www.so-concrete.com",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "3a818965-397b-4302-808f-972d79c03655",
+      "supplierName": "So Concrete",
+      "supplierWebsite": "https://www.so-concrete.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Carbon Fiber"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "2dcd031d-4f68-4e14-8c54-eea2bf134409",
+      "supplierName": "Xometry",
+      "supplierWebsite": "https://www.xometry.com/",
+      "orphanedItem": "ASA",
+      "orphanedItemId": "aaa4de9f-3cdc-4721-8429-9b3d14ffa1bc",
+      "family": "Polymer / Engineering",
+      "supplierTechs": [
+        "CNC Machining",
+        "CNC Milling",
+        "CNC Turning",
+        "Carbon DLS",
+        "Die Casting",
+        "Laser Cutting",
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "2dcd031d-4f68-4e14-8c54-eea2bf134409",
+      "supplierName": "Xometry",
+      "supplierWebsite": "https://www.xometry.com/",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "CNC Machining",
+        "CNC Milling",
+        "CNC Turning",
+        "Carbon DLS",
+        "Die Casting",
+        "Laser Cutting",
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "2dcd031d-4f68-4e14-8c54-eea2bf134409",
+      "supplierName": "Xometry",
+      "supplierWebsite": "https://www.xometry.com/",
+      "orphanedItem": "PPS",
+      "orphanedItemId": "7ebd7852-659e-4b10-9210-0b823b528516",
+      "family": "Polymer / High Performance",
+      "supplierTechs": [
+        "CNC Machining",
+        "CNC Milling",
+        "CNC Turning",
+        "Carbon DLS",
+        "Die Casting",
+        "Laser Cutting",
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "2dcd031d-4f68-4e14-8c54-eea2bf134409",
+      "supplierName": "Xometry",
+      "supplierWebsite": "https://www.xometry.com/",
+      "orphanedItem": "TPU",
+      "orphanedItemId": "12522e48-ded9-4387-8a0e-1b0f78350098",
+      "family": "Polymer / Flexible",
+      "supplierTechs": [
+        "CNC Machining",
+        "CNC Milling",
+        "CNC Turning",
+        "Carbon DLS",
+        "Die Casting",
+        "Laser Cutting",
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "2dcd031d-4f68-4e14-8c54-eea2bf134409",
+      "supplierName": "Xometry",
+      "supplierWebsite": "https://www.xometry.com/",
+      "orphanedItem": "Die Casting",
+      "orphanedItemId": "148e8964-5643-4bbc-b532-e68193c6a7e6",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "Brass",
+        "Carbon Fiber",
+        "Copper",
+        "PEEK",
+        "PEI (Ultem)",
+        "PPS",
+        "Silicone",
+        "TPU",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "2dcd031d-4f68-4e14-8c54-eea2bf134409",
+      "supplierName": "Xometry",
+      "supplierWebsite": "https://www.xometry.com/",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS",
+        "ASA",
+        "Brass",
+        "Carbon Fiber",
+        "Copper",
+        "PEEK",
+        "PEI (Ultem)",
+        "PPS",
+        "Silicone",
+        "TPU",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "9b3402f3-feb1-4ce2-b421-053871aaefa5",
+      "supplierName": "Additive Manufacturing, LLC",
+      "supplierWebsite": "https://additivemanufacturingllc.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "ABS",
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "9b3402f3-feb1-4ce2-b421-053871aaefa5",
+      "supplierName": "Additive Manufacturing, LLC",
+      "supplierWebsite": "https://additivemanufacturingllc.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "ABS",
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "0fed7ece-831f-4b1c-8335-3f647b1000ab",
+      "supplierName": "Print a Thing",
+      "supplierWebsite": "https://printathing.com/",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "0fed7ece-831f-4b1c-8335-3f647b1000ab",
+      "supplierName": "Print a Thing",
+      "supplierWebsite": "https://printathing.com/",
+      "orphanedItem": "Bronze",
+      "orphanedItemId": "8fdd1347-e3e7-49fd-ba6e-bda479582d21",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "FDM",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "0fed7ece-831f-4b1c-8335-3f647b1000ab",
+      "supplierName": "Print a Thing",
+      "supplierWebsite": "https://printathing.com/",
+      "orphanedItem": "Brass",
+      "orphanedItemId": "84a9403b-010f-4e61-b83d-08c10f073a3b",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "FDM",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "0fed7ece-831f-4b1c-8335-3f647b1000ab",
+      "supplierName": "Print a Thing",
+      "supplierWebsite": "https://printathing.com/",
+      "orphanedItem": "Copper",
+      "orphanedItemId": "159dda4e-16c1-4402-8876-904a8d97fd54",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "FDM",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "2b82c31f-a61a-43f7-9067-05925cad6a4b",
+      "supplierName": "Ponoko",
+      "supplierWebsite": "https://www.ponoko.com/",
+      "orphanedItem": "Brass",
+      "orphanedItemId": "84a9403b-010f-4e61-b83d-08c10f073a3b",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "2b82c31f-a61a-43f7-9067-05925cad6a4b",
+      "supplierName": "Ponoko",
+      "supplierWebsite": "https://www.ponoko.com/",
+      "orphanedItem": "Silicone",
+      "orphanedItemId": "e16630be-f6ec-4cfc-9f54-08e4cbaa6bc5",
+      "family": "Elastomer",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "2b82c31f-a61a-43f7-9067-05925cad6a4b",
+      "supplierName": "Ponoko",
+      "supplierWebsite": "https://www.ponoko.com/",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Brass",
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "af31de7a-055a-4ede-9ee1-6e88566d3d5b",
+      "supplierName": "SOLIZE PARTNERS",
+      "supplierWebsite": "https://partners.solize.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "ABS",
+        "High-Temp Resin",
+        "PC (Polycarbonate)",
+        "PEEK",
+        "PPS",
+        "Tough Resin"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "af31de7a-055a-4ede-9ee1-6e88566d3d5b",
+      "supplierName": "SOLIZE PARTNERS",
+      "supplierWebsite": "https://partners.solize.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "ABS",
+        "High-Temp Resin",
+        "PC (Polycarbonate)",
+        "PEEK",
+        "PPS",
+        "Tough Resin"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "65ef6cd6-fc8e-4de0-a387-9c84c60beebc",
+      "supplierName": "SINTX",
+      "supplierWebsite": "https://sintx.com",
+      "orphanedItem": "Alumina",
+      "orphanedItemId": "2ca282f8-4f24-4a68-b648-c03f5891572a",
+      "family": "Ceramic",
+      "supplierTechs": [
+        "FDM",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "65ef6cd6-fc8e-4de0-a387-9c84c60beebc",
+      "supplierName": "SINTX",
+      "supplierWebsite": "https://sintx.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Alumina",
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "3a8a4a66-d64f-4571-a915-047a9d135e3f",
+      "supplierName": "HiveASM BLD",
+      "supplierWebsite": "https://www.hiveasmbld.com",
+      "orphanedItem": "Ceramic",
+      "orphanedItemId": "3b0129a0-c169-49d6-92f8-1bfcb8cfa302",
+      "family": "Ceramic",
+      "supplierTechs": [
+        "Binder Jetting"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "3a8a4a66-d64f-4571-a915-047a9d135e3f",
+      "supplierName": "HiveASM BLD",
+      "supplierWebsite": "https://www.hiveasmbld.com",
+      "orphanedItem": "Binder Jetting",
+      "orphanedItemId": "b6abe667-b884-4117-a168-404ef8563454",
+      "supplierMats": [
+        "Ceramic"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "749a5d45-af67-4a6f-b5a9-28289ac932b0",
+      "supplierName": "Applied Rapid Technologies",
+      "supplierWebsite": "https://artcorp.com",
+      "orphanedItem": "PC (Polycarbonate)",
+      "orphanedItemId": "9d6d5ff3-e04d-46b4-8272-c8bde69605bc",
+      "family": "Polymer / Engineering",
+      "supplierTechs": [
+        "DLP",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "749a5d45-af67-4a6f-b5a9-28289ac932b0",
+      "supplierName": "Applied Rapid Technologies",
+      "supplierWebsite": "https://artcorp.com",
+      "orphanedItem": "PEEK",
+      "orphanedItemId": "e3f62c4d-a7d7-4371-980b-e8e36a8654e5",
+      "family": "Polymer / High Performance",
+      "supplierTechs": [
+        "DLP",
+        "SLA"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "e135f7fc-7354-4a19-bc4b-9ea14ffe0b74",
+      "supplierName": "OriginLabs - Penn State",
+      "supplierWebsite": "https://originlabs.psu.edu",
+      "orphanedItem": "ABS",
+      "orphanedItemId": "89094852-bbb9-441f-baa7-fb0df7a57b9b",
+      "family": "Polymer / Engineering",
+      "supplierTechs": [
+        "Material Jetting",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "f6369f78-d0b4-4069-bab3-03a4a78e53b5",
+      "supplierName": "One Off Robotics",
+      "supplierWebsite": "https://oneoffrobotics.com",
+      "orphanedItem": "Ceramic",
+      "orphanedItemId": "3b0129a0-c169-49d6-92f8-1bfcb8cfa302",
+      "family": "Ceramic",
+      "supplierTechs": [
+        "WAAM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "f6369f78-d0b4-4069-bab3-03a4a78e53b5",
+      "supplierName": "One Off Robotics",
+      "supplierWebsite": "https://oneoffrobotics.com",
+      "orphanedItem": "WAAM",
+      "orphanedItemId": "ee274731-e9d8-4bbf-961f-798a0311901d",
+      "supplierMats": [
+        "Ceramic",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b09a2c00-1ccb-4515-9fdc-4e7ca1f61902",
+      "supplierName": "Zeal 3D",
+      "supplierWebsite": "https://www.zeal3dprinting.com.au/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "Carbon-Filled Nylon",
+        "Glass-Filled Nylon",
+        "Inconel 625",
+        "PP (Polypropylene)",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b09a2c00-1ccb-4515-9fdc-4e7ca1f61902",
+      "supplierName": "Zeal 3D",
+      "supplierWebsite": "https://www.zeal3dprinting.com.au/",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "ABS",
+        "Carbon-Filled Nylon",
+        "Glass-Filled Nylon",
+        "Inconel 625",
+        "PP (Polypropylene)",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b09a2c00-1ccb-4515-9fdc-4e7ca1f61902",
+      "supplierName": "Zeal 3D",
+      "supplierWebsite": "https://www.zeal3dprinting.com.au/",
+      "orphanedItem": "EBM",
+      "orphanedItemId": "15c7cd32-20e5-491d-b8a2-f082a0272d0e",
+      "supplierMats": [
+        "ABS",
+        "Carbon-Filled Nylon",
+        "Glass-Filled Nylon",
+        "Inconel 625",
+        "PP (Polypropylene)",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b09a2c00-1ccb-4515-9fdc-4e7ca1f61902",
+      "supplierName": "Zeal 3D",
+      "supplierWebsite": "https://www.zeal3dprinting.com.au/",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS",
+        "Carbon-Filled Nylon",
+        "Glass-Filled Nylon",
+        "Inconel 625",
+        "PP (Polypropylene)",
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "d6f0224b-66de-4c1a-85b2-c9643865d053",
+      "supplierName": "Protolabs – Digital Manufacturing & Rapid Prototyping",
+      "supplierWebsite": "https://www.protolabs.com/",
+      "orphanedItem": "Brass",
+      "orphanedItemId": "84a9403b-010f-4e61-b83d-08c10f073a3b",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "FDM",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "d6f0224b-66de-4c1a-85b2-c9643865d053",
+      "supplierName": "Protolabs – Digital Manufacturing & Rapid Prototyping",
+      "supplierWebsite": "https://www.protolabs.com/",
+      "orphanedItem": "Copper",
+      "orphanedItemId": "159dda4e-16c1-4402-8876-904a8d97fd54",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "FDM",
+        "SLA",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d6f0224b-66de-4c1a-85b2-c9643865d053",
+      "supplierName": "Protolabs – Digital Manufacturing & Rapid Prototyping",
+      "supplierWebsite": "https://www.protolabs.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Brass",
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d6f0224b-66de-4c1a-85b2-c9643865d053",
+      "supplierName": "Protolabs – Digital Manufacturing & Rapid Prototyping",
+      "supplierWebsite": "https://www.protolabs.com/",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Brass",
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "d6f0224b-66de-4c1a-85b2-c9643865d053",
+      "supplierName": "Protolabs – Digital Manufacturing & Rapid Prototyping",
+      "supplierWebsite": "https://www.protolabs.com/",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Brass",
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "33ae42d2-24c3-473b-beed-52098aa5f47c",
+      "supplierName": "Vision Miner",
+      "supplierWebsite": "https://visionminer.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "PEEK",
+        "PPS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "0c5f5869-43d5-4fef-97bf-9e3c8830ebc9",
+      "supplierName": "RAMLAB",
+      "supplierWebsite": "https://ramlab.com",
+      "orphanedItem": "WAAM",
+      "orphanedItemId": "ee274731-e9d8-4bbf-961f-798a0311901d",
+      "supplierMats": [
+        "Titanium"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "9f7d8701-6c15-4c60-bad5-e63b78e0801a",
+      "supplierName": "PrintAWorld – SLA & Metal 3D Printing Services",
+      "supplierWebsite": "https://prtwd.com/",
+      "orphanedItem": "ABS",
+      "orphanedItemId": "89094852-bbb9-441f-baa7-fb0df7a57b9b",
+      "family": "Polymer / Engineering",
+      "supplierTechs": [
+        "SLA"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "9f7d8701-6c15-4c60-bad5-e63b78e0801a",
+      "supplierName": "PrintAWorld – SLA & Metal 3D Printing Services",
+      "supplierWebsite": "https://prtwd.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b9b197fb-49e0-459e-bc87-9aef88e53331",
+      "supplierName": "Makelab",
+      "supplierWebsite": "https://www.makelab.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "PETG"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b9b197fb-49e0-459e-bc87-9aef88e53331",
+      "supplierName": "Makelab",
+      "supplierWebsite": "https://www.makelab.com/",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "PETG"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "7a98b849-46a0-4154-bd95-18a9da40833e",
+      "supplierName": "Sciaky",
+      "supplierWebsite": "https://www.sciaky.com/",
+      "orphanedItem": "Inconel 625",
+      "orphanedItemId": "aea2cedd-966d-4093-a01b-86d38bf58e88",
+      "family": "Metal / Nickel Superalloy",
+      "supplierTechs": [
+        "EBM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "7a98b849-46a0-4154-bd95-18a9da40833e",
+      "supplierName": "Sciaky",
+      "supplierWebsite": "https://www.sciaky.com/",
+      "orphanedItem": "Tungsten",
+      "orphanedItemId": "b3ee3efd-f506-49a6-a2c6-1a1387eddae6",
+      "family": "Metal / Refractory",
+      "supplierTechs": [
+        "EBM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "7a98b849-46a0-4154-bd95-18a9da40833e",
+      "supplierName": "Sciaky",
+      "supplierWebsite": "https://www.sciaky.com/",
+      "orphanedItem": "Copper",
+      "orphanedItemId": "159dda4e-16c1-4402-8876-904a8d97fd54",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "EBM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "817d58f1-da2f-43a9-9887-c04564b1af59",
+      "supplierName": "Prototek",
+      "supplierWebsite": "https://prototek.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Silicone",
+        "Titanium",
+        "Wax"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "817d58f1-da2f-43a9-9887-c04564b1af59",
+      "supplierName": "Prototek",
+      "supplierWebsite": "https://prototek.com",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "Silicone",
+        "Titanium",
+        "Wax"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "817d58f1-da2f-43a9-9887-c04564b1af59",
+      "supplierName": "Prototek",
+      "supplierWebsite": "https://prototek.com",
+      "orphanedItem": "CNC Milling",
+      "orphanedItemId": "1e2b5b59-87fe-4adb-974a-cf24d39de31f",
+      "supplierMats": [
+        "Silicone",
+        "Titanium",
+        "Wax"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "817d58f1-da2f-43a9-9887-c04564b1af59",
+      "supplierName": "Prototek",
+      "supplierWebsite": "https://prototek.com",
+      "orphanedItem": "CNC Turning",
+      "orphanedItemId": "59aca1de-7b77-4b58-a01b-f0ddd2c8c5fc",
+      "supplierMats": [
+        "Silicone",
+        "Titanium",
+        "Wax"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "ac62d9e2-9d21-4ce2-8b0a-6d7840950d09",
+      "supplierName": "Articon",
+      "supplierWebsite": "https://articon.com",
+      "orphanedItem": "PEEK",
+      "orphanedItemId": "e3f62c4d-a7d7-4371-980b-e8e36a8654e5",
+      "family": "Polymer / High Performance",
+      "supplierTechs": [
+        "DLP"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "ac62d9e2-9d21-4ce2-8b0a-6d7840950d09",
+      "supplierName": "Articon",
+      "supplierWebsite": "https://articon.com",
+      "orphanedItem": "Cobalt Chrome",
+      "orphanedItemId": "d457a78a-5238-4260-8fb5-cd423ee5d87e",
+      "family": "Metal / Cobalt",
+      "supplierTechs": [
+        "DLP"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "ac62d9e2-9d21-4ce2-8b0a-6d7840950d09",
+      "supplierName": "Articon",
+      "supplierWebsite": "https://articon.com",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "Cobalt Chrome",
+        "PEEK"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "15c09d77-9c34-40e2-a0b4-0795ccc45316",
+      "supplierName": "RapidMade – 3D Printing & Digital Manufacturing Services",
+      "supplierWebsite": "https://rapidmade.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "ABS",
+        "PETG",
+        "PP (Polypropylene)"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "15c09d77-9c34-40e2-a0b4-0795ccc45316",
+      "supplierName": "RapidMade – 3D Printing & Digital Manufacturing Services",
+      "supplierWebsite": "https://rapidmade.com/",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "ABS",
+        "PETG",
+        "PP (Polypropylene)"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "15c09d77-9c34-40e2-a0b4-0795ccc45316",
+      "supplierName": "RapidMade – 3D Printing & Digital Manufacturing Services",
+      "supplierWebsite": "https://rapidmade.com/",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "ABS",
+        "PETG",
+        "PP (Polypropylene)"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "0cbb7d18-1625-410d-9f09-ae3a2fa7a0de",
+      "supplierName": "American Additive Manufacturing",
+      "supplierWebsite": "https://americanadditive.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "PEEK"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "0cbb7d18-1625-410d-9f09-ae3a2fa7a0de",
+      "supplierName": "American Additive Manufacturing",
+      "supplierWebsite": "https://americanadditive.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "PEEK"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "0cbb7d18-1625-410d-9f09-ae3a2fa7a0de",
+      "supplierName": "American Additive Manufacturing",
+      "supplierWebsite": "https://americanadditive.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "PEEK"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "49cb1ca6-6451-4459-ade9-c698e9098998",
+      "supplierName": "Quickparts – Rapid Prototyping & Manufacturing Services",
+      "supplierWebsite": "https://quickparts.com/",
+      "orphanedItem": "Injection Molding",
+      "orphanedItemId": "2872606a-f31f-4ccb-857d-9b42746dccb6",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "49cb1ca6-6451-4459-ade9-c698e9098998",
+      "supplierName": "Quickparts – Rapid Prototyping & Manufacturing Services",
+      "supplierWebsite": "https://quickparts.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "49cb1ca6-6451-4459-ade9-c698e9098998",
+      "supplierName": "Quickparts – Rapid Prototyping & Manufacturing Services",
+      "supplierWebsite": "https://quickparts.com/",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "49cb1ca6-6451-4459-ade9-c698e9098998",
+      "supplierName": "Quickparts – Rapid Prototyping & Manufacturing Services",
+      "supplierWebsite": "https://quickparts.com/",
+      "orphanedItem": "DMP",
+      "orphanedItemId": "d054d195-0553-4662-9462-ab3f07112a1f",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "49cb1ca6-6451-4459-ade9-c698e9098998",
+      "supplierName": "Quickparts – Rapid Prototyping & Manufacturing Services",
+      "supplierWebsite": "https://quickparts.com/",
+      "orphanedItem": "Die Casting",
+      "orphanedItemId": "148e8964-5643-4bbc-b532-e68193c6a7e6",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "49cb1ca6-6451-4459-ade9-c698e9098998",
+      "supplierName": "Quickparts – Rapid Prototyping & Manufacturing Services",
+      "supplierWebsite": "https://quickparts.com/",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "Copper"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "e3ecfc87-e34a-427f-ab8c-b53e1e54e9fa",
+      "supplierName": "TriMech Advanced Manufacturing Services",
+      "supplierWebsite": "https://mfg.trimech.com",
+      "orphanedItem": "Silicone",
+      "orphanedItemId": "e16630be-f6ec-4cfc-9f54-08e4cbaa6bc5",
+      "family": "Elastomer",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "Material Jetting",
+        "SAF",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "e3ecfc87-e34a-427f-ab8c-b53e1e54e9fa",
+      "supplierName": "TriMech Advanced Manufacturing Services",
+      "supplierWebsite": "https://mfg.trimech.com",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "Material Jetting",
+        "SAF",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e3ecfc87-e34a-427f-ab8c-b53e1e54e9fa",
+      "supplierName": "TriMech Advanced Manufacturing Services",
+      "supplierWebsite": "https://mfg.trimech.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e3ecfc87-e34a-427f-ab8c-b53e1e54e9fa",
+      "supplierName": "TriMech Advanced Manufacturing Services",
+      "supplierWebsite": "https://mfg.trimech.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e3ecfc87-e34a-427f-ab8c-b53e1e54e9fa",
+      "supplierName": "TriMech Advanced Manufacturing Services",
+      "supplierWebsite": "https://mfg.trimech.com",
+      "orphanedItem": "SAF",
+      "orphanedItemId": "8bc3a085-b637-4f97-b948-c87d0da0408d",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e3ecfc87-e34a-427f-ab8c-b53e1e54e9fa",
+      "supplierName": "TriMech Advanced Manufacturing Services",
+      "supplierWebsite": "https://mfg.trimech.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e3ecfc87-e34a-427f-ab8c-b53e1e54e9fa",
+      "supplierName": "TriMech Advanced Manufacturing Services",
+      "supplierWebsite": "https://mfg.trimech.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e3ecfc87-e34a-427f-ab8c-b53e1e54e9fa",
+      "supplierName": "TriMech Advanced Manufacturing Services",
+      "supplierWebsite": "https://mfg.trimech.com",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "e3ecfc87-e34a-427f-ab8c-b53e1e54e9fa",
+      "supplierName": "TriMech Advanced Manufacturing Services",
+      "supplierWebsite": "https://mfg.trimech.com",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "Carbon Fiber",
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "b60a9d84-7eab-4616-ae8d-6cff513e041c",
+      "supplierName": "NUGAE",
+      "supplierWebsite": "https://nugae.tech",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "b60a9d84-7eab-4616-ae8d-6cff513e041c",
+      "supplierName": "NUGAE",
+      "supplierWebsite": "https://nugae.tech",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Carbon Fiber"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "46d35e40-8044-42fb-bd12-6bec39e1e42d",
+      "supplierName": "Jiga",
+      "supplierWebsite": "https://jiga.io",
+      "orphanedItem": "Tool Steel",
+      "orphanedItemId": "72367b0b-f6cd-4e2a-bcf2-45da69eb9c93",
+      "family": "Metal / Tool Steel",
+      "supplierTechs": [
+        "DLP",
+        "FDM",
+        "MJF",
+        "Material Jetting",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "46d35e40-8044-42fb-bd12-6bec39e1e42d",
+      "supplierName": "Jiga",
+      "supplierWebsite": "https://jiga.io",
+      "orphanedItem": "Bronze",
+      "orphanedItemId": "8fdd1347-e3e7-49fd-ba6e-bda479582d21",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "DLP",
+        "FDM",
+        "MJF",
+        "Material Jetting",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "46d35e40-8044-42fb-bd12-6bec39e1e42d",
+      "supplierName": "Jiga",
+      "supplierWebsite": "https://jiga.io",
+      "orphanedItem": "Brass",
+      "orphanedItemId": "84a9403b-010f-4e61-b83d-08c10f073a3b",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "DLP",
+        "FDM",
+        "MJF",
+        "Material Jetting",
+        "SLA",
+        "SLM",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "46d35e40-8044-42fb-bd12-6bec39e1e42d",
+      "supplierName": "Jiga",
+      "supplierWebsite": "https://jiga.io",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS",
+        "Brass",
+        "Bronze",
+        "Ceramic",
+        "Copper",
+        "PC (Polycarbonate)",
+        "PEEK",
+        "PP (Polypropylene)",
+        "PPS",
+        "Titanium",
+        "Tool Steel",
+        "Tungsten"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "49af8215-583b-47bf-8a49-a4c21315b4ee",
+      "supplierName": "Treatstock – On-Demand Manufacturing Platform & Marketplace",
+      "supplierWebsite": "https://www.treatstock.com",
+      "orphanedItem": "PETG",
+      "orphanedItemId": "c8f2124e-4795-4490-b886-d8fbbd6ba810",
+      "family": "Polymer / Engineering",
+      "supplierTechs": [
+        "3D Scanning",
+        "CNC Machining",
+        "CNC Turning",
+        "Injection Molding"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "49af8215-583b-47bf-8a49-a4c21315b4ee",
+      "supplierName": "Treatstock – On-Demand Manufacturing Platform & Marketplace",
+      "supplierWebsite": "https://www.treatstock.com",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "3D Scanning",
+        "CNC Machining",
+        "CNC Turning",
+        "Injection Molding"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "6f07d806-a7b1-4dde-ad35-982c1c969ec6",
+      "supplierName": "Cosine Additive – Large Scale 3D Printing & AM Systems",
+      "supplierWebsite": "https://www.cosineadditive.com/",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "27465667-990b-4bf1-a93b-9b5fd03f9d80",
+      "supplierName": "3ERP – Rapid Prototyping & Low-Volume Manufacturing Services",
+      "supplierWebsite": "https://www.3erp.com/",
+      "orphanedItem": "Polyurethane",
+      "orphanedItemId": "5761e97a-75a5-4148-b750-58dad122e758",
+      "family": "Elastomer",
+      "supplierTechs": [
+        "CNC Machining",
+        "Injection Molding",
+        "Rapid Tooling"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "27465667-990b-4bf1-a93b-9b5fd03f9d80",
+      "supplierName": "3ERP – Rapid Prototyping & Low-Volume Manufacturing Services",
+      "supplierWebsite": "https://www.3erp.com/",
+      "orphanedItem": "CNC Machining",
+      "orphanedItemId": "713812d7-084b-457e-8a5a-fa1a7fbe6b69",
+      "supplierMats": [
+        "Polyurethane"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "27465667-990b-4bf1-a93b-9b5fd03f9d80",
+      "supplierName": "3ERP – Rapid Prototyping & Low-Volume Manufacturing Services",
+      "supplierWebsite": "https://www.3erp.com/",
+      "orphanedItem": "Injection Molding",
+      "orphanedItemId": "2872606a-f31f-4ccb-857d-9b42746dccb6",
+      "supplierMats": [
+        "Polyurethane"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "174cc44a-7191-46e7-9d60-a130114eaec3",
+      "supplierName": "ADDMAN",
+      "supplierWebsite": "https://www.addmangroup.com/",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "174cc44a-7191-46e7-9d60-a130114eaec3",
+      "supplierName": "ADDMAN",
+      "supplierWebsite": "https://www.addmangroup.com/",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "174cc44a-7191-46e7-9d60-a130114eaec3",
+      "supplierName": "ADDMAN",
+      "supplierWebsite": "https://www.addmangroup.com/",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "174cc44a-7191-46e7-9d60-a130114eaec3",
+      "supplierName": "ADDMAN",
+      "supplierWebsite": "https://www.addmangroup.com/",
+      "orphanedItem": "DLP",
+      "orphanedItemId": "9689aaa1-258c-49c0-9337-14ca8a4d11a4",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "174cc44a-7191-46e7-9d60-a130114eaec3",
+      "supplierName": "ADDMAN",
+      "supplierWebsite": "https://www.addmangroup.com/",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "174cc44a-7191-46e7-9d60-a130114eaec3",
+      "supplierName": "ADDMAN",
+      "supplierWebsite": "https://www.addmangroup.com/",
+      "orphanedItem": "CNC Milling",
+      "orphanedItemId": "1e2b5b59-87fe-4adb-974a-cf24d39de31f",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "174cc44a-7191-46e7-9d60-a130114eaec3",
+      "supplierName": "ADDMAN",
+      "supplierWebsite": "https://www.addmangroup.com/",
+      "orphanedItem": "CNC Turning",
+      "orphanedItemId": "59aca1de-7b77-4b58-a01b-f0ddd2c8c5fc",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "174cc44a-7191-46e7-9d60-a130114eaec3",
+      "supplierName": "ADDMAN",
+      "supplierWebsite": "https://www.addmangroup.com/",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "174cc44a-7191-46e7-9d60-a130114eaec3",
+      "supplierName": "ADDMAN",
+      "supplierWebsite": "https://www.addmangroup.com/",
+      "orphanedItem": "SLM",
+      "orphanedItemId": "4445d579-5029-492e-af11-78c3b6491c5a",
+      "supplierMats": [
+        "Silicone"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "6f7165ed-87b0-41ae-9076-216f6b7343b4",
+      "supplierName": "JawsTec – Online 3D Printing Service",
+      "supplierWebsite": "https://www.jawstec.com",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "6f7165ed-87b0-41ae-9076-216f6b7343b4",
+      "supplierName": "JawsTec – Online 3D Printing Service",
+      "supplierWebsite": "https://www.jawstec.com",
+      "orphanedItem": "Aluminum 6061",
+      "orphanedItemId": "b48f76af-599d-4a4a-ad3f-739ab0f5cfe7",
+      "family": "Metal / Aluminum",
+      "supplierTechs": [
+        "FDM",
+        "MJF",
+        "SLS"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0003-4000-8000-000000000003",
+      "supplierName": "RYSE 3D",
+      "supplierWebsite": "https://ryse3d.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "PETG"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0004-4000-8000-000000000004",
+      "supplierName": "zone3Dplus",
+      "supplierWebsite": "https://zone3dplus.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "Inconel 718"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0004-4000-8000-000000000004",
+      "supplierName": "zone3Dplus",
+      "supplierWebsite": "https://zone3dplus.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "Inconel 718"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0004-4000-8000-000000000004",
+      "supplierName": "zone3Dplus",
+      "supplierWebsite": "https://zone3dplus.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "Inconel 718"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0004-4000-8000-000000000004",
+      "supplierName": "zone3Dplus",
+      "supplierWebsite": "https://zone3dplus.com",
+      "orphanedItem": "FDM",
+      "orphanedItemId": "70bc2a43-b906-45e5-bef2-9b572fed9a2e",
+      "supplierMats": [
+        "Inconel 718"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0004-4000-8000-000000000004",
+      "supplierName": "zone3Dplus",
+      "supplierWebsite": "https://zone3dplus.com",
+      "orphanedItem": "Binder Jetting",
+      "orphanedItemId": "b6abe667-b884-4117-a168-404ef8563454",
+      "supplierMats": [
+        "Inconel 718"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0004-4000-8000-000000000004",
+      "supplierName": "zone3Dplus",
+      "supplierWebsite": "https://zone3dplus.com",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "Inconel 718"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0006-4000-8000-000000000006",
+      "supplierName": "BaessTech Engineering",
+      "supplierWebsite": "https://www.baesstech.com",
+      "orphanedItem": "SLS",
+      "orphanedItemId": "54e5e36c-bfac-453f-a3e1-88b1c1f96261",
+      "supplierMats": [
+        "PETG"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0006-4000-8000-000000000006",
+      "supplierName": "BaessTech Engineering",
+      "supplierWebsite": "https://www.baesstech.com",
+      "orphanedItem": "MJF",
+      "orphanedItemId": "dcca4588-b30f-4b43-bedc-0ee5c43e683c",
+      "supplierMats": [
+        "PETG"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "cc000001-0006-4000-8000-000000000006",
+      "supplierName": "BaessTech Engineering",
+      "supplierWebsite": "https://www.baesstech.com",
+      "orphanedItem": "SLA",
+      "orphanedItemId": "f0f48123-c6ed-48fc-b099-c42b4239e45e",
+      "supplierMats": [
+        "PETG"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "4cfe6688-a4df-4228-9eb0-5d25747b0a22",
+      "supplierName": "FORMES ET VOLUMES",
+      "supplierWebsite": "https://www.formes-et-volumes.fr",
+      "orphanedItem": "Polyurethane",
+      "orphanedItemId": "5761e97a-75a5-4148-b750-58dad122e758",
+      "family": "Elastomer",
+      "supplierTechs": [
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "4cfe6688-a4df-4228-9eb0-5d25747b0a22",
+      "supplierName": "FORMES ET VOLUMES",
+      "supplierWebsite": "https://www.formes-et-volumes.fr",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "Polyurethane"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "177b476c-03f8-4341-bd22-afdbac981bd6",
+      "supplierName": "THINK3D",
+      "supplierWebsite": "https://www.think3d.in/",
+      "orphanedItem": "ABS",
+      "orphanedItemId": "89094852-bbb9-441f-baa7-fb0df7a57b9b",
+      "family": "Polymer / Engineering",
+      "supplierTechs": [
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "177b476c-03f8-4341-bd22-afdbac981bd6",
+      "supplierName": "THINK3D",
+      "supplierWebsite": "https://www.think3d.in/",
+      "orphanedItem": "Brass",
+      "orphanedItemId": "84a9403b-010f-4e61-b83d-08c10f073a3b",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "177b476c-03f8-4341-bd22-afdbac981bd6",
+      "supplierName": "THINK3D",
+      "supplierWebsite": "https://www.think3d.in/",
+      "orphanedItem": "Carbon Fiber",
+      "orphanedItemId": "6fae0a58-9e52-4e88-969b-a677f94b1df5",
+      "family": "Composite",
+      "supplierTechs": [
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "177b476c-03f8-4341-bd22-afdbac981bd6",
+      "supplierName": "THINK3D",
+      "supplierWebsite": "https://www.think3d.in/",
+      "orphanedItem": "Cobalt Chrome",
+      "orphanedItemId": "d457a78a-5238-4260-8fb5-cd423ee5d87e",
+      "family": "Metal / Cobalt",
+      "supplierTechs": [
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "177b476c-03f8-4341-bd22-afdbac981bd6",
+      "supplierName": "THINK3D",
+      "supplierWebsite": "https://www.think3d.in/",
+      "orphanedItem": "Copper",
+      "orphanedItemId": "159dda4e-16c1-4402-8876-904a8d97fd54",
+      "family": "Metal / Copper",
+      "supplierTechs": [
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "177b476c-03f8-4341-bd22-afdbac981bd6",
+      "supplierName": "THINK3D",
+      "supplierWebsite": "https://www.think3d.in/",
+      "orphanedItem": "Kevlar",
+      "orphanedItemId": "8dd5fae8-6527-45e2-b2e8-605e42d4a8de",
+      "family": "Composite",
+      "supplierTechs": [
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "material-orphan",
+      "supplierId": "177b476c-03f8-4341-bd22-afdbac981bd6",
+      "supplierName": "THINK3D",
+      "supplierWebsite": "https://www.think3d.in/",
+      "orphanedItem": "TPU",
+      "orphanedItemId": "12522e48-ded9-4387-8a0e-1b0f78350098",
+      "family": "Polymer / Flexible",
+      "supplierTechs": [
+        "Material Jetting"
+      ]
+    },
+    {
+      "kind": "technology-orphan",
+      "supplierId": "177b476c-03f8-4341-bd22-afdbac981bd6",
+      "supplierName": "THINK3D",
+      "supplierWebsite": "https://www.think3d.in/",
+      "orphanedItem": "Material Jetting",
+      "orphanedItemId": "0ef05db0-ca3e-4dbc-9457-bf5d17c24fe3",
+      "supplierMats": [
+        "ABS",
+        "Brass",
+        "Carbon Fiber",
+        "Cobalt Chrome",
+        "Copper",
+        "Kevlar",
+        "TPU",
+        "Titanium"
+      ]
+    }
+  ]
+}

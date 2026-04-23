@@ -1,0 +1,275 @@
+kind,supplier_name,supplier_website,orphaned_item,context_other_items
+technology-orphan,Direct 3D Printing – Industrial 3D Printing & Manufacturing,https://www.direct3dprinting.com.au/,SLS,ABS; ASA; Cobalt Chrome; PC (Polycarbonate); PEI (Ultem); Titanium
+technology-orphan,Direct 3D Printing – Industrial 3D Printing & Manufacturing,https://www.direct3dprinting.com.au/,SLA,ABS; ASA; Cobalt Chrome; PC (Polycarbonate); PEI (Ultem); Titanium
+technology-orphan,Direct 3D Printing – Industrial 3D Printing & Manufacturing,https://www.direct3dprinting.com.au/,SAF,ABS; ASA; Cobalt Chrome; PC (Polycarbonate); PEI (Ultem); Titanium
+technology-orphan,Direct 3D Printing – Industrial 3D Printing & Manufacturing,https://www.direct3dprinting.com.au/,Material Jetting,ABS; ASA; Cobalt Chrome; PC (Polycarbonate); PEI (Ultem); Titanium
+technology-orphan,Materialise OnSite,https://manufacturing.materialise.com,SLA,TPU
+technology-orphan,Materialise OnSite,https://manufacturing.materialise.com,SLM,TPU
+technology-orphan,Materialise OnSite,https://manufacturing.materialise.com,Material Jetting,TPU
+material-orphan,i.materialise – Online 3D Printing Service,https://i.materialise.com,Brass,FDM; MJF; SLA; SLS
+material-orphan,i.materialise – Online 3D Printing Service,https://i.materialise.com,Aluminum AlSi10Mg,FDM; MJF; SLA; SLS
+material-orphan,i.materialise – Online 3D Printing Service,https://i.materialise.com,Inconel 718,FDM; MJF; SLA; SLS
+technology-orphan,i.materialise – Online 3D Printing Service,https://i.materialise.com,SLA,ABS; Aluminum AlSi10Mg; Brass; Inconel 718; TPU; Titanium
+material-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,Aluminum 6061,DLP; MJF; SLA; SLS
+material-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,Aluminum 7075,DLP; MJF; SLA; SLS
+material-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,Brass,DLP; MJF; SLA; SLS
+material-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,Bronze,DLP; MJF; SLA; SLS
+material-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,Copper,DLP; MJF; SLA; SLS
+material-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,ABS,DLP; MJF; SLA; SLS
+material-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,PC (Polycarbonate),DLP; MJF; SLA; SLS
+technology-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,SLA,ABS; Aluminum 6061; Aluminum 7075; Brass; Bronze; Copper; PC (Polycarbonate); PEEK
+technology-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,DLP,ABS; Aluminum 6061; Aluminum 7075; Brass; Bronze; Copper; PC (Polycarbonate); PEEK
+technology-orphan,Machinified – Additive Manufacturing & Digital Production Pl,https://www.machinified.com/,MJF,ABS; Aluminum 6061; Aluminum 7075; Brass; Bronze; Copper; PC (Polycarbonate); PEEK
+technology-orphan,Proto3000,https://proto3000.com,SLS,Ceramic
+technology-orphan,Proto3000,https://proto3000.com,Binder Jetting,Ceramic
+technology-orphan,Proto3000,https://proto3000.com,MJF,Ceramic
+technology-orphan,Proto3000,https://proto3000.com,SLM,Ceramic
+material-orphan,HLH Prototypes,https://www.hlhprototypes.com,Carbon Fiber,CNC Machining; Die Casting; Injection Molding; Rapid Tooling; SLA; SLS
+technology-orphan,HLH Prototypes,https://www.hlhprototypes.com,SLA,Carbon Fiber
+technology-orphan,HLH Prototypes,https://www.hlhprototypes.com,SLS,Carbon Fiber
+technology-orphan,HLH Prototypes,https://www.hlhprototypes.com,CNC Machining,Carbon Fiber
+technology-orphan,HLH Prototypes,https://www.hlhprototypes.com,Injection Molding,Carbon Fiber
+technology-orphan,HLH Prototypes,https://www.hlhprototypes.com,Die Casting,Carbon Fiber
+material-orphan,in3Dtec,https://in3dtec.com,Carbon Fiber,Binder Jetting; DLP; FDM; MJF; SLA; SLM; SLS
+material-orphan,in3Dtec,https://in3dtec.com,Aluminum 6061,Binder Jetting; DLP; FDM; MJF; SLA; SLM; SLS
+technology-orphan,JLC3DP – Online 3D Printing Service,https://jlc3dp.com,SLA,ABS; ASA; PA11 Nylon; PA12 Nylon; TPU
+technology-orphan,JLC3DP – Online 3D Printing Service,https://jlc3dp.com,SLM,ABS; ASA; PA11 Nylon; PA12 Nylon; TPU
+technology-orphan,JLC3DP – Online 3D Printing Service,https://jlc3dp.com,Binder Jetting,ABS; ASA; PA11 Nylon; PA12 Nylon; TPU
+technology-orphan,Prototal Denmark – Industrial 3D Printing Service,https://prototal.dk,SLA,ABS; Aluminum AlSi10Mg; TPU
+technology-orphan,Prototal Denmark – Industrial 3D Printing Service,https://prototal.dk,SAF,ABS; Aluminum AlSi10Mg; TPU
+technology-orphan,Prototal Denmark – Industrial 3D Printing Service,https://prototal.dk,Material Jetting,ABS; Aluminum AlSi10Mg; TPU
+technology-orphan,PROTIQ – Digital Manufacturing Marketplace & 3D Printing Sol,https://www.protiq.com/,SLS,Ceramic; Copper
+technology-orphan,PROTIQ – Digital Manufacturing Marketplace & 3D Printing Sol,https://www.protiq.com/,MJF,Ceramic; Copper
+technology-orphan,PROTIQ – Digital Manufacturing Marketplace & 3D Printing Sol,https://www.protiq.com/,Material Jetting,Ceramic; Copper
+material-orphan,Robot faber,https://robotfaber.com,Ceramic,FDM
+technology-orphan,Robot faber,https://robotfaber.com,FDM,Ceramic
+material-orphan,BigRep Partlab,https://bigrep.com,Carbon Fiber,FDM
+technology-orphan,toolcraft AG,https://www.toolcraft.de/en/,SLM,Titanium; Tool Steel
+technology-orphan,toolcraft AG,https://www.toolcraft.de/en/,Injection Molding,Titanium; Tool Steel
+material-orphan,EXL PROTOTYPES CO LTD,http://www.exlprototypes.com,ABS,Material Jetting; SLA; SLM; SLS
+technology-orphan,EXL PROTOTYPES CO LTD,http://www.exlprototypes.com,SLA,ABS
+technology-orphan,EXL PROTOTYPES CO LTD,http://www.exlprototypes.com,SLS,ABS
+technology-orphan,EXL PROTOTYPES CO LTD,http://www.exlprototypes.com,Material Jetting,ABS
+technology-orphan,EXL PROTOTYPES CO LTD,http://www.exlprototypes.com,SLM,ABS
+material-orphan,Treddy,https://treddy.it,Carbon Fiber,MJF; SLA
+technology-orphan,Treddy,https://treddy.it,SLA,Carbon Fiber; PA12 Nylon
+material-orphan,Foremost AddiTech,https://foremost3d.com,Tool Steel,FDM; MJF; SLA; SLM; SLS
+material-orphan,Foremost AddiTech,https://foremost3d.com,Carbon Fiber,FDM; MJF; SLA; SLM; SLS
+technology-orphan,Foremost AddiTech,https://foremost3d.com,SLA,ABS; Aluminum AlSi10Mg; Carbon Fiber; Cobalt Chrome; Copper; Inconel 718; PEEK; PETG; PLA; PPS; TPU; Tool Steel
+material-orphan,FIT Additive Manufacturing Group,https://fit.technology,Tool Steel,DLP; EBM; SLA; SLM; SLS; WAAM
+technology-orphan,FIT Additive Manufacturing Group,https://fit.technology,SLS,Ceramic; Copper; Titanium; Tool Steel
+technology-orphan,FIT Additive Manufacturing Group,https://fit.technology,WAAM,Ceramic; Copper; Titanium; Tool Steel
+technology-orphan,FIT Additive Manufacturing Group,https://fit.technology,EBM,Ceramic; Copper; Titanium; Tool Steel
+technology-orphan,Prosilas (Prototal Prosilas),https://www.prosilas.com,SLA,PA11 Nylon
+technology-orphan,Prosilas (Prototal Prosilas),https://www.prosilas.com,Injection Molding,PA11 Nylon
+material-orphan,K3D – Masters in 3D Metal Printing,https://k3d.nl/en/,Tool Steel,SLM
+material-orphan,3D Makers Zone,https://3dmz.nl,Carbon Fiber,Binder Jetting; DLP; EBM; FDM; SLA
+material-orphan,3D Makers Zone,https://3dmz.nl,Kevlar,Binder Jetting; DLP; EBM; FDM; SLA
+technology-orphan,3D Makers Zone,https://3dmz.nl,FDM,Carbon Fiber; Ceramic; Kevlar
+technology-orphan,3D Makers Zone,https://3dmz.nl,Binder Jetting,Carbon Fiber; Ceramic; Kevlar
+technology-orphan,3D Makers Zone,https://3dmz.nl,EBM,Carbon Fiber; Ceramic; Kevlar
+technology-orphan,Forecast 3D – Industrial 3D Printing & Digital Manufacturing,https://www.forecast3d.com,SLA,ABS; PC (Polycarbonate); PP (Polypropylene); TPU
+technology-orphan,Forecast 3D – Industrial 3D Printing & Digital Manufacturing,https://www.forecast3d.com,SLM,ABS; PC (Polycarbonate); PP (Polypropylene); TPU
+technology-orphan,Forecast 3D – Industrial 3D Printing & Digital Manufacturing,https://www.forecast3d.com,Material Jetting,ABS; PC (Polycarbonate); PP (Polypropylene); TPU
+technology-orphan,Holit,https://holit.nl,SLA,ABS; PETG; PLA; TPU
+technology-orphan,Holit,https://holit.nl,SLM,ABS; PETG; PLA; TPU
+technology-orphan,WayKen,https://waykenrm.com,SLA,ABS
+technology-orphan,WayKen,https://waykenrm.com,SLS,ABS
+technology-orphan,WayKen,https://waykenrm.com,MJF,ABS
+technology-orphan,WayKen,https://waykenrm.com,Sheet Metal,ABS
+technology-orphan,WayKen,https://waykenrm.com,SLM,ABS
+material-orphan,Polyproducts B.V./ENLARG3D,https://www.polyproducts.nl,Carbon Fiber,FDM
+technology-orphan,Polyproducts B.V./ENLARG3D,https://www.polyproducts.nl,FDM,Carbon Fiber
+technology-orphan,HabitAdd,https://habitadd.bg,SLS,Ceramic
+technology-orphan,HabitAdd,https://habitadd.bg,MJF,Ceramic
+technology-orphan,HabitAdd,https://habitadd.bg,SLM,Ceramic
+technology-orphan,HabitAdd,https://habitadd.bg,FDM,Ceramic
+technology-orphan,HabitAdd,https://habitadd.bg,DED,Ceramic
+technology-orphan,HabitAdd,https://habitadd.bg,Binder Jetting,Ceramic
+technology-orphan,Printerior,https://printeriordesigns.com,SLA,PETG; PLA
+technology-orphan,Printerior,https://printeriordesigns.com,SLS,PETG; PLA
+material-orphan,LaMáquina,https://lamaquina.io,Ceramic,FDM
+technology-orphan,Shapeways,https://www.shapeways.com/,MJF,ABS; ASA; PC (Polycarbonate); PETG
+technology-orphan,Shapeways,https://www.shapeways.com/,SLS,ABS; ASA; PC (Polycarbonate); PETG
+technology-orphan,Shapeways,https://www.shapeways.com/,Binder Jetting,ABS; ASA; PC (Polycarbonate); PETG
+technology-orphan,Shapeways,https://www.shapeways.com/,SLA,ABS; ASA; PC (Polycarbonate); PETG
+technology-orphan,Imaginarium,https://imaginarium.io,SLA,ABS; PC (Polycarbonate)
+technology-orphan,Imaginarium,https://imaginarium.io,SLS,ABS; PC (Polycarbonate)
+technology-orphan,Imaginarium,https://imaginarium.io,DLP,ABS; PC (Polycarbonate)
+technology-orphan,Imaginarium,https://imaginarium.io,Material Jetting,ABS; PC (Polycarbonate)
+material-orphan,"Wenext Technology Co., Ltd",https://www.wenext.com,Tool Steel,FDM; MJF; SLA; SLM; SLS
+technology-orphan,"Wenext Technology Co., Ltd",https://www.wenext.com,SLA,ABS; ASA; Copper; PP (Polypropylene); TPU; Titanium; Tool Steel
+material-orphan,NanoFract UG,https://www.nanofract.com,Ceramic,FDM
+material-orphan,NanoFract UG,https://www.nanofract.com,Tool Steel,FDM
+material-orphan,NanoFract UG,https://www.nanofract.com,Brass,FDM
+technology-orphan,NanoFract UG,https://www.nanofract.com,FDM,Brass; Ceramic; Tool Steel
+technology-orphan,Plus Manufact GmbH,https://plusmanufact.de,MJF,Titanium
+technology-orphan,Plus Manufact GmbH,https://plusmanufact.de,SLM,Titanium
+material-orphan,3DR TECH,http://3drtech.it,Carbon Fiber,FDM
+material-orphan,Geomiq,https://geomiq.com,Silicone,CNC Machining; Die Casting; FDM; MJF; Material Jetting; SLA; SLM; SLS
+technology-orphan,Geomiq,https://geomiq.com,SLA,Silicone
+technology-orphan,Geomiq,https://geomiq.com,FDM,Silicone
+technology-orphan,Geomiq,https://geomiq.com,SLS,Silicone
+technology-orphan,Geomiq,https://geomiq.com,MJF,Silicone
+technology-orphan,Geomiq,https://geomiq.com,CNC Machining,Silicone
+technology-orphan,Geomiq,https://geomiq.com,Die Casting,Silicone
+technology-orphan,Geomiq,https://geomiq.com,SLM,Silicone
+technology-orphan,Geomiq,https://geomiq.com,Material Jetting,Silicone
+material-orphan,3Diligent,https://www.3diligent.com,Silicone,Binder Jetting; DLP; EBM; FDM; MJF; Material Jetting; SLA; SLM; SLS
+technology-orphan,3Diligent,https://www.3diligent.com,FDM,Silicone
+technology-orphan,3Diligent,https://www.3diligent.com,SLA,Silicone
+technology-orphan,3Diligent,https://www.3diligent.com,SLS,Silicone
+technology-orphan,3Diligent,https://www.3diligent.com,MJF,Silicone
+technology-orphan,3Diligent,https://www.3diligent.com,DLP,Silicone
+technology-orphan,3Diligent,https://www.3diligent.com,SLM,Silicone
+technology-orphan,3Diligent,https://www.3diligent.com,EBM,Silicone
+technology-orphan,3Diligent,https://www.3diligent.com,Material Jetting,Silicone
+technology-orphan,3Diligent,https://www.3diligent.com,Binder Jetting,Silicone
+material-orphan,3DCeram,https://3dceram.com,Copper,FDM; SLA
+technology-orphan,3DCeram,https://3dceram.com,FDM,Ceramic; Copper
+material-orphan,WAAM3D,http://waam3d.com,Bronze,WAAM
+material-orphan,WAAM3D,http://waam3d.com,Tungsten,WAAM
+technology-orphan,WAAM3D,http://waam3d.com,WAAM,Bronze; Titanium; Tungsten
+technology-orphan,RapidDirect,https://www.rapiddirect.com/,SLA,Copper
+technology-orphan,RapidDirect,https://www.rapiddirect.com/,MJF,Copper
+technology-orphan,RapidDirect,https://www.rapiddirect.com/,SLS,Copper
+technology-orphan,RapidDirect,https://www.rapiddirect.com/,Injection Molding,Copper
+technology-orphan,RapidDirect,https://www.rapiddirect.com/,Die Casting,Copper
+material-orphan,SGD 3D,https://sgd3d.co.uk,Carbon Fiber,FDM; SLA; SLS
+technology-orphan,SGD 3D,https://sgd3d.co.uk,SLA,ABS; Carbon Fiber; PEEK
+material-orphan,Fab.Pub,https://fabpub.com,Ceramic,FDM
+material-orphan,Sculpteo – On-Demand 3D Printing & Digital Manufacturing,https://www.sculpteo.com,Brass,Binder Jetting; DLP; FDM; LCD; MJF; Material Jetting; SLA; SLM; SLS
+technology-orphan,Sculpteo – On-Demand 3D Printing & Digital Manufacturing,https://www.sculpteo.com,SLA,Brass; Bronze; PA11 Nylon
+technology-orphan,Sculpteo – On-Demand 3D Printing & Digital Manufacturing,https://www.sculpteo.com,FDM,Brass; Bronze; PA11 Nylon
+technology-orphan,Sculpteo – On-Demand 3D Printing & Digital Manufacturing,https://www.sculpteo.com,SLM,Brass; Bronze; PA11 Nylon
+technology-orphan,Sculpteo – On-Demand 3D Printing & Digital Manufacturing,https://www.sculpteo.com,DLP,Brass; Bronze; PA11 Nylon
+technology-orphan,Sculpteo – On-Demand 3D Printing & Digital Manufacturing,https://www.sculpteo.com,LCD,Brass; Bronze; PA11 Nylon
+technology-orphan,Sculpteo – On-Demand 3D Printing & Digital Manufacturing,https://www.sculpteo.com,Material Jetting,Brass; Bronze; PA11 Nylon
+technology-orphan,3D Printing Services,https://3dprintingservices.com,SLS,ABS; Castable Resin; Clear Resin; Dental Resin; Flexible Resin; High-Temp Resin; PETG; PLA; Standard Resin; Tough Resin
+technology-orphan,3D Printing Services,https://3dprintingservices.com,Binder Jetting,ABS; Castable Resin; Clear Resin; Dental Resin; Flexible Resin; High-Temp Resin; PETG; PLA; Standard Resin; Tough Resin
+technology-orphan,3D Printing Services,https://3dprintingservices.com,SLM,ABS; Castable Resin; Clear Resin; Dental Resin; Flexible Resin; High-Temp Resin; PETG; PLA; Standard Resin; Tough Resin
+technology-orphan,Makexyz,https://www.makexyz.com/,Material Jetting,ABS; Ceramic; PC (Polycarbonate); PETG; PLA; TPU; Titanium
+technology-orphan,3D Systems,https://www.3dsystems.com/,SLS,Titanium; Wax
+technology-orphan,3D Systems,https://www.3dsystems.com/,SLA,Titanium; Wax
+technology-orphan,3D Systems,https://www.3dsystems.com/,MJF,Titanium; Wax
+technology-orphan,3D Systems,https://www.3dsystems.com/,DLP,Titanium; Wax
+technology-orphan,3D Systems,https://www.3dsystems.com/,SLM,Titanium; Wax
+material-orphan,Guaranteed,https://www.guaranteed.be,Bronze,WAAM
+technology-orphan,Guaranteed,https://www.guaranteed.be,WAAM,Bronze; Titanium
+material-orphan,So Concrete,https://www.so-concrete.com,Carbon Fiber,FDM
+technology-orphan,So Concrete,https://www.so-concrete.com,FDM,Carbon Fiber
+material-orphan,Xometry,https://www.xometry.com/,ASA,CNC Machining; CNC Milling; CNC Turning; Carbon DLS; Die Casting; Laser Cutting; Material Jetting
+material-orphan,Xometry,https://www.xometry.com/,Carbon Fiber,CNC Machining; CNC Milling; CNC Turning; Carbon DLS; Die Casting; Laser Cutting; Material Jetting
+material-orphan,Xometry,https://www.xometry.com/,PPS,CNC Machining; CNC Milling; CNC Turning; Carbon DLS; Die Casting; Laser Cutting; Material Jetting
+material-orphan,Xometry,https://www.xometry.com/,TPU,CNC Machining; CNC Milling; CNC Turning; Carbon DLS; Die Casting; Laser Cutting; Material Jetting
+technology-orphan,Xometry,https://www.xometry.com/,Die Casting,ABS; ASA; Brass; Carbon Fiber; Copper; PEEK; PEI (Ultem); PPS; Silicone; TPU; Titanium
+technology-orphan,Xometry,https://www.xometry.com/,Material Jetting,ABS; ASA; Brass; Carbon Fiber; Copper; PEEK; PEI (Ultem); PPS; Silicone; TPU; Titanium
+technology-orphan,"Additive Manufacturing, LLC",https://additivemanufacturingllc.com,SLS,ABS; Ceramic
+technology-orphan,"Additive Manufacturing, LLC",https://additivemanufacturingllc.com,SLM,ABS; Ceramic
+material-orphan,Print a Thing,https://printathing.com/,Carbon Fiber,FDM; SLA
+material-orphan,Print a Thing,https://printathing.com/,Bronze,FDM; SLA
+material-orphan,Print a Thing,https://printathing.com/,Brass,FDM; SLA
+material-orphan,Print a Thing,https://printathing.com/,Copper,FDM; SLA
+material-orphan,Ponoko,https://www.ponoko.com/,Brass,FDM
+material-orphan,Ponoko,https://www.ponoko.com/,Silicone,FDM
+technology-orphan,Ponoko,https://www.ponoko.com/,FDM,Brass; Silicone
+technology-orphan,SOLIZE PARTNERS,https://partners.solize.com,MJF,ABS; High-Temp Resin; PC (Polycarbonate); PEEK; PPS; Tough Resin
+technology-orphan,SOLIZE PARTNERS,https://partners.solize.com,SLM,ABS; High-Temp Resin; PC (Polycarbonate); PEEK; PPS; Tough Resin
+material-orphan,SINTX,https://sintx.com,Alumina,FDM; SLA
+technology-orphan,SINTX,https://sintx.com,FDM,Alumina; Ceramic
+material-orphan,HiveASM BLD,https://www.hiveasmbld.com,Ceramic,Binder Jetting
+technology-orphan,HiveASM BLD,https://www.hiveasmbld.com,Binder Jetting,Ceramic
+material-orphan,Applied Rapid Technologies,https://artcorp.com,PC (Polycarbonate),DLP; SLA
+material-orphan,Applied Rapid Technologies,https://artcorp.com,PEEK,DLP; SLA
+material-orphan,OriginLabs - Penn State,https://originlabs.psu.edu,ABS,Material Jetting; SLA; SLS
+material-orphan,One Off Robotics,https://oneoffrobotics.com,Ceramic,WAAM
+technology-orphan,One Off Robotics,https://oneoffrobotics.com,WAAM,Ceramic; Titanium
+technology-orphan,Zeal 3D,https://www.zeal3dprinting.com.au/,SLA,ABS; Carbon-Filled Nylon; Glass-Filled Nylon; Inconel 625; PP (Polypropylene); Titanium
+technology-orphan,Zeal 3D,https://www.zeal3dprinting.com.au/,DLP,ABS; Carbon-Filled Nylon; Glass-Filled Nylon; Inconel 625; PP (Polypropylene); Titanium
+technology-orphan,Zeal 3D,https://www.zeal3dprinting.com.au/,EBM,ABS; Carbon-Filled Nylon; Glass-Filled Nylon; Inconel 625; PP (Polypropylene); Titanium
+technology-orphan,Zeal 3D,https://www.zeal3dprinting.com.au/,Material Jetting,ABS; Carbon-Filled Nylon; Glass-Filled Nylon; Inconel 625; PP (Polypropylene); Titanium
+material-orphan,Protolabs – Digital Manufacturing & Rapid Prototyping,https://www.protolabs.com/,Brass,FDM; SLA; SLS
+material-orphan,Protolabs – Digital Manufacturing & Rapid Prototyping,https://www.protolabs.com/,Copper,FDM; SLA; SLS
+technology-orphan,Protolabs – Digital Manufacturing & Rapid Prototyping,https://www.protolabs.com/,SLA,Brass; Copper
+technology-orphan,Protolabs – Digital Manufacturing & Rapid Prototyping,https://www.protolabs.com/,SLS,Brass; Copper
+technology-orphan,Protolabs – Digital Manufacturing & Rapid Prototyping,https://www.protolabs.com/,FDM,Brass; Copper
+technology-orphan,Vision Miner,https://visionminer.com/,SLA,PEEK; PPS
+technology-orphan,RAMLAB,https://ramlab.com,WAAM,Titanium
+material-orphan,PrintAWorld – SLA & Metal 3D Printing Services,https://prtwd.com/,ABS,SLA
+technology-orphan,PrintAWorld – SLA & Metal 3D Printing Services,https://prtwd.com/,SLA,ABS
+technology-orphan,Makelab,https://www.makelab.com/,SLA,PETG
+technology-orphan,Makelab,https://www.makelab.com/,MJF,PETG
+material-orphan,Sciaky,https://www.sciaky.com/,Inconel 625,EBM
+material-orphan,Sciaky,https://www.sciaky.com/,Tungsten,EBM
+material-orphan,Sciaky,https://www.sciaky.com/,Copper,EBM
+technology-orphan,Prototek,https://prototek.com,SLA,Silicone; Titanium; Wax
+technology-orphan,Prototek,https://prototek.com,DLP,Silicone; Titanium; Wax
+technology-orphan,Prototek,https://prototek.com,CNC Milling,Silicone; Titanium; Wax
+technology-orphan,Prototek,https://prototek.com,CNC Turning,Silicone; Titanium; Wax
+material-orphan,Articon,https://articon.com,PEEK,DLP
+material-orphan,Articon,https://articon.com,Cobalt Chrome,DLP
+technology-orphan,Articon,https://articon.com,DLP,Cobalt Chrome; PEEK
+technology-orphan,RapidMade – 3D Printing & Digital Manufacturing Services,https://rapidmade.com/,SLA,ABS; PETG; PP (Polypropylene)
+technology-orphan,RapidMade – 3D Printing & Digital Manufacturing Services,https://rapidmade.com/,DLP,ABS; PETG; PP (Polypropylene)
+technology-orphan,RapidMade – 3D Printing & Digital Manufacturing Services,https://rapidmade.com/,SLM,ABS; PETG; PP (Polypropylene)
+technology-orphan,American Additive Manufacturing,https://americanadditive.com,SLA,PEEK
+technology-orphan,American Additive Manufacturing,https://americanadditive.com,MJF,PEEK
+technology-orphan,American Additive Manufacturing,https://americanadditive.com,SLM,PEEK
+technology-orphan,Quickparts – Rapid Prototyping & Manufacturing Services,https://quickparts.com/,Injection Molding,Copper
+technology-orphan,Quickparts – Rapid Prototyping & Manufacturing Services,https://quickparts.com/,SLA,Copper
+technology-orphan,Quickparts – Rapid Prototyping & Manufacturing Services,https://quickparts.com/,SLS,Copper
+technology-orphan,Quickparts – Rapid Prototyping & Manufacturing Services,https://quickparts.com/,DMP,Copper
+technology-orphan,Quickparts – Rapid Prototyping & Manufacturing Services,https://quickparts.com/,Die Casting,Copper
+technology-orphan,Quickparts – Rapid Prototyping & Manufacturing Services,https://quickparts.com/,DLP,Copper
+material-orphan,TriMech Advanced Manufacturing Services,https://mfg.trimech.com,Silicone,FDM; MJF; Material Jetting; SAF; SLA; SLM; SLS
+material-orphan,TriMech Advanced Manufacturing Services,https://mfg.trimech.com,Carbon Fiber,FDM; MJF; Material Jetting; SAF; SLA; SLM; SLS
+technology-orphan,TriMech Advanced Manufacturing Services,https://mfg.trimech.com,FDM,Carbon Fiber; Silicone
+technology-orphan,TriMech Advanced Manufacturing Services,https://mfg.trimech.com,MJF,Carbon Fiber; Silicone
+technology-orphan,TriMech Advanced Manufacturing Services,https://mfg.trimech.com,SAF,Carbon Fiber; Silicone
+technology-orphan,TriMech Advanced Manufacturing Services,https://mfg.trimech.com,SLA,Carbon Fiber; Silicone
+technology-orphan,TriMech Advanced Manufacturing Services,https://mfg.trimech.com,SLS,Carbon Fiber; Silicone
+technology-orphan,TriMech Advanced Manufacturing Services,https://mfg.trimech.com,SLM,Carbon Fiber; Silicone
+technology-orphan,TriMech Advanced Manufacturing Services,https://mfg.trimech.com,Material Jetting,Carbon Fiber; Silicone
+material-orphan,NUGAE,https://nugae.tech,Carbon Fiber,FDM
+technology-orphan,NUGAE,https://nugae.tech,FDM,Carbon Fiber
+material-orphan,Jiga,https://jiga.io,Tool Steel,DLP; FDM; MJF; Material Jetting; SLA; SLM; SLS
+material-orphan,Jiga,https://jiga.io,Bronze,DLP; FDM; MJF; Material Jetting; SLA; SLM; SLS
+material-orphan,Jiga,https://jiga.io,Brass,DLP; FDM; MJF; Material Jetting; SLA; SLM; SLS
+technology-orphan,Jiga,https://jiga.io,Material Jetting,ABS; Brass; Bronze; Ceramic; Copper; PC (Polycarbonate); PEEK; PP (Polypropylene); PPS; Titanium; Tool Steel; Tungsten
+material-orphan,Treatstock – On-Demand Manufacturing Platform & Marketplace,https://www.treatstock.com,PETG,3D Scanning; CNC Machining; CNC Turning; Injection Molding
+material-orphan,Treatstock – On-Demand Manufacturing Platform & Marketplace,https://www.treatstock.com,Carbon Fiber,3D Scanning; CNC Machining; CNC Turning; Injection Molding
+material-orphan,Cosine Additive – Large Scale 3D Printing & AM Systems,https://www.cosineadditive.com/,Carbon Fiber,FDM
+material-orphan,3ERP – Rapid Prototyping & Low-Volume Manufacturing Services,https://www.3erp.com/,Polyurethane,CNC Machining; Injection Molding; Rapid Tooling
+technology-orphan,3ERP – Rapid Prototyping & Low-Volume Manufacturing Services,https://www.3erp.com/,CNC Machining,Polyurethane
+technology-orphan,3ERP – Rapid Prototyping & Low-Volume Manufacturing Services,https://www.3erp.com/,Injection Molding,Polyurethane
+technology-orphan,ADDMAN,https://www.addmangroup.com/,MJF,Silicone
+technology-orphan,ADDMAN,https://www.addmangroup.com/,FDM,Silicone
+technology-orphan,ADDMAN,https://www.addmangroup.com/,SLA,Silicone
+technology-orphan,ADDMAN,https://www.addmangroup.com/,DLP,Silicone
+technology-orphan,ADDMAN,https://www.addmangroup.com/,SLS,Silicone
+technology-orphan,ADDMAN,https://www.addmangroup.com/,CNC Milling,Silicone
+technology-orphan,ADDMAN,https://www.addmangroup.com/,CNC Turning,Silicone
+technology-orphan,ADDMAN,https://www.addmangroup.com/,Material Jetting,Silicone
+technology-orphan,ADDMAN,https://www.addmangroup.com/,SLM,Silicone
+material-orphan,JawsTec – Online 3D Printing Service,https://www.jawstec.com,Carbon Fiber,FDM; MJF; SLS
+material-orphan,JawsTec – Online 3D Printing Service,https://www.jawstec.com,Aluminum 6061,FDM; MJF; SLS
+technology-orphan,RYSE 3D,https://ryse3d.com,MJF,PETG
+technology-orphan,zone3Dplus,https://zone3dplus.com,SLS,Inconel 718
+technology-orphan,zone3Dplus,https://zone3dplus.com,MJF,Inconel 718
+technology-orphan,zone3Dplus,https://zone3dplus.com,SLA,Inconel 718
+technology-orphan,zone3Dplus,https://zone3dplus.com,FDM,Inconel 718
+technology-orphan,zone3Dplus,https://zone3dplus.com,Binder Jetting,Inconel 718
+technology-orphan,zone3Dplus,https://zone3dplus.com,Material Jetting,Inconel 718
+technology-orphan,BaessTech Engineering,https://www.baesstech.com,SLS,PETG
+technology-orphan,BaessTech Engineering,https://www.baesstech.com,MJF,PETG
+technology-orphan,BaessTech Engineering,https://www.baesstech.com,SLA,PETG
+material-orphan,FORMES ET VOLUMES,https://www.formes-et-volumes.fr,Polyurethane,Material Jetting
+technology-orphan,FORMES ET VOLUMES,https://www.formes-et-volumes.fr,Material Jetting,Polyurethane
+material-orphan,THINK3D,https://www.think3d.in/,ABS,Material Jetting
+material-orphan,THINK3D,https://www.think3d.in/,Brass,Material Jetting
+material-orphan,THINK3D,https://www.think3d.in/,Carbon Fiber,Material Jetting
+material-orphan,THINK3D,https://www.think3d.in/,Cobalt Chrome,Material Jetting
+material-orphan,THINK3D,https://www.think3d.in/,Copper,Material Jetting
+material-orphan,THINK3D,https://www.think3d.in/,Kevlar,Material Jetting
+material-orphan,THINK3D,https://www.think3d.in/,TPU,Material Jetting
+technology-orphan,THINK3D,https://www.think3d.in/,Material Jetting,ABS; Brass; Carbon Fiber; Cobalt Chrome; Copper; Kevlar; TPU; Titanium
