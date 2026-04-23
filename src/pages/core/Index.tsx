@@ -910,7 +910,7 @@ const Index = () => {
       <Navbar onScrollToSection={scrollToSection} />
       
       {/* Hero Section */}
-      <section id="hero" className="relative flex flex-col items-center justify-center min-h-[calc(100svh-240px)] py-8 lg:py-12 overflow-visible bg-black z-20">
+      <section id="hero" className="relative flex flex-col items-center justify-center min-h-[calc(100svh-340px)] py-8 lg:py-12 overflow-visible bg-black z-20">
         <div className="absolute inset-0 overflow-hidden">
           <img
             src={heroPrintingImageUrl}
@@ -927,10 +927,10 @@ const Index = () => {
           }`}
         >
           <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-1">
+            <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-4 md:mb-5">
               Find AM suppliers by capability, not by name
             </h1>
-            <p className="text-lg md:text-2xl font-semibold bg-gradient-primary bg-clip-text text-transparent mb-4">
+            <p className="text-lg md:text-2xl font-semibold bg-gradient-primary bg-clip-text text-transparent mb-8 md:mb-10">
               Search 3D printing technologies, materials &amp; expertise
             </p>
 
@@ -938,7 +938,7 @@ const Index = () => {
             <PriceCalculator />
 
             {/* Search Interface with AI and Live Preview */}
-            <div className="max-w-4xl mx-auto mb-4 overflow-visible relative z-[70]">
+            <div className="max-w-4xl mx-auto mb-8 md:mb-10 overflow-visible relative z-[70]">
               <div 
                 className="bg-background/80 backdrop-blur-sm rounded-2xl shadow-2xl p-3 sm:p-4 border border-border/20 overflow-visible"
               >
