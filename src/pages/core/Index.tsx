@@ -910,7 +910,7 @@ const Index = () => {
       <Navbar onScrollToSection={scrollToSection} />
       
       {/* Hero Section */}
-      <section id="hero" className="relative py-6 lg:py-8 overflow-visible bg-black z-20">
+      <section id="hero" className="relative flex flex-col items-center justify-center min-h-[calc(100svh-240px)] py-8 lg:py-12 overflow-visible bg-black z-20">
         <div className="absolute inset-0 overflow-hidden">
           <img
             src={heroPrintingImageUrl}
