@@ -19,6 +19,7 @@ dist-ssr
 .tmp/
 tools/__pycache__/
 tools/*.pyc
+tools/prototype-output/
 
 # Build artifacts
 *.tsbuildinfo
