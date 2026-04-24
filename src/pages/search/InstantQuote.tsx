@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -536,10 +536,23 @@ function MatchResultView({
     requirements: [],
   }));
 
+  // Debounced copy used by the heavy filter memo so rapid checkbox clicks
+  // don't trigger O(n×m) re-filter on every keystroke.
+  const [debouncedFilters, setDebouncedFilters] = useState(filters);
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedFilters(filters), 150);
+    return () => clearTimeout(t);
+  }, [filters]);
+
+  // Pagination: render a window of matches, grow on "Vis flere". Resets
+  // whenever the filter set changes so users always start at the top.
+  const [visibleCount, setVisibleCount] = useState(20);
+  useEffect(() => setVisibleCount(20), [debouncedFilters]);
+
   const visibleMatches = useMemo(() => {
-    const techFilter = filters.technologies.map((t) => t.toLowerCase());
-    const matFilter = filters.materials.map((m) => m.toLowerCase());
-    const areaFilter = filters.areas
+    const techFilter = debouncedFilters.technologies.map((t) => t.toLowerCase());
+    const matFilter = debouncedFilters.materials.map((m) => m.toLowerCase());
+    const areaFilter = debouncedFilters.areas
       .filter((a) => !['global', 'worldwide'].includes(a.toLowerCase()))
       .map((a) => a.toLowerCase());
 
@@ -575,22 +588,28 @@ function MatchResultView({
       }
       return true;
     });
-  }, [sortedMatches, filters]);
+  }, [sortedMatches, debouncedFilters]);
 
-  // Client-side geo lookup: MatchedSupplier doesn't carry lat/lng, so fetch
-  // them by supplier_id after matches arrive. Avoids touching edge functions
-  // or the Trigger.dev task.
+  // Geo for map pins: prefer lat/lng baked into the match (Trigger.dev now
+  // includes them). Fall back to a batched lookup for any stragglers — e.g.
+  // older search_results rows written before the backend shipped lat/lng.
   const [geoById, setGeoById] = useState<Map<string, { lat: number; lng: number }>>(new Map());
   useEffect(() => {
-    const ids = safeMatches.map((m: any) => m.supplier.supplier_id).filter(Boolean);
-    if (ids.length === 0) return;
+    const missingIds = safeMatches
+      .filter((m: any) => m.supplier.location_lat == null || m.supplier.location_lng == null)
+      .map((m: any) => m.supplier.supplier_id)
+      .filter(Boolean);
+    if (missingIds.length === 0) {
+      setGeoById(new Map());
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
         const { data, error } = await supabase
           .from('suppliers')
           .select('supplier_id, location_lat, location_lng')
-          .in('supplier_id', ids);
+          .in('supplier_id', missingIds);
         if (cancelled || error || !data) return;
         const m = new Map<string, { lat: number; lng: number }>();
         for (const row of data) {
@@ -612,16 +631,17 @@ function MatchResultView({
     () =>
       visibleMatches
         .map((m: any) => {
-          const geo = geoById.get(m.supplier.supplier_id);
-          if (!geo) return null;
+          const lat = m.supplier.location_lat ?? geoById.get(m.supplier.supplier_id)?.lat;
+          const lng = m.supplier.location_lng ?? geoById.get(m.supplier.supplier_id)?.lng;
+          if (lat == null || lng == null) return null;
           const city = m.supplier.location_city || '';
           const country = m.supplier.location_country || m.supplier.region || '';
           return {
             id: m.supplier.supplier_id,
             name: m.supplier.name ?? 'Unknown supplier',
             location: {
-              lat: geo.lat,
-              lng: geo.lng,
+              lat,
+              lng,
               city,
               country,
               fullAddress: [city, country].filter(Boolean).join(', '),
@@ -701,7 +721,7 @@ function MatchResultView({
                   Fetching live prices from 90+ vendors…
                 </div>
               )}
-              {visibleMatches.map((match: any, i: number) => (
+              {visibleMatches.slice(0, visibleCount).map((match: any, i: number) => (
                 <SupplierResultCard
                   key={match.supplier.supplier_id}
                   match={match}
@@ -710,6 +730,17 @@ function MatchResultView({
                   isRanking={isRanking}
                 />
               ))}
+              {visibleCount < visibleMatches.length && (
+                <div className="flex justify-center pt-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setVisibleCount((c) => c + 20)}
+                  >
+                    Vis flere leverandører ({visibleMatches.length - visibleCount} tilbage)
+                  </Button>
+                </div>
+              )}
             </div>
             <aside className="lg:sticky lg:top-4 lg:h-[calc(100vh-6rem)] min-h-[400px]">
               <ErrorBoundary
@@ -734,7 +765,7 @@ function MatchResultView({
   );
 }
 
-function SupplierResultCard({
+const SupplierResultCard = memo(function SupplierResultCard({
   match,
   rank,
   price,
@@ -838,7 +869,19 @@ function SupplierResultCard({
       </div>
     </Link>
   );
-}
+}, (prev, next) => {
+  // Skip re-render when nothing visible on the card changed. Polls rebuild
+  // the matches tree every 700ms with new references but usually same data.
+  if (prev.rank !== next.rank) return false;
+  if (prev.isRanking !== next.isRanking) return false;
+  if (prev.price !== next.price) return false;
+  if (prev.match.supplier.supplier_id !== next.match.supplier.supplier_id) return false;
+  if (prev.match.score !== next.match.score) return false;
+  if (prev.match.matchDetails.overallExplanation !== next.match.matchDetails.overallExplanation) return false;
+  if ((prev.match.matchDetails.matchedTechnologies?.length ?? 0) !== (next.match.matchDetails.matchedTechnologies?.length ?? 0)) return false;
+  if ((prev.match.matchDetails.matchedMaterials?.length ?? 0) !== (next.match.matchDetails.matchedMaterials?.length ?? 0)) return false;
+  return true;
+});
 
 function PriceBlock({ price }: { price: SupplierPriceInfo }) {
   if (price.kind === 'live') {

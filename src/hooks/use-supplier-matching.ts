@@ -24,6 +24,8 @@ export interface MatchedSupplier {
   region: string | null;
   location_city: string | null;
   location_country: string | null;
+  location_lat?: number | null;
+  location_lng?: number | null;
   verified: boolean;
   premium: boolean;
   logo_url: string | null;

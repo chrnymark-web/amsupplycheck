@@ -157,7 +157,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
       }
     };
 
-    setTimeout(() => poll(), 1000);
+    setTimeout(() => poll(), 250);
   }, []);
 
   const triggerSTLMatch = useCallback(async (input: STLMatchInput) => {

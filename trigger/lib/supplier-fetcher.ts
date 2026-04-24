@@ -22,7 +22,7 @@ export async function fetchSuppliers(): Promise<EnrichedSupplier[]> {
   // ones at equal prices.
   const { data: suppliers, error: supError } = await supabase
     .from("suppliers")
-    .select("id, supplier_id, name, website, description, location_city, location_country, region, verified, premium, logo_url, country_id")
+    .select("id, supplier_id, name, website, description, location_city, location_country, location_lat, location_lng, region, verified, premium, logo_url, country_id")
     .order("name");
 
   if (supError) throw new Error(`Failed to fetch suppliers: ${supError.message}`);
@@ -92,6 +92,8 @@ export async function fetchSuppliers(): Promise<EnrichedSupplier[]> {
     description: s.description,
     location_city: s.location_city,
     location_country: s.location_country,
+    location_lat: s.location_lat,
+    location_lng: s.location_lng,
     region: s.region,
     verified: s.verified ?? false,
     premium: s.premium ?? false,

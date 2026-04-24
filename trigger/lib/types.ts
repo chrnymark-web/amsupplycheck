@@ -8,6 +8,8 @@ export interface EnrichedSupplier {
   description: string | null;
   location_city: string | null;
   location_country: string | null;
+  location_lat: number | null;
+  location_lng: number | null;
   region: string | null;
   verified: boolean;
   premium: boolean;
@@ -57,6 +59,8 @@ export interface MatchResult {
     region: string | null;
     location_city: string | null;
     location_country: string | null;
+    location_lat: number | null;
+    location_lng: number | null;
     verified: boolean;
     premium: boolean;
     logo_url: string | null;

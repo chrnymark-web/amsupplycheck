@@ -238,6 +238,8 @@ export function scoreSuppliers(
           region: supplier.country?.region || supplier.region,
           location_city: supplier.location_city,
           location_country: supplier.location_country,
+          location_lat: supplier.location_lat,
+          location_lng: supplier.location_lng,
           verified: supplier.verified,
           premium: supplier.premium,
           logo_url: supplier.logo_url,
