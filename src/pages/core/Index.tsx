@@ -9,6 +9,7 @@ import Map from '@/components/ui/map';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Navbar from '@/components/ui/navbar';
 import CinematicHero from '@/components/hero/CinematicHero';
+import PageVideoBackground from '@/components/layout/PageVideoBackground';
 import CookieConsent from '@/components/layout/CookieConsent';
 import NewsletterSignup from '@/components/forms/NewsletterSignup';
 import FloatingNav from '@/components/layout/FloatingNav';
@@ -894,7 +895,8 @@ const Index = () => {
   }, [selectedTechnologies, selectedMaterials, selectedAreas, filteredSuppliers.length]);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-transparent relative">
+      <PageVideoBackground />
       <Helmet>
         <title>AMSupplyCheck - Find 3D Printing Suppliers Worldwide</title>
         <meta name="description" content="Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project." />
@@ -918,7 +920,7 @@ const Index = () => {
 
       {/* Hero Section — video background with original text + search */}
       <CinematicHero>
-        <div className="flex min-h-[68svh] w-full flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-10 md:pt-14 pb-6">
+        <div className="flex min-h-[68svh] w-full flex-col items-center justify-center px-4 sm:px-6 lg:px-8 py-10 md:py-14">
           <div
             ref={heroRef}
             className={`max-w-7xl mx-auto text-center transition-all duration-1000 ${
@@ -1064,7 +1066,7 @@ const Index = () => {
 
 
       {/* Supplier Map Section */}
-      <section id="supplier-map" className="py-8 bg-black relative z-0">
+      <section id="supplier-map" className="py-8 relative z-0">
         <div 
           ref={mapRef}
           className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8"
@@ -1199,7 +1201,7 @@ const Index = () => {
       </section>
 
       {/* Why Choose SupplyCheck Section */}
-      <section id="why-choose" className="py-20 bg-gradient-to-br from-primary to-primary-hover">
+      <section id="why-choose" className="py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <WhyChooseSectionContent />
         </div>
