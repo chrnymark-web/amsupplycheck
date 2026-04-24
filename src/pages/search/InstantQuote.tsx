@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import FilterPanel, { type FilterState } from '@/components/ui/filter-panel';
 import { LivePriceComparison } from '@/components/ui/live-price-comparison';
 import SupplierMap from '@/components/ui/map';
 import { ConfiguratorPanel } from '@/components/stl-viewer/ConfiguratorPanel';
@@ -526,6 +527,56 @@ function MatchResultView({
     [safeMatches, priceInfo]
   );
 
+  // In-page filtering: seeded from the configurator's single-value selections,
+  // then narrowed further by the FilterPanel below the header.
+  const [filters, setFilters] = useState<FilterState>(() => ({
+    technologies: technology ? [technology] : [],
+    materials: material ? [material] : [],
+    areas: area ? [area] : [],
+    requirements: [],
+  }));
+
+  const visibleMatches = useMemo(() => {
+    const techFilter = filters.technologies.map((t) => t.toLowerCase());
+    const matFilter = filters.materials.map((m) => m.toLowerCase());
+    const areaFilter = filters.areas
+      .filter((a) => !['global', 'worldwide'].includes(a.toLowerCase()))
+      .map((a) => a.toLowerCase());
+
+    if (techFilter.length === 0 && matFilter.length === 0 && areaFilter.length === 0) {
+      return sortedMatches;
+    }
+
+    return sortedMatches.filter((m: any) => {
+      const supplier = m.supplier ?? {};
+      const sTechs: string[] = (supplier.technologies ?? []).map((t: string) => t.toLowerCase());
+      const sMats: string[] = (supplier.materials ?? []).map((x: string) => x.toLowerCase());
+      const sRegion = (supplier.region ?? '').toLowerCase();
+      const sCountry = (supplier.location_country ?? '').toLowerCase();
+      const sCity = (supplier.location_city ?? '').toLowerCase();
+
+      if (techFilter.length > 0) {
+        const hit = techFilter.some((t) =>
+          sTechs.some((st) => st === t || st.includes(t) || t.includes(st))
+        );
+        if (!hit) return false;
+      }
+      if (matFilter.length > 0) {
+        const hit = matFilter.some((mt) =>
+          sMats.some((sm) => sm === mt || sm.includes(mt) || mt.includes(sm))
+        );
+        if (!hit) return false;
+      }
+      if (areaFilter.length > 0) {
+        const hit = areaFilter.some(
+          (a) => sRegion.includes(a) || sCountry.includes(a) || sCity.includes(a) || a.includes(sRegion) || a.includes(sCountry)
+        );
+        if (!hit) return false;
+      }
+      return true;
+    });
+  }, [sortedMatches, filters]);
+
   // Client-side geo lookup: MatchedSupplier doesn't carry lat/lng, so fetch
   // them by supplier_id after matches arrive. Avoids touching edge functions
   // or the Trigger.dev task.
@@ -559,7 +610,7 @@ function MatchResultView({
 
   const mapSuppliers = useMemo(
     () =>
-      safeMatches
+      visibleMatches
         .map((m: any) => {
           const geo = geoById.get(m.supplier.supplier_id);
           if (!geo) return null;
@@ -584,7 +635,7 @@ function MatchResultView({
           };
         })
         .filter(Boolean) as Array<any>,
-    [safeMatches, geoById]
+    [visibleMatches, geoById]
   );
 
   return (
@@ -610,10 +661,18 @@ function MatchResultView({
               <CheckCircle2 className="h-5 w-5 text-primary shrink-0" />
               <div className="min-w-0">
                 <p className="text-sm font-semibold truncate">
-                  {safeMatches.length} suppliers matched
+                  {visibleMatches.length} suppliers matched
+                  {visibleMatches.length !== safeMatches.length && (
+                    <span className="text-muted-foreground font-normal"> of {safeMatches.length}</span>
+                  )}
                 </p>
                 <p className="text-[11px] text-muted-foreground truncate">
-                  {[technology || 'Any technology', material || 'Any material', area || 'Any area', `${quantity} pcs`].join(' · ')}
+                  {[
+                    filters.technologies.length ? filters.technologies.join(', ') : 'Any technology',
+                    filters.materials.length ? filters.materials.join(', ') : 'Any material',
+                    filters.areas.length ? filters.areas.join(', ') : 'Any area',
+                    `${quantity} pcs`,
+                  ].join(' · ')}
                 </p>
               </div>
             </div>
@@ -629,6 +688,7 @@ function MatchResultView({
         <main className="container mx-auto px-4 py-6">
           <div className="grid lg:grid-cols-[1fr_480px] gap-4">
             <div className="space-y-3">
+              <FilterPanel filters={filters} onFilterChange={setFilters} />
               {isRanking && (
                 <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-primary">
                   <Loader2 className="h-3 w-3 animate-spin" />
@@ -641,7 +701,7 @@ function MatchResultView({
                   Fetching live prices from 90+ vendors…
                 </div>
               )}
-              {sortedMatches.map((match: any, i: number) => (
+              {visibleMatches.map((match: any, i: number) => (
                 <SupplierResultCard
                   key={match.supplier.supplier_id}
                   match={match}
