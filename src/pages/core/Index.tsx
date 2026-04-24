@@ -8,6 +8,7 @@ import { useForm } from 'react-hook-form';
 import Map from '@/components/ui/map';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import Navbar from '@/components/ui/navbar';
+import CinematicHero from '@/components/hero/CinematicHero';
 import CookieConsent from '@/components/layout/CookieConsent';
 import NewsletterSignup from '@/components/forms/NewsletterSignup';
 import FloatingNav from '@/components/layout/FloatingNav';
@@ -26,7 +27,7 @@ import { Label } from '@/components/ui/label';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useToast } from '@/hooks/use-toast';
-import { useCounterAnimation, useAnimatedCount } from '@/hooks/use-counter-animation';
+import { useCounterAnimation } from '@/hooks/use-counter-animation';
 import { useInView } from '@/hooks/use-in-view';
 import { useScrollDepth } from '@/hooks/use-scroll-depth';
 import SupplierLogo from '@/components/ui/supplier-logo';
@@ -36,8 +37,6 @@ import { countTechnologyCategories, countMaterialCategories } from '@/lib/catego
 import { useKnowledgeData } from '@/hooks/use-knowledge-data';
 import { supabase } from '@/integrations/supabase/client';
 import { trackSearch, trackCTAClick } from '@/lib/analytics';
-import heroImageUrl from '@/assets/hero-background.avif';
-import heroPrintingImageUrl from '@/assets/hero-3d-printing.jpg';
 
 // Map is now directly imported above to avoid WebGL rendering issues with lazy loading
 
@@ -374,7 +373,7 @@ const Index = () => {
   const [materialCount, setMaterialCount] = useState<number>(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const [scrollProgress, setScrollProgress] = useState(0);
-  
+
   const [isMapPanelMinimized, setIsMapPanelMinimized] = useState(true);
   const [isSearching, setIsSearching] = useState(false);
 
@@ -497,19 +496,30 @@ const Index = () => {
   }, []);
 
 
-  // Show/hide scroll to top button
+  // Show/hide scroll to top button + update scroll-progress bar
   useEffect(() => {
-    const handleScroll = () => {
+    let raf = 0;
+    const update = () => {
       setShowScrollTop(window.scrollY > 300);
-      
-      // Calculate scroll progress
+
       const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-      const scrolled = (window.scrollY / windowHeight) * 100;
+      const scrolled = windowHeight > 0 ? (window.scrollY / windowHeight) * 100 : 0;
       setScrollProgress(scrolled);
     };
 
+    const handleScroll = () => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(update);
+    };
+
+    update();
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('resize', handleScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(raf);
+      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener('resize', handleScroll);
+    };
   }, []);
 
 
@@ -866,9 +876,6 @@ const Index = () => {
     });
   }, [suppliers, selectedTechnologies, selectedMaterials, selectedAreas, searchKeywords]);
 
-  // Animated count for filtered suppliers
-  const animatedFilteredCount = useAnimatedCount(filteredSuppliers.length, 300);
-
   // Track filter changes after filteredSuppliers is available
   useEffect(() => {
     if (selectedTechnologies.length > 0 || selectedMaterials.length > 0 || selectedAreas.length > 0) {
@@ -908,164 +915,152 @@ const Index = () => {
       </div>
 
       <Navbar onScrollToSection={scrollToSection} />
-      
-      {/* Hero Section */}
-      <section id="hero" className="relative flex flex-col items-center justify-center min-h-[calc(100svh-340px)] py-8 lg:py-12 overflow-visible bg-black z-20">
-        <div className="absolute inset-0 overflow-hidden">
-          <img
-            src={heroPrintingImageUrl}
-            alt="3D printing production facility"
-            className="w-full h-full object-cover opacity-25"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/60 to-black" />
-        </div>
-        
-        <div 
-          ref={heroRef}
-          className={`relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center transition-all duration-1000 ${
-            heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-          }`}
-        >
-          <div className="max-w-4xl mx-auto">
-            <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-4 md:mb-5">
-              Find AM suppliers by capability, not by name
-            </h1>
-            <p className="text-lg md:text-2xl font-semibold bg-gradient-primary bg-clip-text text-transparent mb-8 md:mb-10">
-              Search 3D printing technologies, materials &amp; expertise
-            </p>
 
-            {/* Price Calculator */}
-            <PriceCalculator />
+      {/* Hero Section — video background with original text + search */}
+      <CinematicHero>
+        <div className="flex min-h-[68svh] w-full flex-col items-center justify-start px-4 sm:px-6 lg:px-8 pt-10 md:pt-14 pb-6">
+          <div
+            ref={heroRef}
+            className={`max-w-7xl mx-auto text-center transition-all duration-1000 ${
+              heroInView ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`}
+          >
+            <div className="max-w-4xl mx-auto">
+              <h1 className="text-2xl md:text-4xl font-bold text-foreground mb-4 md:mb-5">
+                Find AM suppliers by capability, not by name
+              </h1>
+              <p className="text-lg md:text-2xl font-semibold bg-gradient-primary bg-clip-text text-transparent mb-8 md:mb-10">
+                Search 3D printing technologies, materials &amp; expertise
+              </p>
 
-            {/* Search Interface with AI and Live Preview */}
-            <div className="max-w-4xl mx-auto mb-8 md:mb-10 overflow-visible relative z-[70]">
-              <div 
-                className="bg-background/80 backdrop-blur-sm rounded-2xl shadow-2xl p-3 sm:p-4 border border-border/20 overflow-visible"
-              >
-                <AISearchInput
-                  onFiltersExtracted={(filters: AISearchFilters) => {
-                    // Build search params from AI filters and navigate
-                    const searchParams = new URLSearchParams();
-                    if (filters.technologies.length > 0) searchParams.set('technologies', filters.technologies.join(','));
-                    if (filters.materials.length > 0) searchParams.set('materials', filters.materials.join(','));
-                    if (filters.areas.length > 0) searchParams.set('areas', filters.areas.join(','));
-                    if (filters.certifications?.length > 0) searchParams.set('certifications', filters.certifications.join(','));
-                    if (filters.productionVolume) searchParams.set('volume', filters.productionVolume);
-                    if (filters.urgency && filters.urgency !== 'standard') searchParams.set('urgency', filters.urgency);
-                    if (filters.keywords) searchParams.set('q', filters.keywords);
-                    if (filters.originalQuery) searchParams.set('query', filters.originalQuery);
-                    navigate(`/search?${searchParams.toString()}`);
-                  }}
-                  onClear={() => {
-                    setSelectedTechnologies([]);
-                    setSelectedMaterials([]);
-                    setSelectedAreas([]);
-                    setSearchKeywords('');
-                  }}
-                  suppliers={suppliers.map(s => ({
-                    id: s.id,
-                    name: s.name,
-                    location: {
-                      city: s.location.city,
-                      country: s.location.country
-                    },
-                    technologies: s.technologies,
-                    materials: s.materials,
-                    verified: s.verified,
-                    premium: s.premium,
-                    logoUrl: s.logoUrl,
-                    region: s.region
-                  }))}
-                  enableLivePreview={true}
-                  placeholder="Try: 'titanium aerospace parts urgent' or 'medical grade prototypes in Europe'"
-                />
+              {/* Price Calculator */}
+              <PriceCalculator />
+
+              {/* Search Interface with AI and Live Preview */}
+              <div className="max-w-4xl mx-auto mb-8 md:mb-10 overflow-visible relative z-[70]">
+                <div className="bg-background/80 backdrop-blur-sm rounded-2xl shadow-2xl p-3 sm:p-4 border border-border/20 overflow-visible">
+                  <AISearchInput
+                    onFiltersExtracted={(filters: AISearchFilters) => {
+                      const searchParams = new URLSearchParams();
+                      if (filters.technologies.length > 0) searchParams.set('technologies', filters.technologies.join(','));
+                      if (filters.materials.length > 0) searchParams.set('materials', filters.materials.join(','));
+                      if (filters.areas.length > 0) searchParams.set('areas', filters.areas.join(','));
+                      if (filters.certifications?.length > 0) searchParams.set('certifications', filters.certifications.join(','));
+                      if (filters.productionVolume) searchParams.set('volume', filters.productionVolume);
+                      if (filters.urgency && filters.urgency !== 'standard') searchParams.set('urgency', filters.urgency);
+                      if (filters.keywords) searchParams.set('q', filters.keywords);
+                      if (filters.originalQuery) searchParams.set('query', filters.originalQuery);
+                      navigate(`/search?${searchParams.toString()}`);
+                    }}
+                    onClear={() => {
+                      setSelectedTechnologies([]);
+                      setSelectedMaterials([]);
+                      setSelectedAreas([]);
+                      setSearchKeywords('');
+                    }}
+                    suppliers={suppliers.map(s => ({
+                      id: s.id,
+                      name: s.name,
+                      location: {
+                        city: s.location.city,
+                        country: s.location.country,
+                      },
+                      technologies: s.technologies,
+                      materials: s.materials,
+                      verified: s.verified,
+                      premium: s.premium,
+                      logoUrl: s.logoUrl,
+                      region: s.region,
+                    }))}
+                    enableLivePreview={true}
+                    placeholder="Try: 'titanium aerospace parts urgent' or 'medical grade prototypes in Europe'"
+                  />
+                </div>
               </div>
+
+              <TooltipProvider>
+                <div
+                  ref={statsRef}
+                  className={`flex flex-wrap justify-center gap-2 sm:gap-4 text-sm text-muted-foreground ${
+                    statsInView && !showSuggestions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+                  } ${showSuggestions ? 'transition-none' : 'transition-all duration-700'}`}
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="flex items-center space-x-2">
+                        <div className="h-4 w-4 bg-muted rounded-full animate-pulse" />
+                        <div className="h-4 w-32 bg-muted rounded animate-pulse" />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="h-4 w-4 bg-muted rounded-full animate-pulse" />
+                        <div className="h-4 w-24 bg-muted rounded animate-pulse" />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="h-4 w-4 bg-muted rounded-full animate-pulse" />
+                        <div className="h-4 w-28 bg-muted rounded animate-pulse" />
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <div className="h-4 w-4 bg-muted rounded-full animate-pulse" />
+                        <div className="h-4 w-20 bg-muted rounded animate-pulse" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center transition-transform duration-300 hover:scale-110 cursor-default">
+                            <CheckCircle className="h-4 w-4 text-supplier-verified mr-2" />
+                            {animatedSupplierCount} Verified Suppliers
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          <p>Active and verified 3D printing suppliers in our database</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center transition-transform duration-300 hover:scale-110 cursor-default">
+                            <Globe className="h-4 w-4 text-primary mr-2" />
+                            {animatedCountryCount} Countries
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          <p>Global reach spanning multiple countries worldwide</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center transition-transform duration-300 hover:scale-110 cursor-default">
+                            <Zap className="h-4 w-4 text-primary mr-2" />
+                            {animatedTechnologyCount} Technologies
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          <p>Different 3D printing technologies available</p>
+                        </TooltipContent>
+                      </Tooltip>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div className="flex items-center transition-transform duration-300 hover:scale-110 cursor-default">
+                            <Star className="h-4 w-4 text-primary mr-2" />
+                            {animatedMaterialCount} Materials
+                          </div>
+                        </TooltipTrigger>
+                        <TooltipContent side="bottom">
+                          <p>Wide variety of materials offered by our suppliers</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </>
+                  )}
+                </div>
+              </TooltipProvider>
             </div>
-
-            <TooltipProvider>
-              <div 
-                ref={statsRef}
-                className={`flex flex-wrap justify-center gap-2 sm:gap-4 text-sm text-muted-foreground ${
-                  statsInView && !showSuggestions ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-                } ${showSuggestions ? 'transition-none' : 'transition-all duration-700'}`}
-              >
-                {isLoading ? (
-                  <>
-                    <div className="flex items-center space-x-2">
-                      <div className="h-4 w-4 bg-muted rounded-full animate-pulse" />
-                      <div className="h-4 w-32 bg-muted rounded animate-pulse" />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="h-4 w-4 bg-muted rounded-full animate-pulse" />
-                      <div className="h-4 w-24 bg-muted rounded animate-pulse" />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="h-4 w-4 bg-muted rounded-full animate-pulse" />
-                      <div className="h-4 w-28 bg-muted rounded animate-pulse" />
-                    </div>
-                    <div className="flex items-center space-x-2">
-                      <div className="h-4 w-4 bg-muted rounded-full animate-pulse" />
-                      <div className="h-4 w-20 bg-muted rounded animate-pulse" />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center transition-transform duration-300 hover:scale-110 cursor-default">
-                          <CheckCircle className="h-4 w-4 text-supplier-verified mr-2" />
-                          {animatedSupplierCount} Verified Suppliers
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        <p>Active and verified 3D printing suppliers in our database</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center transition-transform duration-300 hover:scale-110 cursor-default">
-                          <Globe className="h-4 w-4 text-primary mr-2" />
-                          {animatedCountryCount} Countries
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        <p>Global reach spanning multiple countries worldwide</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center transition-transform duration-300 hover:scale-110 cursor-default">
-                          <Zap className="h-4 w-4 text-primary mr-2" />
-                          {animatedTechnologyCount} Technologies
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        <p>Different 3D printing technologies available</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center transition-transform duration-300 hover:scale-110 cursor-default">
-                          <Star className="h-4 w-4 text-primary mr-2" />
-                          {animatedMaterialCount} Materials
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom">
-                        <p>Wide variety of materials offered by our suppliers</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </>
-                )}
-              </div>
-            </TooltipProvider>
-
-            {/* AI Project Matching CTA */}
           </div>
         </div>
-      </section>
+      </CinematicHero>
 
 
       {/* Supplier Map Section */}

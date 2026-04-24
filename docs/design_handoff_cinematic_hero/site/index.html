@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AMSupplyCheck — Find AM suppliers by capability, not by name</title>
+<link rel="stylesheet" href="../colors_and_type.css" />
+<link rel="icon" href="../assets/logos/brand-logo-icon.png" />
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; min-height: 100vh; background: hsl(var(--background)); color: hsl(var(--foreground)); font-family: var(--font-sans); -webkit-font-smoothing: antialiased; }
+
+  /* Page shell ------------------------------------------------------------ */
+  .stage { position: relative; min-height: 100vh; overflow: hidden; }
+
+  /* Background video — fullscreen, looping, muted */
+  .bg-video {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    /* push toward neutral so the sage palette feels native */
+    filter: brightness(0.55) saturate(0.85) contrast(1.05);
+  }
+  /* Subtle vignette + bottom fade so copy and nav sit cleanly on the footage */
+  .bg-veil {
+    position: absolute; inset: 0; z-index: 1;
+    background:
+      radial-gradient(ellipse at 50% 30%, transparent 0%, hsl(var(--background) / 0.35) 60%, hsl(var(--background) / 0.85) 100%),
+      linear-gradient(180deg, hsl(var(--background) / 0.55) 0%, hsl(var(--background) / 0.15) 35%, hsl(var(--background) / 0.65) 80%, hsl(var(--background)) 100%);
+    pointer-events: none;
+  }
+  /* Faint film grain so the dark blacks don't band */
+  .bg-grain {
+    position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    opacity: 0.06; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.85'/></svg>");
+  }
+
+  /* Navigation bar ------------------------------------------------------- */
+  .nav {
+    position: relative; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    max-width: 1280px; margin: 0 auto;
+    padding: 22px 28px;
+  }
+  .nav-brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    color: hsl(var(--foreground));
+    text-decoration: none;
+    font-size: 22px; font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+  .nav-brand .mark {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(87 22% 50%) 100%);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 1px hsl(var(--primary) / 0.4), inset 0 1px 0 hsl(0 0% 100% / 0.12);
+  }
+  .nav-brand .mark svg { width: 16px; height: 16px; color: #fff; }
+  .nav-brand sup { font-size: 11px; opacity: 0.7; margin-left: 1px; font-weight: 400; }
+
+  .nav-links {
+    display: none; gap: 4px; align-items: center;
+  }
+  @media (min-width: 768px) {
+    .nav-links { display: inline-flex; }
+  }
+  .nav-link {
+    padding: 8px 14px;
+    color: hsl(var(--muted-foreground));
+    text-decoration: none;
+    font-size: 13.5px;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: color 200ms cubic-bezier(0.4, 0, 0.2, 1), background-color 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .nav-link:hover { color: hsl(var(--foreground)); }
+  .nav-link.active { color: hsl(var(--foreground)); }
+
+  /* Liquid-glass component (capsule) */
+  .glass {
+    position: relative; overflow: hidden;
+    background: hsl(0 0% 100% / 0.025);
+    backdrop-filter: blur(10px) saturate(140%);
+    -webkit-backdrop-filter: blur(10px) saturate(140%);
+    border: none;
+    box-shadow: inset 0 1px 1px hsl(0 0% 100% / 0.10);
+    border-radius: 999px;
+    color: hsl(var(--foreground));
+    font-family: inherit;
+    font-weight: 500;
+    transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1), box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+  }
+  .glass::before {
+    content: '';
+    position: absolute; inset: 0;
+    border-radius: inherit;
+    padding: 1.4px;
+    background: linear-gradient(180deg,
+      hsl(0 0% 100% / 0.45) 0%,
+      hsl(0 0% 100% / 0.15) 20%,
+      hsl(0 0% 100% / 0) 40%,
+      hsl(0 0% 100% / 0) 60%,
+      hsl(0 0% 100% / 0.15) 80%,
+      hsl(0 0% 100% / 0.45) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    pointer-events: none;
+  }
+  .glass:hover { transform: scale(1.03); box-shadow: inset 0 1px 1px hsl(0 0% 100% / 0.16), 0 8px 30px hsl(var(--primary) / 0.18); }
+  .glass:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
+
+  .glass--sm { padding: 10px 22px; font-size: 13.5px; }
+  .glass--lg { padding: 18px 50px; font-size: 15px; letter-spacing: -0.005em; }
+  .glass--lg .arrow { display: inline-block; margin-left: 10px; transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1); }
+  .glass--lg:hover .arrow { transform: translateX(4px); }
+
+  /* Hero ---------------------------------------------------------------- */
+  .hero {
+    position: relative; z-index: 10;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center;
+    padding: 88px 24px 96px;
+  }
+  @media (min-width: 768px) {
+    .hero { padding: 112px 24px 144px; }
+  }
+
+  .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: hsl(var(--primary) / 0.10);
+    border: 1px solid hsl(var(--primary) / 0.32);
+    color: hsl(var(--primary));
+    font-size: 11px; font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.10em;
+    margin-bottom: 28px;
+  }
+  .eyebrow .dot { width: 6px; height: 6px; border-radius: 999px; background: hsl(var(--primary)); box-shadow: 0 0 0 4px hsl(var(--primary) / 0.18); }
+
+  .hero h1 {
+    margin: 0;
+    max-width: 1180px;
+    font-size: clamp(40px, 8.4vw, 96px);
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+  }
+  .hero h1 .ghost {
+    color: hsl(var(--muted-foreground));
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .hero p {
+    margin: 28px auto 0;
+    max-width: 620px;
+    color: hsl(var(--muted-foreground));
+    font-size: 16px; line-height: 1.65;
+  }
+  @media (min-width: 768px) {
+    .hero p { font-size: 17.5px; }
+  }
+
+  .hero-cta-row {
+    margin-top: 48px;
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 14px;
+  }
+
+  /* Trust row ------------------------------------------------------------ */
+  .trust {
+    position: relative; z-index: 10;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center;
+    gap: 20px 32px;
+    padding: 0 24px 64px;
+    color: hsl(var(--muted-foreground));
+    font-size: 13.5px;
+  }
+  .trust-item { display: inline-flex; align-items: center; gap: 8px; }
+  .trust-item svg { width: 16px; height: 16px; color: hsl(var(--primary)); }
+  .trust-item b { color: hsl(var(--foreground)); font-weight: 600; }
+  .trust-sep { width: 1px; height: 14px; background: hsl(var(--border)); display: none; }
+  @media (min-width: 768px) { .trust-sep { display: inline-block; } }
+
+  /* Scroll cue ----------------------------------------------------------- */
+  .scroll-cue {
+    position: absolute; left: 50%; bottom: 26px; transform: translateX(-50%);
+    z-index: 10; display: inline-flex; flex-direction: column; align-items: center;
+    color: hsl(var(--muted-foreground)); font-size: 11px; letter-spacing: 0.18em;
+    text-transform: uppercase; gap: 8px;
+    opacity: 0.7;
+  }
+  .scroll-cue .line {
+    width: 1px; height: 28px;
+    background: linear-gradient(180deg, hsl(var(--muted-foreground) / 0.05), hsl(var(--muted-foreground) / 0.6), hsl(var(--muted-foreground) / 0.05));
+    animation: scrollPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes scrollPulse {
+    0%, 100% { transform: translateY(-4px); opacity: 0.4; }
+    50% { transform: translateY(4px); opacity: 1; }
+  }
+
+  /* Animations ----------------------------------------------------------- */
+  @keyframes fadeRise {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  .anim       { animation: fadeRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both; }
+  .anim-d1    { animation: fadeRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both; }
+  .anim-d2    { animation: fadeRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.30s both; }
+  .anim-d3    { animation: fadeRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.45s both; }
+  .anim-d4    { animation: fadeRise 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.60s both; }
+
+  /* Sage-tinted accent on H1 active phrase */
+  .accent { color: hsl(var(--primary)); }
+
+  /* Reduce motion ------------------------------------------------------- */
+  @media (prefers-reduced-motion: reduce) {
+    .anim, .anim-d1, .anim-d2, .anim-d3, .anim-d4 { animation: none; }
+    .scroll-cue .line { animation: none; }
+    .bg-video { display: none; }
+    .stage { background: hsl(var(--background)); }
+  }
+</style>
+</head>
+<body>
+  <main class="stage">
+    <!-- Background video -->
+    <video class="bg-video" src="assets/hero-printer.mp4" autoplay loop muted playsinline preload="metadata" aria-hidden="true"></video>
+    <div class="bg-veil"></div>
+    <div class="bg-grain"></div>
+
+    <!-- Nav -->
+    <nav class="nav anim">
+      <a href="/" class="nav-brand" aria-label="AMSupplyCheck home">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7l9-4 9 4-9 4-9-4z"/><path d="M3 7v10l9 4 9-4V7"/><path d="M12 11v10"/></svg>
+        </span>
+        <span>AMSupplyCheck<sup>®</sup></span>
+      </a>
+
+      <div class="nav-links" role="navigation" aria-label="Primary">
+        <a href="#" class="nav-link active">Discover</a>
+        <a href="#" class="nav-link">Technologies</a>
+        <a href="#" class="nav-link">Materials</a>
+        <a href="#" class="nav-link">Suppliers</a>
+        <a href="#" class="nav-link">About</a>
+      </div>
+
+      <button class="glass glass--sm" type="button">Become a Supplier</button>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+      <span class="eyebrow anim-d1"><span class="dot"></span>Instant Supplier Match</span>
+
+      <h1 class="anim-d1">
+        Find AM suppliers by<br/>
+        <span class="ghost">capability,</span> <span class="accent">not by name.</span>
+      </h1>
+
+      <p class="anim-d2">
+        Search 3D printing technologies, materials &amp; expertise across
+        <b style="color: hsl(var(--foreground)); font-weight: 600;">200+ verified suppliers</b> worldwide.
+        No login. Anonymous indication. NDAs only after match.
+      </p>
+
+      <div class="hero-cta-row anim-d3">
+        <button class="glass glass--lg" type="button">
+          Begin Discovery
+          <span class="arrow" aria-hidden="true">→</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- Trust row -->
+    <div class="trust anim-d4">
+      <span class="trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <b>200+</b> Verified Suppliers
+      </span>
+      <span class="trust-sep" aria-hidden="true"></span>
+      <span class="trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+        <b>50+</b> Countries
+      </span>
+      <span class="trust-sep" aria-hidden="true"></span>
+      <span class="trust-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <b>SLS · SLA · DMLS · MJF · FDM</b>
+      </span>
+    </div>
+
+    <!-- Scroll cue -->
+    <span class="scroll-cue" aria-hidden="true">
+      <span>Scroll</span>
+      <span class="line"></span>
+    </span>
+  </main>
+
+  <script>
+    // Some browsers block autoplay until interaction; nudge it.
+    const v = document.querySelector('.bg-video');
+    if (v) {
+      const tryPlay = () => v.play().catch(() => {});
+      v.addEventListener('canplay', tryPlay, { once: true });
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) tryPlay(); });
+    }
+  </script>
+</body>
+</html>
