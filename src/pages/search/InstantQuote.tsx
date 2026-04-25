@@ -600,7 +600,10 @@ function MatchResultView({
       .map((m: any) => m.supplier.supplier_id)
       .filter(Boolean);
     if (missingIds.length === 0) {
-      setGeoById(new Map());
+      // Skip the setState when already empty — every poll re-runs this effect
+      // with a fresh `safeMatches` reference, and unconditionally writing
+      // `new Map()` would thrash the geo state and re-render the map every 700ms.
+      setGeoById((prev) => (prev.size === 0 ? prev : new Map()));
       return;
     }
     let cancelled = false;

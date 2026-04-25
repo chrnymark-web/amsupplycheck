@@ -251,9 +251,9 @@ export function scoreSuppliers(
           locationScore: Math.round(locationScore * 100),
           certificationScore: Math.round(certificationScore * 100),
           overallExplanation: "",
-          matchedTechnologies: matchedTechs,
-          matchedMaterials: matchedMats,
-          matchedCertifications: matchedCerts,
+          matchedTechnologies: [...new Set(matchedTechs)],
+          matchedMaterials: [...new Set(matchedMats)],
+          matchedCertifications: [...new Set(matchedCerts)],
         },
       });
     }

@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { supabase } from "@/integrations/supabase/client";
 import type { MatchingResult } from "./use-supplier-matching";
@@ -46,6 +46,18 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
   const [runId, setRunId] = useState<string | undefined>(undefined);
   const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
 
+  // Ref-based kill switch for the recursive setTimeout polling chain. Flipped
+  // true on terminal status (completed/failed), reset to false on each new
+  // search, and forced true on unmount so chains can't outlive the component
+  // or pile up across multiple searches.
+  const cancelPollingRef = useRef(false);
+
+  useEffect(() => {
+    return () => {
+      cancelPollingRef.current = true;
+    };
+  }, []);
+
   useRealtimeRun(runId, {
     accessToken,
     enabled: !!runId && !!accessToken,
@@ -60,9 +72,11 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         });
         if (output.stlMetrics) setStlMetrics(output.stlMetrics);
       }
+      cancelPollingRef.current = true;
       setStatus("completed");
     },
     onError: (run) => {
+      cancelPollingRef.current = true;
       setStatus("failed");
       setError(run.error?.message || "Task failed");
     },
@@ -80,7 +94,10 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
     if (status === "idle" || status === "completed" || status === "failed") return;
 
     if (status === "ranking" && hasResult) {
-      const t = setTimeout(() => setStatus("completed"), 30_000);
+      const t = setTimeout(() => {
+        cancelPollingRef.current = true;
+        setStatus("completed");
+      }, 30_000);
       return () => clearTimeout(t);
     }
 
@@ -101,12 +118,15 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
     // (including transient errors, missing row, unknown status) we keep
     // polling — the watchdog effect above guarantees we don't spin forever.
     const poll = async () => {
+      if (cancelPollingRef.current) return;
       try {
         const { data, error } = await supabase
           .from("search_results")
           .select("status, matches, extracted_requirements, technology_rationale, total_suppliers_analyzed, stl_metrics, error_message")
           .eq("id", id)
           .single();
+
+        if (cancelPollingRef.current) return;
 
         if (error || !data) {
           setTimeout(() => poll(), 700);
@@ -116,6 +136,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         const dbStatus = data.status as SearchStatus;
 
         if (dbStatus === "completed" && data.matches) {
+          cancelPollingRef.current = true;
           setStatus("completed");
           setResult({
             requirements: data.extracted_requirements as any,
@@ -128,6 +149,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         }
 
         if (dbStatus === "failed") {
+          cancelPollingRef.current = true;
           setStatus("failed");
           setError(data.error_message || "Search failed");
           return;
@@ -152,6 +174,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
 
         setTimeout(() => poll(), 700);
       } catch (err) {
+        if (cancelPollingRef.current) return;
         console.warn("[pollStatus] transient error, retrying:", err);
         setTimeout(() => poll(), 700);
       }
@@ -161,6 +184,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
   }, []);
 
   const triggerSTLMatch = useCallback(async (input: STLMatchInput) => {
+    cancelPollingRef.current = false;
     setStatus("uploading");
     setError(null);
     setResult(null);
@@ -208,6 +232,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
   }, [pollStatus]);
 
   const reset = useCallback(() => {
+    cancelPollingRef.current = true;
     setStatus("idle");
     setError(null);
     setResult(null);
