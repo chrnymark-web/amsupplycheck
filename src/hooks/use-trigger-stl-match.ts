@@ -117,6 +117,8 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
     // Only "completed" and "failed" are terminal. For any other result
     // (including transient errors, missing row, unknown status) we keep
     // polling — the watchdog effect above guarantees we don't spin forever.
+    const pollStart = performance.now();
+    let lastLoggedStatus: SearchStatus | null = null;
     const poll = async () => {
       if (cancelPollingRef.current) return;
       try {
@@ -134,6 +136,14 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         }
 
         const dbStatus = data.status as SearchStatus;
+
+        // Log only on status transitions (not every 700ms) so the console
+        // shows a clean timeline without flooding during stuck states.
+        if (dbStatus !== lastLoggedStatus) {
+          const elapsed = Math.round(performance.now() - pollStart);
+          console.log(`[stl-match] status: ${lastLoggedStatus ?? "(initial)"} → ${dbStatus} @ ${elapsed}ms`);
+          lastLoggedStatus = dbStatus;
+        }
 
         if (dbStatus === "completed" && data.matches) {
           cancelPollingRef.current = true;
@@ -193,15 +203,18 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
     try {
       // Upload STL to Supabase Storage
       const fileName = `${crypto.randomUUID()}_${input.file.name}`;
+      const uploadStart = performance.now();
       const { error: uploadError } = await supabase.storage
         .from("stl-uploads")
         .upload(fileName, input.file);
+      console.log(`[stl-match] upload: ${Math.round(performance.now() - uploadStart)}ms (${(input.file.size / 1024 / 1024).toFixed(2)}MB)`);
 
       if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
 
       setStatus("pending");
 
       // Trigger the edge function
+      const invokeStart = performance.now();
       const { data, error: invokeError } = await supabase.functions.invoke(
         "trigger-stl-match",
         {
@@ -215,6 +228,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
           },
         }
       );
+      console.log(`[stl-match] invoke: ${Math.round(performance.now() - invokeStart)}ms`);
 
       if (invokeError) throw new Error(invokeError.message);
       if (data?.error) throw new Error(data.error);

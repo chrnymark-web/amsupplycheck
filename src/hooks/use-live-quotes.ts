@@ -159,7 +159,15 @@ export function useLiveQuotes(options: UseLiveQuotesOptions = {}) {
         setResults(data.results);
       } catch (err) {
         if (seq !== requestSeqRef.current) return;
-        setError(err as Error);
+        // AbortError fires when the wall-clock timeout cap trips. The partial
+        // quotes already rendered via onPartial stay visible; we just stop the
+        // spinner silently instead of showing a scary red error banner.
+        const isAbort = err instanceof DOMException && err.name === 'AbortError';
+        if (isAbort) {
+          console.warn('[useLiveQuotes] live price fetch aborted by timeout');
+        } else {
+          setError(err as Error);
+        }
       } finally {
         if (seq === requestSeqRef.current) setIsLoading(false);
       }

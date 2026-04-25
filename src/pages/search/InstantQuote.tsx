@@ -470,8 +470,12 @@ function MatchResultView({
       let g: typeof geometry;
       if (file.name.toLowerCase().endsWith('.stl')) {
         try {
+          const bufStart = performance.now();
           const buf = await file.arrayBuffer();
+          console.log(`[stl-match] arrayBuffer: ${Math.round(performance.now() - bufStart)}ms (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
+          const parseStart = performance.now();
           const parsed = parseSTL(buf);
+          console.log(`[stl-match] parseSTL: ${Math.round(performance.now() - parseStart)}ms (${parsed.triangleCount} tris)`);
           g = {
             volumeCm3: parsed.volumeCm3,
             boundingBox: parsed.boundingBox,
@@ -483,7 +487,9 @@ function MatchResultView({
       }
       if (cancelled) return;
       setGeometry(g);
+      const quotesStart = performance.now();
       getQuotes(file, quantity, g);
+      console.log(`[stl-match] getQuotes kickoff: ${Math.round(performance.now() - quotesStart)}ms`);
     })();
     return () => {
       cancelled = true;
@@ -498,6 +504,14 @@ function MatchResultView({
         ? result.matches.filter((m: any) => m?.supplier && m?.matchDetails)
         : [],
     [result]
+  );
+
+  // Backend writes matches with overallExplanation:"" first, then fills them in
+  // on a second DB update. Hiding the explanations loader the moment all
+  // matches have text avoids blindly waiting for the 30s watchdog.
+  const hasPendingExplanations = useMemo(
+    () => safeMatches.some((m: any) => !m?.matchDetails?.overallExplanation?.trim()),
+    [safeMatches]
   );
 
   const estimatedPrices = useMemo(
@@ -712,7 +726,7 @@ function MatchResultView({
           <div className="grid lg:grid-cols-[1fr_480px] gap-4">
             <div className="space-y-3">
               <FilterPanel filters={filters} onFilterChange={setFilters} />
-              {isRanking && (
+              {isRanking && hasPendingExplanations && (
                 <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-primary">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   Generating match explanations…

@@ -94,7 +94,11 @@ interface CraftcloudPriceResponse {
 }
 
 // Upload a model file → returns model metadata
-async function uploadModel(file: File, unit: string = 'mm'): Promise<CraftcloudModelResponse[]> {
+async function uploadModel(
+  file: File,
+  unit: string = 'mm',
+  signal?: AbortSignal,
+): Promise<CraftcloudModelResponse[]> {
   const formData = new FormData();
   formData.append('file', file);
   formData.append('unit', unit);
@@ -102,6 +106,7 @@ async function uploadModel(file: File, unit: string = 'mm'): Promise<CraftcloudM
   const response = await fetch(`${CRAFTCLOUD_BASE_URL}/v5/model`, {
     method: 'POST',
     body: formData,
+    signal,
   });
 
   if (!response.ok) {
@@ -116,7 +121,8 @@ async function requestPrice(
   modelId: string,
   quantity: number,
   currency: Currency = 'EUR',
-  countryCode: string = 'DK'
+  countryCode: string = 'DK',
+  signal?: AbortSignal,
 ): Promise<string> {
   const response = await fetch(`${CRAFTCLOUD_BASE_URL}/v5/price`, {
     method: 'POST',
@@ -126,6 +132,7 @@ async function requestPrice(
       countryCode,
       models: [{ modelId, quantity, scale: 1 }],
     }),
+    signal,
   });
 
   if (!response.ok) {
@@ -143,11 +150,14 @@ async function getPriceResults(
   priceId: string,
   onPartial?: (data: CraftcloudPriceResponse) => void,
   maxAttempts: number = 10,
-  delayMs: number = 1500
+  delayMs: number = 1500,
+  signal?: AbortSignal,
 ): Promise<CraftcloudPriceResponse> {
   let lastQuoteCount = 0;
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    const response = await fetch(`${CRAFTCLOUD_BASE_URL}/v5/price/${priceId}`);
+    if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+
+    const response = await fetch(`${CRAFTCLOUD_BASE_URL}/v5/price/${priceId}`, { signal });
 
     if (!response.ok) {
       throw new Error(`Craftcloud price poll failed: ${response.status}`);
@@ -169,11 +179,23 @@ async function getPriceResults(
       }
     }
 
-    await new Promise((resolve) => setTimeout(resolve, delayMs));
+    // Sleep that aborts immediately on signal instead of waiting out the delay.
+    await new Promise<void>((resolve, reject) => {
+      const t = setTimeout(resolve, delayMs);
+      signal?.addEventListener(
+        'abort',
+        () => {
+          clearTimeout(t);
+          reject(new DOMException('Aborted', 'AbortError'));
+        },
+        { once: true },
+      );
+    });
   }
 
   // Return partial results after timeout
-  const response = await fetch(`${CRAFTCLOUD_BASE_URL}/v5/price/${priceId}`);
+  if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
+  const response = await fetch(`${CRAFTCLOUD_BASE_URL}/v5/price/${priceId}`, { signal });
   return response.json();
 }
 
@@ -243,33 +265,44 @@ function formatVendorName(vendorId: string): string {
 
 // Main: upload file → request price → poll → return normalized quotes.
 // Optional onPartial callback fires on each poll that yields new quotes.
+// Hard-capped at 20s wall-clock so a stalled endpoint can't leave callers
+// stuck on isLoading forever.
 export async function getCraftcloudQuotes(
   request: QuoteRequest,
-  onPartial?: (quotes: LiveQuote[]) => void
+  onPartial?: (quotes: LiveQuote[]) => void,
+  timeoutMs: number = 20_000,
 ): Promise<LiveQuote[]> {
-  // Kick off vendor info lookup in parallel with the upload/price flow.
-  const vendorInfoPromise = loadCraftcloudVendorInfo();
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
 
-  const models = await uploadModel(request.file);
-  if (models.length === 0) {
-    throw new Error('Craftcloud: No models returned from upload');
+  try {
+    // Kick off vendor info lookup in parallel with the upload/price flow.
+    const vendorInfoPromise = loadCraftcloudVendorInfo();
+
+    const models = await uploadModel(request.file, 'mm', controller.signal);
+    if (models.length === 0) {
+      throw new Error('Craftcloud: No models returned from upload');
+    }
+
+    const priceId = await requestPrice(
+      models[0].modelId,
+      request.quantity,
+      request.currency,
+      request.countryCode,
+      controller.signal,
+    );
+
+    // Ensure the map is resolved before any toQuotes call runs (partial or final).
+    const vendorInfo = await vendorInfoPromise;
+
+    const partialBridge = onPartial
+      ? (raw: CraftcloudPriceResponse) => onPartial(toQuotes(raw, request.quantity, vendorInfo))
+      : undefined;
+
+    const priceResponse = await getPriceResults(priceId, partialBridge, 10, 1500, controller.signal);
+
+    return toQuotes(priceResponse, request.quantity, vendorInfo);
+  } finally {
+    clearTimeout(timer);
   }
-
-  const priceId = await requestPrice(
-    models[0].modelId,
-    request.quantity,
-    request.currency,
-    request.countryCode
-  );
-
-  // Ensure the map is resolved before any toQuotes call runs (partial or final).
-  const vendorInfo = await vendorInfoPromise;
-
-  const partialBridge = onPartial
-    ? (raw: CraftcloudPriceResponse) => onPartial(toQuotes(raw, request.quantity, vendorInfo))
-    : undefined;
-
-  const priceResponse = await getPriceResults(priceId, partialBridge);
-
-  return toQuotes(priceResponse, request.quantity, vendorInfo);
 }
