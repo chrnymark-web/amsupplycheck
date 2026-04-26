@@ -44,7 +44,7 @@ const PageVideoBackground: React.FC = () => {
         muted
         playsInline
         preload="metadata"
-        style={{ filter: 'brightness(0.28) saturate(0.85) contrast(1.05)' }}
+        style={{ filter: 'brightness(0.40) saturate(0.85) contrast(1.05)' }}
       />
       <div className="absolute inset-0" style={{ background: veilBackground }} />
       <div
