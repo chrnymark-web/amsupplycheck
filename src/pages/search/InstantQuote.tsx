@@ -152,6 +152,7 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
         area={area}
         isRanking={isRanking}
         onNew={handleRemoveFile}
+        parsedMetrics={metrics}
       />
     );
   }
@@ -436,6 +437,7 @@ function MatchResultView({
   area,
   isRanking = false,
   onNew,
+  parsedMetrics,
 }: {
   result: any;
   file: File | null;
@@ -445,6 +447,7 @@ function MatchResultView({
   area: string;
   isRanking?: boolean;
   onNew: () => void;
+  parsedMetrics: STLResult | null;
 }) {
   const navigate = useNavigate();
   const { getQuotes, liveQuotes, isLoading: liveLoading } = useLiveQuotes({
@@ -460,41 +463,21 @@ function MatchResultView({
     { volumeCm3: number; boundingBox: { x: number; y: number; z: number }; triangleCount: number } | undefined
   >(undefined);
 
-  // Auto-fetch live quotes when the file/quantity changes (mirrors
-  // LivePriceComparison's internal effect so quotes are available here for
-  // per-supplier pairing — the response is cached inside the hook).
+  // Auto-fetch live quotes when the file/quantity changes. Reuses the
+  // STL parse from the upload step (parsedMetrics) so we don't block the
+  // main thread re-parsing the same file when MatchResultView mounts.
   useEffect(() => {
     if (!file) return;
-    let cancelled = false;
-    (async () => {
-      let g: typeof geometry;
-      if (file.name.toLowerCase().endsWith('.stl')) {
-        try {
-          const bufStart = performance.now();
-          const buf = await file.arrayBuffer();
-          console.log(`[stl-match] arrayBuffer: ${Math.round(performance.now() - bufStart)}ms (${(file.size / 1024 / 1024).toFixed(2)}MB)`);
-          const parseStart = performance.now();
-          const parsed = parseSTL(buf);
-          console.log(`[stl-match] parseSTL: ${Math.round(performance.now() - parseStart)}ms (${parsed.triangleCount} tris)`);
-          g = {
-            volumeCm3: parsed.volumeCm3,
-            boundingBox: parsed.boundingBox,
-            triangleCount: parsed.triangleCount,
-          };
-        } catch {
-          // fall through without geometry
+    const g = parsedMetrics
+      ? {
+          volumeCm3: parsedMetrics.volumeCm3,
+          boundingBox: parsedMetrics.boundingBox,
+          triangleCount: parsedMetrics.triangleCount,
         }
-      }
-      if (cancelled) return;
-      setGeometry(g);
-      const quotesStart = performance.now();
-      getQuotes(file, quantity, g);
-      console.log(`[stl-match] getQuotes kickoff: ${Math.round(performance.now() - quotesStart)}ms`);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [file, quantity, getQuotes]);
+      : undefined;
+    setGeometry(g);
+    getQuotes(file, quantity, g);
+  }, [file, quantity, getQuotes, parsedMetrics]);
 
   // Rows lacking a supplier or matchDetails block would crash the unguarded
   // property access below. Partial-ranking polls can briefly produce these.

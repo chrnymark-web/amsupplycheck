@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { useRealtimeRun } from "@trigger.dev/react-hooks";
 import { supabase } from "@/integrations/supabase/client";
 import type { MatchingResult } from "./use-supplier-matching";
 import type { STLResult } from "@/lib/stlParser";
@@ -38,13 +37,26 @@ interface TriggerSTLMatchReturn {
   reset: () => void;
 }
 
+// Signature compresses match data so polls that bring back identical content
+// (matches haven't changed, no new explanations filled in) skip the setResult
+// call entirely — avoiding the cascading re-render through every memo and
+// child component every 700ms.
+function matchesSignature(matches: any[] | null | undefined): string {
+  if (!Array.isArray(matches)) return '';
+  let sig = '';
+  for (const m of matches) {
+    const id = m?.supplier?.supplier_id ?? '';
+    const exp = (m?.matchDetails?.overallExplanation ?? '').length;
+    sig += `${id}:${exp}|`;
+  }
+  return sig;
+}
+
 export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
   const [status, setStatus] = useState<SearchStatus>("idle");
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<MatchingResult | null>(null);
   const [stlMetrics, setStlMetrics] = useState<STLResult | null>(null);
-  const [runId, setRunId] = useState<string | undefined>(undefined);
-  const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
 
   // Ref-based kill switch for the recursive setTimeout polling chain. Flipped
   // true on terminal status (completed/failed), reset to false on each new
@@ -52,35 +64,15 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
   // or pile up across multiple searches.
   const cancelPollingRef = useRef(false);
 
+  // Tracks the last-applied match-content signature so identical poll results
+  // skip the setResult/re-render churn during the explanations-fill-in phase.
+  const lastSignatureRef = useRef<string>('');
+
   useEffect(() => {
     return () => {
       cancelPollingRef.current = true;
     };
   }, []);
-
-  useRealtimeRun(runId, {
-    accessToken,
-    enabled: !!runId && !!accessToken,
-    onComplete: (run) => {
-      const output = run.output as any;
-      if (output) {
-        setResult({
-          requirements: output.requirements,
-          matches: output.matches,
-          totalSuppliersAnalyzed: output.totalSuppliersAnalyzed,
-          technologyRationale: output.technologyRationale,
-        });
-        if (output.stlMetrics) setStlMetrics(output.stlMetrics);
-      }
-      cancelPollingRef.current = true;
-      setStatus("completed");
-    },
-    onError: (run) => {
-      cancelPollingRef.current = true;
-      setStatus("failed");
-      setError(run.error?.message || "Task failed");
-    },
-  });
 
   // Watchdog: surface a user-visible error instead of spinning forever when
   // the backend or network hangs silently. Cleared on every status transition,
@@ -131,14 +123,14 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         if (cancelPollingRef.current) return;
 
         if (error || !data) {
-          setTimeout(() => poll(), 700);
+          setTimeout(() => poll(), 1500);
           return;
         }
 
         const dbStatus = data.status as SearchStatus;
 
-        // Log only on status transitions (not every 700ms) so the console
-        // shows a clean timeline without flooding during stuck states.
+        // Log only on status transitions so the console shows a clean
+        // timeline instead of flooding during stuck states.
         if (dbStatus !== lastLoggedStatus) {
           const elapsed = Math.round(performance.now() - pollStart);
           console.log(`[stl-match] status: ${lastLoggedStatus ?? "(initial)"} → ${dbStatus} @ ${elapsed}ms`);
@@ -148,12 +140,16 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         if (dbStatus === "completed" && data.matches) {
           cancelPollingRef.current = true;
           setStatus("completed");
-          setResult({
-            requirements: data.extracted_requirements as any,
-            matches: data.matches as any,
-            totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
-            technologyRationale: data.technology_rationale as any,
-          });
+          const sig = matchesSignature(data.matches as any[]);
+          if (sig !== lastSignatureRef.current) {
+            lastSignatureRef.current = sig;
+            setResult({
+              requirements: data.extracted_requirements as any,
+              matches: data.matches as any,
+              totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
+              technologyRationale: data.technology_rationale as any,
+            });
+          }
           if (data.stl_metrics) setStlMetrics(data.stl_metrics as any);
           return;
         }
@@ -170,23 +166,32 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
           if (data.stl_metrics) setStlMetrics(data.stl_metrics as any);
 
           // Progressive: matches are written at the start of "ranking" before
-          // Claude finishes explanations. Surface them immediately so the UI can
-          // render cards while explanations fill in on the next poll.
+          // Claude finishes explanations. Surface them immediately so the UI
+          // renders cards while explanations fill in on the next poll.
+          // Signature dedup skips identical-content reruns to avoid a memo
+          // cascade re-render every 1.5s during the fill-in phase.
           if (dbStatus === "ranking" && data.matches) {
-            setResult({
-              requirements: data.extracted_requirements as any,
-              matches: data.matches as any,
-              totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
-              technologyRationale: data.technology_rationale as any,
-            });
+            const sig = matchesSignature(data.matches as any[]);
+            if (sig !== lastSignatureRef.current) {
+              lastSignatureRef.current = sig;
+              setResult({
+                requirements: data.extracted_requirements as any,
+                matches: data.matches as any,
+                totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
+                technologyRationale: data.technology_rationale as any,
+              });
+            }
           }
         }
 
-        setTimeout(() => poll(), 700);
+        // Slower cadence once we have data on screen — the user is just
+        // waiting for explanations to fill in, no need to poll aggressively.
+        const nextDelay = dbStatus === "ranking" ? 2000 : 700;
+        setTimeout(() => poll(), nextDelay);
       } catch (err) {
         if (cancelPollingRef.current) return;
         console.warn("[pollStatus] transient error, retrying:", err);
-        setTimeout(() => poll(), 700);
+        setTimeout(() => poll(), 1500);
       }
     };
 
@@ -195,6 +200,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
 
   const triggerSTLMatch = useCallback(async (input: STLMatchInput) => {
     cancelPollingRef.current = false;
+    lastSignatureRef.current = '';
     setStatus("uploading");
     setError(null);
     setResult(null);
@@ -233,10 +239,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
       if (invokeError) throw new Error(invokeError.message);
       if (data?.error) throw new Error(data.error);
 
-      const { searchResultId, runId: rid, publicAccessToken: pat } = data;
-      setRunId(rid);
-      setAccessToken(pat);
-
+      const { searchResultId } = data;
       pollStatus(searchResultId);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "Failed to start STL search";
@@ -247,12 +250,11 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
 
   const reset = useCallback(() => {
     cancelPollingRef.current = true;
+    lastSignatureRef.current = '';
     setStatus("idle");
     setError(null);
     setResult(null);
     setStlMetrics(null);
-    setRunId(undefined);
-    setAccessToken(undefined);
   }, []);
 
   return {
