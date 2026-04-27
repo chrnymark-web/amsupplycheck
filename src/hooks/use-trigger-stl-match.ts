@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { MatchingResult } from "./use-supplier-matching";
 import type { STLResult } from "@/lib/stlParser";
+import { startTrace, trace, endTrace } from "@/lib/perf-trace";
 
 type SearchStatus = "idle" | "uploading" | "pending" | "analyzing" | "matching" | "ranking" | "completed" | "failed";
 
@@ -68,9 +69,17 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
   // skip the setResult/re-render churn during the explanations-fill-in phase.
   const lastSignatureRef = useRef<string>('');
 
+  // AbortController for in-flight Supabase queries. Without this, the polling
+  // closure can fire setResult on an unmounted component and the request keeps
+  // running for tens of seconds after the user navigated away. The 73s
+  // "phantom poll" we saw in earlier traces was this.
+  const abortRef = useRef<AbortController | null>(null);
+
   useEffect(() => {
     return () => {
       cancelPollingRef.current = true;
+      abortRef.current?.abort();
+      endTrace();
     };
   }, []);
 
@@ -111,13 +120,17 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
     // polling — the watchdog effect above guarantees we don't spin forever.
     const pollStart = performance.now();
     let lastLoggedStatus: SearchStatus | null = null;
+    let firstMatchesSeen = false;
     const poll = async () => {
       if (cancelPollingRef.current) return;
       try {
+        const ac = new AbortController();
+        abortRef.current = ac;
         const { data, error } = await supabase
           .from("search_results")
           .select("status, matches, extracted_requirements, technology_rationale, total_suppliers_analyzed, stl_metrics, error_message")
           .eq("id", id)
+          .abortSignal(ac.signal)
           .single();
 
         if (cancelPollingRef.current) return;
@@ -135,6 +148,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
           const elapsed = Math.round(performance.now() - pollStart);
           console.log(`[stl-match] status: ${lastLoggedStatus ?? "(initial)"} → ${dbStatus} @ ${elapsed}ms`);
           lastLoggedStatus = dbStatus;
+          trace(`trigger:status:${dbStatus}`);
         }
 
         if (dbStatus === "completed" && data.matches) {
@@ -143,6 +157,10 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
           const sig = matchesSignature(data.matches as any[]);
           if (sig !== lastSignatureRef.current) {
             lastSignatureRef.current = sig;
+            if (!firstMatchesSeen) {
+              firstMatchesSeen = true;
+              trace('trigger:matches-arrived');
+            }
             setResult({
               requirements: data.extracted_requirements as any,
               matches: data.matches as any,
@@ -158,6 +176,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
           cancelPollingRef.current = true;
           setStatus("failed");
           setError(data.error_message || "Search failed");
+          endTrace('trigger:failed');
           return;
         }
 
@@ -174,6 +193,10 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
             const sig = matchesSignature(data.matches as any[]);
             if (sig !== lastSignatureRef.current) {
               lastSignatureRef.current = sig;
+              if (!firstMatchesSeen) {
+                firstMatchesSeen = true;
+                trace('trigger:matches-arrived');
+              }
               setResult({
                 requirements: data.extracted_requirements as any,
                 matches: data.matches as any,
@@ -190,6 +213,13 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         setTimeout(() => poll(), nextDelay);
       } catch (err) {
         if (cancelPollingRef.current) return;
+        // Aborted requests come back as errors here — that's expected on
+        // unmount or status terminal, don't retry those.
+        const isAbort =
+          err instanceof DOMException && err.name === 'AbortError' ||
+          (err as any)?.code === '20' ||
+          (err as any)?.message?.toLowerCase?.().includes('abort');
+        if (isAbort) return;
         console.warn("[pollStatus] transient error, retrying:", err);
         setTimeout(() => poll(), 1500);
       }
@@ -206,6 +236,8 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
     setResult(null);
     setStlMetrics(null);
 
+    startTrace('trigger:click');
+
     try {
       // Upload STL to Supabase Storage
       const fileName = `${crypto.randomUUID()}_${input.file.name}`;
@@ -214,6 +246,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         .from("stl-uploads")
         .upload(fileName, input.file);
       console.log(`[stl-match] upload: ${Math.round(performance.now() - uploadStart)}ms (${(input.file.size / 1024 / 1024).toFixed(2)}MB)`);
+      trace('trigger:upload-done');
 
       if (uploadError) throw new Error(`Upload failed: ${uploadError.message}`);
 
@@ -235,6 +268,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         }
       );
       console.log(`[stl-match] invoke: ${Math.round(performance.now() - invokeStart)}ms`);
+      trace('trigger:invoke-done');
 
       if (invokeError) throw new Error(invokeError.message);
       if (data?.error) throw new Error(data.error);
@@ -245,16 +279,19 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
       const msg = err instanceof Error ? err.message : "Failed to start STL search";
       setError(msg);
       setStatus("failed");
+      endTrace('trigger:start-failed');
     }
   }, [pollStatus]);
 
   const reset = useCallback(() => {
     cancelPollingRef.current = true;
+    abortRef.current?.abort();
     lastSignatureRef.current = '';
     setStatus("idle");
     setError(null);
     setResult(null);
     setStlMetrics(null);
+    endTrace();
   }, []);
 
   return {

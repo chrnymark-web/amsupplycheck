@@ -37,6 +37,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import logo from '@/assets/amsupplycheck-logo-white.png';
+import { trace, endTrace } from '@/lib/perf-trace';
 
 const STLViewer = lazy(() => import('@/components/stl-viewer/STLViewer'));
 
@@ -231,20 +232,32 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
           />
         ) : (
           <main className="flex-1 min-h-0 flex flex-col lg:grid lg:grid-cols-[1fr_420px] lg:gap-4 p-3 lg:p-4">
-            {/* Viewer (left / top on mobile) */}
+            {/* Viewer (left / top on mobile). The r3f Canvas holds GPU buffers,
+                shadows and an `observe`-mode bounds tick; for big STLs that's
+                hot enough to compete with the matching pipeline. We unmount
+                it the moment the search starts, then bring it back when the
+                results render — the user is staring at the search progress
+                anyway. */}
             <div className="relative rounded-xl overflow-hidden border border-border/60 bg-card/30 min-h-[320px] lg:min-h-0 h-[40vh] lg:h-auto">
-              <Suspense
-                fallback={
-                  <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,hsl(87,20%,45%,0.08),transparent_70%)]">
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <Loader2 className="h-3 w-3 animate-spin" />
-                      Loading 3D viewer
+              {matchLoading ? (
+                <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[radial-gradient(ellipse_at_center,hsl(87,20%,45%,0.1),hsl(0,0%,6%)_70%)]">
+                  <Loader2 className="h-5 w-5 animate-spin text-primary" />
+                  <p className="text-xs text-muted-foreground">3D preview paused while we search</p>
+                </div>
+              ) : (
+                <Suspense
+                  fallback={
+                    <div className="absolute inset-0 flex items-center justify-center bg-[radial-gradient(circle_at_center,hsl(87,20%,45%,0.08),transparent_70%)]">
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Loading 3D viewer
+                      </div>
                     </div>
-                  </div>
-                }
-              >
-                <STLViewer file={file} wireframe={wireframe} resetTrigger={resetTrigger} />
-              </Suspense>
+                  }
+                >
+                  <STLViewer file={file} wireframe={wireframe} resetTrigger={resetTrigger} />
+                </Suspense>
+              )}
 
               <ViewerControls
                 wireframe={wireframe}
@@ -296,18 +309,26 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
               {matchLoading && <SearchProgress status={status as any} />}
 
               {mode === 'match' && !matchLoading && (
-                <Button
-                  onClick={handleFindSuppliers}
-                  size="lg"
-                  className={cn(
-                    'sticky bottom-0 h-12 text-sm font-semibold',
-                    'bg-primary hover:bg-primary/90',
-                    'shadow-[0_8px_30px_hsl(87,20%,45%,0.25)]'
+                <>
+                  {file && file.size > 50_000_000 && (
+                    <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-[11px] text-amber-200/90 leading-relaxed">
+                      This file is {(file.size / 1024 / 1024).toFixed(0)} MB. Large files can slow your browser
+                      while we search — consider exporting at lower mesh resolution if your tab freezes.
+                    </div>
                   )}
-                >
-                  <Sparkles className="h-4 w-4 mr-2" />
-                  Find suppliers for this part
-                </Button>
+                  <Button
+                    onClick={handleFindSuppliers}
+                    size="lg"
+                    className={cn(
+                      'sticky bottom-0 h-12 text-sm font-semibold',
+                      'bg-primary hover:bg-primary/90',
+                      'shadow-[0_8px_30px_hsl(87,20%,45%,0.25)]'
+                    )}
+                  >
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    Find suppliers for this part
+                  </Button>
+                </>
               )}
             </aside>
           </main>
@@ -463,11 +484,35 @@ function MatchResultView({
     { volumeCm3: number; boundingBox: { x: number; y: number; z: number }; triangleCount: number } | undefined
   >(undefined);
 
+  // Mark the moment MatchResultView mounts and defer the heavy "first paint"
+  // work (Mapbox init + Craftcloud fan-out + map-pin geometry) off the same
+  // tick the cards are landing on. `requestIdleCallback` falls back to
+  // setTimeout(0) on Safari. Without this defer, on the matching→ranking
+  // transition we'd run the cascading memos for 326 matches AND mount Mapbox
+  // AND fire 90+ vendor fetches all in one frame — the freeze the user reports.
+  const [deferredMount, setDeferredMount] = useState(false);
+  useEffect(() => {
+    trace('trigger:result-mounted');
+    let cleanup: () => void;
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+    const cic = (window as unknown as { cancelIdleCallback?: (handle: number) => void }).cancelIdleCallback;
+    if (typeof ric === 'function') {
+      const handle = ric(() => setDeferredMount(true), { timeout: 600 });
+      cleanup = () => cic?.(handle);
+    } else {
+      const handle = window.setTimeout(() => setDeferredMount(true), 80);
+      cleanup = () => window.clearTimeout(handle);
+    }
+    return cleanup;
+  }, []);
+
   // Auto-fetch live quotes when the file/quantity changes. Reuses the
   // STL parse from the upload step (parsedMetrics) so we don't block the
-  // main thread re-parsing the same file when MatchResultView mounts.
+  // main thread re-parsing the same file when MatchResultView mounts. Gated
+  // on `deferredMount` so the 90+ vendor fan-out doesn't compete with the
+  // first card paint.
   useEffect(() => {
-    if (!file) return;
+    if (!file || !deferredMount) return;
     const g = parsedMetrics
       ? {
           volumeCm3: parsedMetrics.volumeCm3,
@@ -477,7 +522,7 @@ function MatchResultView({
       : undefined;
     setGeometry(g);
     getQuotes(file, quantity, g);
-  }, [file, quantity, getQuotes, parsedMetrics]);
+  }, [file, quantity, getQuotes, parsedMetrics, deferredMount]);
 
   // Rows lacking a supplier or matchDetails block would crash the unguarded
   // property access below. Partial-ranking polls can briefly produce these.
@@ -729,26 +774,35 @@ function MatchResultView({
                   Fetching live prices from 90+ vendors…
                 </div>
               )}
-              {visibleMatches.slice(0, visibleCount).map((match: any, i: number) => (
-                <SupplierResultCard
-                  key={match.supplier.supplier_id}
-                  match={match}
-                  rank={i + 1}
-                  price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
-                  isRanking={isRanking}
-                />
-              ))}
-              {visibleCount < visibleMatches.length && (
-                <div className="flex justify-center pt-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setVisibleCount((c) => c + 20)}
-                  >
-                    Vis flere leverandører ({visibleMatches.length - visibleCount} tilbage)
-                  </Button>
-                </div>
-              )}
+              <ErrorBoundary
+                fallback={
+                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 p-4 text-sm text-amber-200/90">
+                    Couldn't render some suppliers — try refreshing the page.
+                  </div>
+                }
+              >
+                {visibleMatches.slice(0, visibleCount).map((match: any, i: number) => (
+                  <SupplierResultCard
+                    key={match.supplier.supplier_id}
+                    match={match}
+                    rank={i + 1}
+                    price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
+                    isRanking={isRanking}
+                  />
+                ))}
+                {visibleCount < visibleMatches.length && (
+                  <div className="flex justify-center pt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setVisibleCount((c) => c + 20)}
+                    >
+                      Vis flere leverandører ({visibleMatches.length - visibleCount} tilbage)
+                    </Button>
+                  </div>
+                )}
+                <CardsPaintedMark count={visibleMatches.length} />
+              </ErrorBoundary>
             </div>
             <aside className="lg:sticky lg:top-4 lg:h-[calc(100vh-6rem)] min-h-[400px]">
               <ErrorBoundary
@@ -758,12 +812,19 @@ function MatchResultView({
                   </div>
                 }
               >
-                <SupplierMap
-                  suppliers={mapSuppliers}
-                  height="100%"
-                  className="rounded-xl overflow-hidden"
-                  showControls
-                />
+                {deferredMount ? (
+                  <SupplierMap
+                    suppliers={mapSuppliers}
+                    height="100%"
+                    className="rounded-xl overflow-hidden"
+                    showControls
+                  />
+                ) : (
+                  <div className="h-full min-h-[400px] rounded-xl border border-border/60 bg-card/30 flex items-center justify-center text-xs text-muted-foreground">
+                    <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                    Loading map…
+                  </div>
+                )}
               </ErrorBoundary>
             </aside>
           </div>
@@ -771,6 +832,23 @@ function MatchResultView({
       </div>
     </>
   );
+}
+
+// Fires once when cards first commit. Waits for the next animation frame so
+// the perf mark lands AFTER paint, not just after React's commit phase. Ends
+// the trace and triggers the console.table dump on the user's machine.
+function CardsPaintedMark({ count }: { count: number }) {
+  const firedRef = useRef(false);
+  useEffect(() => {
+    if (firedRef.current || count === 0) return;
+    firedRef.current = true;
+    const raf = requestAnimationFrame(() => {
+      trace('trigger:cards-painted');
+      endTrace();
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [count]);
+  return null;
 }
 
 const SupplierResultCard = memo(function SupplierResultCard({
