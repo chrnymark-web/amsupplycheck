@@ -43,7 +43,7 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
     <nav className={`bg-background/95 backdrop-blur-sm border-b border-border sticky top-0 z-50 ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Single row with logo left and menu items right */}
-        <div className="flex items-center justify-between h-28 py-1">
+        <div className="flex items-center justify-between h-36 py-1">
           {/* Logo on left */}
           <a
             href="/"
@@ -53,7 +53,7 @@ const Navbar: React.FC<NavbarProps> = ({ className = "", onScrollToSection }) =>
             <img
               src={logo}
               alt="AMSupplyCheck"
-              className="h-24 w-auto"
+              className="h-32 w-auto"
             />
           </a>
 

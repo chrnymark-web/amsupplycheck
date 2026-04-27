@@ -727,7 +727,7 @@ function MatchResultView({
                 className="flex items-center cursor-pointer flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-sm"
                 aria-label="Go to home page"
               >
-                <img src={logo} alt="AMSupplyCheck" className="h-24 w-auto" />
+                <img src={logo} alt="AMSupplyCheck" className="h-32 w-auto" />
               </a>
             </div>
             <div className="flex items-center gap-3 min-w-0 shrink-0">
