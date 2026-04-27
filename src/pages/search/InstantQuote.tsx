@@ -492,8 +492,16 @@ function MatchResultView({
   // Backend writes matches with overallExplanation:"" first, then fills them in
   // on a second DB update. Hiding the explanations loader the moment all
   // matches have text avoids blindly waiting for the 30s watchdog.
+  //
+  // Only the top N are ever explained (EXPLANATION_CAP in trigger/stl-supplier-match.ts).
+  // Checking all matches here meant the spinner could never clear naturally on
+  // large result sets — only the watchdog hid it after 30s.
+  const EXPLAINED_TOP_N = 20;
   const hasPendingExplanations = useMemo(
-    () => safeMatches.some((m: any) => !m?.matchDetails?.overallExplanation?.trim()),
+    () =>
+      safeMatches
+        .slice(0, EXPLAINED_TOP_N)
+        .some((m: any) => !m?.matchDetails?.overallExplanation?.trim()),
     [safeMatches]
   );
 

@@ -128,7 +128,10 @@ ${matches.map((m, i) => `${i + 1}. ${m.supplier.name} - Score: ${m.score}%, Matc
 
   const response = await client.messages.create({
     model: MODEL,
-    max_tokens: 1024,
+    // 1024 was right at the budget for 20 × 1–2 sentences and would silently
+    // truncate mid tool_use, returning an empty array with no error. Headroom
+    // here is cheaper than a stuck "Generating match explanations…" spinner.
+    max_tokens: 4096,
     system: "You are a helpful assistant. Write in English. Be concise and friendly.",
     messages: [{ role: "user", content: prompt }],
     tools: [
