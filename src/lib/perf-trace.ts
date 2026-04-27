@@ -16,6 +16,7 @@ type Session = {
   longtasks: PerformanceEntry[];
   marks: Mark[];
   startTime: number;
+  visUnsub?: () => void;
 };
 
 let session: Session | null = null;
@@ -38,6 +39,15 @@ export function startTrace(label: string) {
 
   session = { observer, longtasks, marks: [{ name: label, time: 0 }], startTime };
   logHeap(label, 0);
+
+  // Tag the perf timeline with every tab-visibility flip so the user's
+  // pasted log proves whether polling/mount actually paused while hidden.
+  if (typeof document !== 'undefined') {
+    const onVis = () =>
+      trace(document.visibilityState === 'hidden' ? 'visibility:hidden' : 'visibility:visible');
+    document.addEventListener('visibilitychange', onVis);
+    session.visUnsub = () => document.removeEventListener('visibilitychange', onVis);
+  }
 }
 
 export function trace(name: string) {
@@ -52,9 +62,10 @@ export function endTrace(finalMark?: string) {
   if (!session) return;
   if (finalMark) trace(finalMark);
 
-  const { observer, longtasks, marks, startTime } = session;
+  const { observer, longtasks, marks, startTime, visUnsub } = session;
   session = null;
   observer?.disconnect();
+  visUnsub?.();
 
   const dump = () => {
     // eslint-disable-next-line no-console

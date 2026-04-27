@@ -38,6 +38,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import logo from '@/assets/amsupplycheck-logo-white.png';
 import { trace, endTrace } from '@/lib/perf-trace';
+import { isHidden, onVisible } from '@/lib/visibility';
 
 const STLViewer = lazy(() => import('@/components/stl-viewer/STLViewer'));
 
@@ -490,20 +491,45 @@ function MatchResultView({
   // setTimeout(0) on Safari. Without this defer, on the matching→ranking
   // transition we'd run the cascading memos for 326 matches AND mount Mapbox
   // AND fire 90+ vendor fetches all in one frame — the freeze the user reports.
+  //
+  // Critically, the rIC `timeout` fallback is `setTimeout`-based and fires in
+  // background tabs even though rIC itself is gated. If we let it commit
+  // while hidden, Mapbox would allocate WebGL textures + tiles in a tab
+  // Chrome is trying to throttle, then the 326-vendor Craftcloud fan-out
+  // would start — the combo has been pushing us into the memory-saver kill
+  // threshold. Defer the commit until the tab is visible again.
   const [deferredMount, setDeferredMount] = useState(false);
   useEffect(() => {
     trace('trigger:result-mounted');
-    let cleanup: () => void;
+    let visUnsub: (() => void) | null = null;
+    let ricHandle: number | null = null;
+    let toHandle: number | null = null;
+
+    const commit = () => {
+      if (isHidden()) {
+        trace('trigger:deferred-mount-blocked-hidden');
+        visUnsub = onVisible(() => {
+          trace('trigger:deferred-mount-resumed');
+          setDeferredMount(true);
+        });
+        return;
+      }
+      setDeferredMount(true);
+    };
+
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
     const cic = (window as unknown as { cancelIdleCallback?: (handle: number) => void }).cancelIdleCallback;
     if (typeof ric === 'function') {
-      const handle = ric(() => setDeferredMount(true), { timeout: 600 });
-      cleanup = () => cic?.(handle);
+      ricHandle = ric(commit, { timeout: 600 });
     } else {
-      const handle = window.setTimeout(() => setDeferredMount(true), 80);
-      cleanup = () => window.clearTimeout(handle);
+      toHandle = window.setTimeout(commit, 80);
     }
-    return cleanup;
+
+    return () => {
+      if (ricHandle != null) cic?.(ricHandle);
+      if (toHandle != null) window.clearTimeout(toHandle);
+      visUnsub?.();
+    };
   }, []);
 
   // Auto-fetch live quotes when the file/quantity changes. Reuses the

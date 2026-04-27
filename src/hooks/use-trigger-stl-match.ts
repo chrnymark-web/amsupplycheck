@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import type { MatchingResult } from "./use-supplier-matching";
 import type { STLResult } from "@/lib/stlParser";
 import { startTrace, trace, endTrace } from "@/lib/perf-trace";
+import { isHidden, onVisibilityChange } from "@/lib/visibility";
 
 type SearchStatus = "idle" | "uploading" | "pending" | "analyzing" | "matching" | "ranking" | "completed" | "failed";
 
@@ -75,10 +76,22 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
   // "phantom poll" we saw in earlier traces was this.
   const abortRef = useRef<AbortController | null>(null);
 
+  // Pending poll timer + visibility unsub, refs so unmount/reset can tear
+  // them down. The polling chain pauses when the tab is hidden (Chrome's
+  // memory-saver kills background tabs that keep hammering Supabase).
+  const pollHandleRef = useRef<number | null>(null);
+  const visUnsubRef = useRef<(() => void) | null>(null);
+
   useEffect(() => {
     return () => {
       cancelPollingRef.current = true;
       abortRef.current?.abort();
+      if (pollHandleRef.current != null) {
+        clearTimeout(pollHandleRef.current);
+        pollHandleRef.current = null;
+      }
+      visUnsubRef.current?.();
+      visUnsubRef.current = null;
       endTrace();
     };
   }, []);
@@ -121,8 +134,27 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
     const pollStart = performance.now();
     let lastLoggedStatus: SearchStatus | null = null;
     let firstMatchesSeen = false;
+
+    const schedule = (delay: number) => {
+      if (cancelPollingRef.current) return;
+      if (pollHandleRef.current != null) clearTimeout(pollHandleRef.current);
+      pollHandleRef.current = window.setTimeout(() => {
+        pollHandleRef.current = null;
+        poll();
+      }, delay);
+    };
+
     const poll = async () => {
       if (cancelPollingRef.current) return;
+      // Skip work entirely while the tab is hidden — Chrome's memory saver
+      // kills background tabs that keep allocating ~200KB Supabase responses
+      // every 700ms. We sleep for 5s and re-check, but the visibility
+      // listener below will force an immediate poll when the tab returns.
+      if (isHidden()) {
+        trace('trigger:poll-skipped-hidden');
+        schedule(5000);
+        return;
+      }
       try {
         const ac = new AbortController();
         abortRef.current = ac;
@@ -136,7 +168,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         if (cancelPollingRef.current) return;
 
         if (error || !data) {
-          setTimeout(() => poll(), 1500);
+          schedule(1500);
           return;
         }
 
@@ -210,7 +242,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         // Slower cadence once we have data on screen — the user is just
         // waiting for explanations to fill in, no need to poll aggressively.
         const nextDelay = dbStatus === "ranking" ? 2000 : 700;
-        setTimeout(() => poll(), nextDelay);
+        schedule(nextDelay);
       } catch (err) {
         if (cancelPollingRef.current) return;
         // Aborted requests come back as errors here — that's expected on
@@ -221,11 +253,21 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
           (err as any)?.message?.toLowerCase?.().includes('abort');
         if (isAbort) return;
         console.warn("[pollStatus] transient error, retrying:", err);
-        setTimeout(() => poll(), 1500);
+        schedule(1500);
       }
     };
 
-    setTimeout(() => poll(), 250);
+    // Wake the polling chain immediately when the tab returns to the
+    // foreground after being backgrounded — otherwise we'd wait out the
+    // full 5s hidden-tick before the user sees fresh data.
+    visUnsubRef.current?.();
+    visUnsubRef.current = onVisibilityChange((hidden) => {
+      if (cancelPollingRef.current) return;
+      trace(hidden ? 'trigger:visibility-hidden' : 'trigger:visibility-visible');
+      if (!hidden) schedule(0);
+    });
+
+    schedule(250);
   }, []);
 
   const triggerSTLMatch = useCallback(async (input: STLMatchInput) => {
@@ -286,6 +328,12 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
   const reset = useCallback(() => {
     cancelPollingRef.current = true;
     abortRef.current?.abort();
+    if (pollHandleRef.current != null) {
+      clearTimeout(pollHandleRef.current);
+      pollHandleRef.current = null;
+    }
+    visUnsubRef.current?.();
+    visUnsubRef.current = null;
     lastSignatureRef.current = '';
     setStatus("idle");
     setError(null);
