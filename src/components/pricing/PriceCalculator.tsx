@@ -135,7 +135,7 @@ export function PriceCalculator() {
           className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all text-sm text-primary/90 hover:text-primary"
         >
           <Calculator className="h-4 w-4" />
-          <span>Get Instant Price Estimate</span>
+          <span>Compare prices for different suppliers</span>
           <ChevronDown className="h-3.5 w-3.5" />
         </button>
       )}
@@ -146,7 +146,7 @@ export function PriceCalculator() {
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2 text-sm font-medium">
               <Calculator className="h-4 w-4 text-primary" />
-              Instant Price Estimate
+              Compare prices for different suppliers
             </div>
             <button onClick={() => { setIsExpanded(false); reset(); }} className="text-muted-foreground hover:text-foreground">
               <ChevronUp className="h-4 w-4" />
