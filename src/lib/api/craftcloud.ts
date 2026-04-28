@@ -295,13 +295,56 @@ export async function getCraftcloudQuotes(
     // Ensure the map is resolved before any toQuotes call runs (partial or final).
     const vendorInfo = await vendorInfoPromise;
 
+    // Throttle the partial-handler to one fire per ~1.5s. Without this,
+    // every poll-tick that grew the quote set fired onPartial → useLiveQuotes
+    // setQuotes → re-render of MatchResultView's resolvePriceInfo over all
+    // matches. The trailing-edge fire ensures the last partial isn't dropped.
+    const PARTIAL_MIN_INTERVAL_MS = 1500;
+    let lastPartialAt = 0;
+    let trailingTimer: ReturnType<typeof setTimeout> | null = null;
+    let trailingRaw: CraftcloudPriceResponse | null = null;
+
+    const fireOnPartial = (raw: CraftcloudPriceResponse) => {
+      onPartial?.(toQuotes(raw, request.quantity, vendorInfo));
+    };
+
     const partialBridge = onPartial
-      ? (raw: CraftcloudPriceResponse) => onPartial(toQuotes(raw, request.quantity, vendorInfo))
+      ? (raw: CraftcloudPriceResponse) => {
+          const now = Date.now();
+          const since = now - lastPartialAt;
+          if (since >= PARTIAL_MIN_INTERVAL_MS) {
+            lastPartialAt = now;
+            if (trailingTimer) {
+              clearTimeout(trailingTimer);
+              trailingTimer = null;
+              trailingRaw = null;
+            }
+            fireOnPartial(raw);
+            return;
+          }
+          // Inside the throttle window — replace the pending payload with the
+          // newest one and schedule a single trailing fire when the window ends.
+          trailingRaw = raw;
+          if (!trailingTimer) {
+            trailingTimer = setTimeout(() => {
+              trailingTimer = null;
+              const r = trailingRaw;
+              trailingRaw = null;
+              if (r) {
+                lastPartialAt = Date.now();
+                fireOnPartial(r);
+              }
+            }, PARTIAL_MIN_INTERVAL_MS - since);
+          }
+        }
       : undefined;
 
-    const priceResponse = await getPriceResults(priceId, partialBridge, 10, 1500, controller.signal);
-
-    return toQuotes(priceResponse, request.quantity, vendorInfo);
+    try {
+      const priceResponse = await getPriceResults(priceId, partialBridge, 10, 1500, controller.signal);
+      return toQuotes(priceResponse, request.quantity, vendorInfo);
+    } finally {
+      if (trailingTimer) clearTimeout(trailingTimer);
+    }
   } finally {
     clearTimeout(timer);
   }

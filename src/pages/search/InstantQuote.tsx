@@ -25,7 +25,8 @@ import { ViewerControls } from '@/components/stl-viewer/ViewerControls';
 import { SearchProgress } from '@/components/search/SearchProgress';
 import { useTriggerSTLMatch } from '@/hooks/use-trigger-stl-match';
 import { useLiveQuotes } from '@/hooks/use-live-quotes';
-import { parseSTL, type STLResult } from '@/lib/stlParser';
+import { type STLResult } from '@/lib/stlParser';
+import { parseSTLInWorker } from '@/lib/stlParserClient';
 import { getEstimatedPrice } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/format';
@@ -88,11 +89,12 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
     if (!ACCEPTED_EXTS.includes(ext)) return;
     if (f.size > MAX_FILE_SIZE) return;
     setFile(f);
-    // Parse STL geometry for dimension/volume readout (only for .stl; others skip)
+    // Parse STL geometry for dimension/volume readout (only for .stl; others skip).
+    // Runs in a Web Worker — a 500k-triangle file would otherwise freeze the
+    // main thread for several seconds while the user is staring at the upload UI.
     if (ext === '.stl') {
       try {
-        const buf = await f.arrayBuffer();
-        setMetrics(parseSTL(buf));
+        setMetrics(await parseSTLInWorker(f));
       } catch {
         setMetrics(null);
       }
@@ -576,9 +578,27 @@ function MatchResultView({
     [safeMatches]
   );
 
+  // Cap the heavy pricing/sorting work to the top-N matches by backend score.
+  // resolvePriceInfo runs an O(matches × liveQuotes) name-matcher with token
+  // splitting and stop-word filtering — running it across all 326 matches on
+  // every live-quote partial pinned the main thread in foreground tabs. The
+  // backend already returns matches in score order, so the first PRICED_TOP_N
+  // are exactly the ones the user is most likely to scroll to via "Vis flere".
+  // Matches beyond the cap render unpriced, which is a fair UX trade for
+  // unfreezing the page.
+  const PRICED_TOP_N = 100;
+  const pricedSubset = useMemo(
+    () => safeMatches.slice(0, PRICED_TOP_N),
+    [safeMatches]
+  );
+  const unpricedTail = useMemo(
+    () => safeMatches.slice(PRICED_TOP_N),
+    [safeMatches]
+  );
+
   const estimatedPrices = useMemo(
     () =>
-      safeMatches.map((m: any) =>
+      pricedSubset.map((m: any) =>
         getEstimatedPrice({
           supplierName: m.supplier.name ?? 'Unknown supplier',
           supplierId: m.supplier.supplier_id,
@@ -590,17 +610,17 @@ function MatchResultView({
           logoUrl: m.supplier.logo_url || undefined,
         })
       ),
-    [safeMatches, technology, material, quantity, geometry]
+    [pricedSubset, technology, material, quantity, geometry]
   );
 
   const priceInfo = useMemo(
-    () => resolvePriceInfo(safeMatches, liveQuotes, estimatedPrices),
-    [safeMatches, liveQuotes, estimatedPrices]
+    () => resolvePriceInfo(pricedSubset, liveQuotes, estimatedPrices),
+    [pricedSubset, liveQuotes, estimatedPrices]
   );
 
   const sortedMatches = useMemo(
-    () => sortMatchesByPrice(safeMatches, priceInfo),
-    [safeMatches, priceInfo]
+    () => [...sortMatchesByPrice(pricedSubset, priceInfo), ...unpricedTail],
+    [pricedSubset, priceInfo, unpricedTail]
   );
 
   // In-page filtering: seeded from the configurator's single-value selections,
