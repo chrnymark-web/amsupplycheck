@@ -52,7 +52,7 @@ export function SearchProgress({ status }: SearchProgressProps) {
             </span>
           </div>
           <DialogDescription className="sr-only">
-            Søger efter leverandører der matcher dine krav
+            Searching for suppliers matching your requirements
           </DialogDescription>
         </div>
         <div className="px-4 pb-4">
