@@ -29,18 +29,22 @@ SET
   updated_at = now()
 WHERE id = '66e4af96-5da1-48cb-84ab-168b5ebfafd0';
 
--- Reset junction rows for this supplier (idempotent)
+-- Reset junction rows for this supplier (slug-based — UUIDs differ between local
+-- and prod, so the previous hardcoded-UUID form failed on remote).
 DELETE FROM supplier_technologies WHERE supplier_id = '66e4af96-5da1-48cb-84ab-168b5ebfafd0';
-INSERT INTO supplier_technologies (supplier_id, technology_id) VALUES
-  ('66e4af96-5da1-48cb-84ab-168b5ebfafd0', '7da248a3-fb46-4e4d-817d-3f3ba97f9421'), -- SLS
-  ('66e4af96-5da1-48cb-84ab-168b5ebfafd0', '0540be63-cf03-41e6-81ce-80cc84e655d3')  -- MJF
+INSERT INTO supplier_technologies (supplier_id, technology_id)
+SELECT '66e4af96-5da1-48cb-84ab-168b5ebfafd0', id
+FROM technologies
+WHERE slug IN ('sls','mjf')
+  AND COALESCE(hidden, false) = false
 ON CONFLICT (supplier_id, technology_id) DO NOTHING;
 
 DELETE FROM supplier_materials WHERE supplier_id = '66e4af96-5da1-48cb-84ab-168b5ebfafd0';
-INSERT INTO supplier_materials (supplier_id, material_id) VALUES
-  ('66e4af96-5da1-48cb-84ab-168b5ebfafd0', '4f45e8df-c056-4dfe-bf15-d958a435b663'), -- PA12 Nylon
-  ('66e4af96-5da1-48cb-84ab-168b5ebfafd0', '86b593f9-c2d7-4369-9984-f6a463029af2'), -- Glass-Filled Nylon
-  ('66e4af96-5da1-48cb-84ab-168b5ebfafd0', 'e91db8ca-144e-4102-a265-28f3f68aac3a')  -- TPU
+INSERT INTO supplier_materials (supplier_id, material_id)
+SELECT '66e4af96-5da1-48cb-84ab-168b5ebfafd0', id
+FROM materials
+WHERE slug IN ('pa12','glass-filled-nylon','tpu')
+  AND COALESCE(hidden, false) = false
 ON CONFLICT (supplier_id, material_id) DO NOTHING;
 
 COMMIT;
