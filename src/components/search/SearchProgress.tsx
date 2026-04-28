@@ -6,7 +6,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 
-type SearchStatus = "idle" | "pending" | "analyzing" | "matching" | "ranking" | "completed" | "failed";
+type SearchStatus = "idle" | "uploading" | "pending" | "analyzing" | "matching" | "ranking" | "completed" | "failed";
 
 const STEPS = [
   { key: "analyzing", label: "Analyzing your requirements" },
@@ -15,7 +15,8 @@ const STEPS = [
 ] as const;
 
 const STEP_ORDER: Record<string, number> = {
-  pending: -1,
+  uploading: 0,
+  pending: 0,
   analyzing: 0,
   matching: 1,
   ranking: 2,

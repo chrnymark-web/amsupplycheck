@@ -267,7 +267,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
       if (!hidden) schedule(0);
     });
 
-    schedule(250);
+    schedule(0);
   }, []);
 
   const triggerSTLMatch = useCallback(async (input: STLMatchInput) => {
