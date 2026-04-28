@@ -244,26 +244,29 @@ WHERE supplier_id = '10xl';
 
 -- supplier_technologies: 10XL previously had a single row pointing at FDM, which is wrong
 -- (10XL operates large-format pellet extruders, not filament FDM). Drop the FDM row and
--- insert four rows matching the new technologies (text[]) array. Technology UUIDs taken
--- from public.technologies (canonical seed in seed.sql).
+-- insert rows matching the new technologies (text[]) array. Slug-based so it works on
+-- both local and prod (technology UUIDs differ between environments). Note: 'lfam',
+-- 'fgf', and 'robotic-3d-printing' are not yet rows in the technologies catalog on
+-- production, so those junction rows will be skipped — the suppliers.technologies
+-- text[] still records them for display.
 DELETE FROM supplier_technologies
 WHERE supplier_id = 'b566e968-14a1-4fb1-a2c9-1a5452f8abbc'
-  AND technology_id = '4b6a0965-d67e-4b71-9fe6-f62ec0f76068'; -- FDM
+  AND technology_id IN (SELECT id FROM technologies WHERE slug = 'fdm');
 
-INSERT INTO supplier_technologies (id, supplier_id, technology_id, created_at)
-VALUES
-  ('a1c25210-7d31-4d6c-9e1c-8a4f2b3d0001', 'b566e968-14a1-4fb1-a2c9-1a5452f8abbc', '022ef3c7-5b82-493c-b2dc-91c88cd5bcb6', now()), -- LFAM
-  ('a1c25210-7d31-4d6c-9e1c-8a4f2b3d0002', 'b566e968-14a1-4fb1-a2c9-1a5452f8abbc', 'd85165fd-1a70-492d-8103-83ae4b22c28d', now()), -- FGF
-  ('a1c25210-7d31-4d6c-9e1c-8a4f2b3d0003', 'b566e968-14a1-4fb1-a2c9-1a5452f8abbc', '94d268fa-6eec-4557-affe-80182925f908', now()), -- Robotic 3D Printing
-  ('a1c25210-7d31-4d6c-9e1c-8a4f2b3d0004', 'b566e968-14a1-4fb1-a2c9-1a5452f8abbc', 'a0f1498d-6a64-4e8f-8bfe-464cc2f3cd8e', now())  -- CNC Machining
+INSERT INTO supplier_technologies (supplier_id, technology_id)
+SELECT 'b566e968-14a1-4fb1-a2c9-1a5452f8abbc', id
+FROM technologies
+WHERE slug IN ('lfam','fgf','robotic-3d-printing','cnc-machining')
+  AND COALESCE(hidden, false) = false
 ON CONFLICT (supplier_id, technology_id) DO NOTHING;
 
 -- supplier_tags: add Architecture (industry tag — 10XL serves architecture / interior /
 -- design clients including Gispen and Neil David). The existing three tags
 -- (production-runs, large-format, design-support) all still apply verbatim and are kept.
-INSERT INTO supplier_tags (id, supplier_id, tag_id, created_at)
-VALUES
-  ('a1c25210-7d31-4d6c-9e1c-8a4f2b3d0010', 'b566e968-14a1-4fb1-a2c9-1a5452f8abbc', '4aecc9c7-6075-4ee1-b242-5352573444c5', now())  -- Architecture
+INSERT INTO supplier_tags (supplier_id, tag_id)
+SELECT 'b566e968-14a1-4fb1-a2c9-1a5452f8abbc', id
+FROM tags
+WHERE slug = 'architecture'
 ON CONFLICT (supplier_id, tag_id) DO NOTHING;
 
 COMMIT;
