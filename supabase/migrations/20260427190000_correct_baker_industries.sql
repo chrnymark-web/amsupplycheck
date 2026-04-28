@@ -215,42 +215,28 @@ SET
 WHERE supplier_id = 'baker-industries';
 
 -- Drop the four supplier_technologies rows that don't reflect Baker's real
--- offering (SLS, FDM, DMLS, SLM). Keep the WAAM row.
+-- offering (SLS, FDM, DMLS, SLM). Keep the WAAM row. Slug-based so it works
+-- on both local and prod (technology UUIDs differ between environments).
 DELETE FROM supplier_technologies
 WHERE supplier_id = '788b14d9-5ebc-4ba7-a68b-89c3d5fe8d1e'
   AND technology_id IN (
-    '7da248a3-fb46-4e4d-817d-3f3ba97f9421', -- SLS
-    '4b6a0965-d67e-4b71-9fe6-f62ec0f76068', -- FDM
-    '25de0a0b-0640-4dc4-8f5c-c8f9a65f2ce7', -- DMLS
-    '4ef0df61-4844-41a0-959a-5e214f3f4347'  -- SLM
+    SELECT id FROM technologies WHERE slug IN ('sls','fdm','dmls','slm')
   );
 
 -- Add CNC Machining as Baker's second technology (alongside WAAM).
-INSERT INTO supplier_technologies (id, supplier_id, technology_id, created_at)
-VALUES (
-  'c1772ff6-5750-484d-a303-3984073da9fb',
-  '788b14d9-5ebc-4ba7-a68b-89c3d5fe8d1e',
-  'a0f1498d-6a64-4e8f-8bfe-464cc2f3cd8e', -- CNC Machining
-  now()
-)
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO supplier_technologies (supplier_id, technology_id)
+SELECT '788b14d9-5ebc-4ba7-a68b-89c3d5fe8d1e', id
+FROM technologies
+WHERE slug = 'cnc-machining'
+  AND COALESCE(hidden, false) = false
+ON CONFLICT (supplier_id, technology_id) DO NOTHING;
 
 -- Add Energy and Medical industry tags (verified on bakerindustriesinc.com
 -- homepage as "Energy and Power Generation" and "Medical Equipment").
-INSERT INTO supplier_tags (id, supplier_id, tag_id, created_at)
-VALUES
-  (
-    'd325b008-7896-4132-9865-4a3c4dfdf87a',
-    '788b14d9-5ebc-4ba7-a68b-89c3d5fe8d1e',
-    '0b4568a2-7a15-400e-b288-a8f897482579', -- Energy
-    now()
-  ),
-  (
-    '825901eb-5d70-46e5-8ed2-bd53091c830d',
-    '788b14d9-5ebc-4ba7-a68b-89c3d5fe8d1e',
-    '99cb8cee-454a-4dd7-9861-b14dd20aa41c', -- Medical
-    now()
-  )
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO supplier_tags (supplier_id, tag_id)
+SELECT '788b14d9-5ebc-4ba7-a68b-89c3d5fe8d1e', id
+FROM tags
+WHERE slug IN ('energy','medical')
+ON CONFLICT (supplier_id, tag_id) DO NOTHING;
 
 COMMIT;

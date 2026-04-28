@@ -176,17 +176,18 @@ SET
   updated_at                 = now()
 WHERE supplier_id = 'discovered-cf74abfb';
 
--- 2) Remove the Consumer Products tag (not stated on b9c.com).
+-- 2) Remove the Consumer Products tag (not stated on b9c.com). Slug-based so
+--    it works on both local and prod (tag UUIDs differ between environments).
 DELETE FROM supplier_tags
 WHERE supplier_id = '4a476828-8352-4e30-be2f-4502fb53f52d'
-  AND tag_id      = '96f16792-e2dd-47a6-ab8e-c8c347e52071';   -- Consumer Products
+  AND tag_id IN (SELECT id FROM tags WHERE slug = 'consumer-products');
 
 -- 3) Add Aerospace, Defense and Industrial tags.
 --    UNIQUE(supplier_id, tag_id) on supplier_tags makes this idempotent.
-INSERT INTO supplier_tags (id, supplier_id, tag_id, created_at) VALUES
-  (gen_random_uuid(), '4a476828-8352-4e30-be2f-4502fb53f52d', 'd7d8b50a-3cd0-470d-a0b5-729417738a77', now()),  -- Aerospace
-  (gen_random_uuid(), '4a476828-8352-4e30-be2f-4502fb53f52d', '9856adb0-bae7-4b32-a77c-8a044b070795', now()),  -- Defense
-  (gen_random_uuid(), '4a476828-8352-4e30-be2f-4502fb53f52d', '2256863c-10dc-4a57-b454-43ada538c958', now())   -- Industrial
+INSERT INTO supplier_tags (supplier_id, tag_id)
+SELECT '4a476828-8352-4e30-be2f-4502fb53f52d', id
+FROM tags
+WHERE slug IN ('aerospace','defense','industrial')
 ON CONFLICT (supplier_id, tag_id) DO NOTHING;
 
 COMMIT;

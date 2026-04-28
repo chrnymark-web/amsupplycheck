@@ -174,23 +174,19 @@ SET
 WHERE supplier_id = '3d-explorer';
 
 -- Drop the two supplier_technologies rows that don't reflect 3D Explorer's
--- in-house printing offering (FDM and SLS). Keep the MJF row.
+-- in-house printing offering (FDM and SLS). Keep the MJF row. Slug-based so
+-- it works on both local and prod (technology UUIDs differ between envs).
 DELETE FROM supplier_technologies
 WHERE supplier_id = '797738eb-9813-47e1-b51f-b96ee4296735'
-  AND technology_id IN (
-    '4b6a0965-d67e-4b71-9fe6-f62ec0f76068', -- FDM
-    '7da248a3-fb46-4e4d-817d-3f3ba97f9421'  -- SLS
-  );
+  AND technology_id IN (SELECT id FROM technologies WHERE slug IN ('fdm','sls'));
 
 -- Add Vapor Smoothing as 3D Explorer's verified post-processing technology
 -- (the AMT/PostPro Chemical Vapour Smoothing service).
-INSERT INTO supplier_technologies (id, supplier_id, technology_id, created_at)
-VALUES (
-  '95bc46f7-f861-493d-ae1c-13817e43a321',
-  '797738eb-9813-47e1-b51f-b96ee4296735',
-  '44d23a99-c17d-4079-bbfc-52c868fc6c78', -- Vapor Smoothing
-  now()
-)
-ON CONFLICT (id) DO NOTHING;
+INSERT INTO supplier_technologies (supplier_id, technology_id)
+SELECT '797738eb-9813-47e1-b51f-b96ee4296735', id
+FROM technologies
+WHERE slug = 'vapor-smoothing'
+  AND COALESCE(hidden, false) = false
+ON CONFLICT (supplier_id, technology_id) DO NOTHING;
 
 COMMIT;

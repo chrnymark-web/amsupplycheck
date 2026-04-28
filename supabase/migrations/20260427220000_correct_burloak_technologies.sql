@@ -224,18 +224,13 @@ SET
 WHERE supplier_id = 'burloak-technologies';
 
 -- Burloak previously had no supplier_technologies rows. Insert one row per
--- process slug in the new technologies (text[]) array. Technology UUIDs taken
--- from public.technologies seed (seed.sql:46-64).
-INSERT INTO supplier_technologies (id, supplier_id, technology_id, created_at)
-VALUES
-  ('818626ea-30a2-4cf1-97f1-1fd71bb1edd1', '63ea4269-6c34-4da5-b8a2-94f17cb9b93a', '5ee5b8aa-e20f-4f4b-ba25-ca1b2d5e16bd', now()), -- LPBF
-  ('63bd3e95-5979-41b9-9777-e70b20d8ccd7', '63ea4269-6c34-4da5-b8a2-94f17cb9b93a', '4ef0df61-4844-41a0-959a-5e214f3f4347', now()), -- SLM
-  ('2245d5d3-784b-4a68-bf10-1fa83831f8bf', '63ea4269-6c34-4da5-b8a2-94f17cb9b93a', '292fa3ec-d345-40a5-8a2e-8fe9643fa950', now()), -- EBM
-  ('815318fe-6b65-4d50-8663-9e8f2814f122', '63ea4269-6c34-4da5-b8a2-94f17cb9b93a', '6d4ad695-9ef7-4eed-8e8b-de474e7f982f', now()), -- DED
-  ('20ddef93-61f6-45fa-a568-bfa2211be2c5', '63ea4269-6c34-4da5-b8a2-94f17cb9b93a', '7da248a3-fb46-4e4d-817d-3f3ba97f9421', now()), -- SLS
-  ('63aec5cd-febf-4f70-a243-ba2ca7748ac2', '63ea4269-6c34-4da5-b8a2-94f17cb9b93a', 'a0f1498d-6a64-4e8f-8bfe-464cc2f3cd8e', now()), -- CNC Machining
-  ('2b019fcb-a156-46ea-8fa5-d8d806e3a2e7', '63ea4269-6c34-4da5-b8a2-94f17cb9b93a', 'dc119aab-a138-453d-9399-88e8dffccbeb', now()), -- Heat Treatment
-  ('553bf755-d4fd-4060-b632-51f430c5b772', '63ea4269-6c34-4da5-b8a2-94f17cb9b93a', '44e85191-e065-4f5f-a45e-86df21ddd6eb', now())  -- Surface Treatment
-ON CONFLICT (id) DO NOTHING;
+-- process slug in the new technologies (text[]) array. Slug-based so it works
+-- on both local and prod (technology UUIDs differ between environments).
+INSERT INTO supplier_technologies (supplier_id, technology_id)
+SELECT '63ea4269-6c34-4da5-b8a2-94f17cb9b93a', id
+FROM technologies
+WHERE slug IN ('lpbf','slm','ebm','ded','sls','cnc-machining','heat-treatment','surface-treatment')
+  AND COALESCE(hidden, false) = false
+ON CONFLICT (supplier_id, technology_id) DO NOTHING;
 
 COMMIT;
