@@ -823,7 +823,7 @@ function MatchResultView({
                       size="sm"
                       onClick={() => setVisibleCount((c) => c + 20)}
                     >
-                      Vis flere leverandører ({visibleMatches.length - visibleCount} tilbage)
+                      Show more suppliers ({visibleMatches.length - visibleCount} remaining)
                     </Button>
                   </div>
                 )}
