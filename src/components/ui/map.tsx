@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from './sheet';
 import { ExternalLink, Eye, ChevronDown, RefreshCw, AlertTriangle, Loader2 } from 'lucide-react';
 import { trackMapInteraction, trackSupplierInteraction, trackOutboundLink } from '@/lib/analytics';
 import { getLocalLogoForSupplier } from '@/lib/supplierLogos';
+import { trace } from '@/lib/perf-trace';
 
 interface Supplier {
   id: string;
@@ -298,7 +299,26 @@ const Map: React.FC<MapProps> = ({
       map.current.on('load', () => {
         clearTimeout(loadTimeout);
         console.log('Map loaded successfully');
-        
+
+        // Hook WebGL context-loss into the perf trace so a renderer crash
+        // shows up in the diagnostic payload. Chrome surfaces this when GPU
+        // memory pressure or driver issues kill the canvas — the page may
+        // appear "frozen" while Mapbox tries to recover.
+        try {
+          const canvas = map.current?.getCanvas();
+          canvas?.addEventListener('webglcontextlost', (ev) => {
+            ev.preventDefault();
+            console.error('Mapbox WebGL context lost', ev);
+            trace('webglcontextlost');
+          }, { once: true });
+          canvas?.addEventListener('webglcontextrestored', () => {
+            console.log('Mapbox WebGL context restored');
+            trace('webglcontextrestored');
+          }, { once: true });
+        } catch (err) {
+          console.warn('Could not attach WebGL context listeners:', err);
+        }
+
         // Aggressive resize sequence to force WebGL canvas to render tiles
         // This is needed because lazy-loaded components may have timing issues
         const forceResize = () => {
@@ -307,13 +327,13 @@ const Map: React.FC<MapProps> = ({
             map.current.triggerRepaint();
           }
         };
-        
+
         forceResize();
         requestAnimationFrame(forceResize);
         setTimeout(forceResize, 100);
         setTimeout(forceResize, 300);
         setTimeout(forceResize, 600);
-        
+
         setMapLoaded(true);
         setMapError(null);
       });

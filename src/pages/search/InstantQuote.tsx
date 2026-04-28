@@ -38,7 +38,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import logo from '@/assets/amsupplycheck-logo-white.png';
-import { trace, endTrace } from '@/lib/perf-trace';
+import { trace, endTrace, timed, readLastDiagnostics, PERF_STORAGE_KEY } from '@/lib/perf-trace';
 import { isHidden, onVisible } from '@/lib/visibility';
 
 const STLViewer = lazy(() => import('@/components/stl-viewer/STLViewer'));
@@ -147,17 +147,20 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
   // are still streaming), show the result view.
   if (mode === 'match' && result) {
     return (
-      <MatchResultView
-        result={result}
-        file={file}
-        technology={technology}
-        material={material}
-        quantity={quantity}
-        area={area}
-        isRanking={isRanking}
-        onNew={handleRemoveFile}
-        parsedMetrics={metrics}
-      />
+      <>
+        <MatchResultView
+          result={result}
+          file={file}
+          technology={technology}
+          material={material}
+          quantity={quantity}
+          area={area}
+          isRanking={isRanking}
+          onNew={handleRemoveFile}
+          parsedMetrics={metrics}
+        />
+        <DiagnosticsButton />
+      </>
     );
   }
 
@@ -337,11 +340,49 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
           </main>
         )}
       </div>
+      <DiagnosticsButton />
     </>
   );
 }
 
 /* -------------------- Subcomponents -------------------- */
+
+// Visible only when the URL has `?debug=perf`. Copies the persisted perf-trace
+// payload (rolling snapshot written by trace() and the freeze watchdog) to the
+// clipboard so the user can paste it back without opening DevTools. Survives
+// "Page unresponsive" freezes because the snapshot is flushed to localStorage
+// continuously, including on visibilitychange→hidden and pagehide.
+function DiagnosticsButton() {
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
+  if (params.get('debug') !== 'perf') return null;
+
+  const onCopy = async () => {
+    const payload = readLastDiagnostics() ?? '(no diagnostics yet — start a search to populate)';
+    try {
+      await navigator.clipboard.writeText(payload);
+      // eslint-disable-next-line no-alert
+      alert(`Copied ${payload.length.toLocaleString()} chars to clipboard.\n\nKey: localStorage['${PERF_STORAGE_KEY}']`);
+    } catch (err) {
+      // Fall back to a console dump if clipboard is blocked (e.g. http://).
+      // eslint-disable-next-line no-console
+      console.log('[stl-match perf] copy failed, payload below:\n', payload);
+      // eslint-disable-next-line no-alert
+      alert(`Clipboard blocked — payload logged to console.\n\nKey: localStorage['${PERF_STORAGE_KEY}']\nError: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  };
+
+  return (
+    <button
+      type="button"
+      onClick={onCopy}
+      className="fixed bottom-4 right-4 z-50 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-xs font-mono text-amber-200 shadow-lg backdrop-blur-sm hover:bg-amber-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400"
+      aria-label="Copy diagnostics payload to clipboard"
+    >
+      Copy diagnostics
+    </button>
+  );
+}
 
 function UploadLanding({
   onFile,
@@ -556,9 +597,11 @@ function MatchResultView({
   // property access below. Partial-ranking polls can briefly produce these.
   const safeMatches = useMemo(
     () =>
-      Array.isArray(result?.matches)
-        ? result.matches.filter((m: any) => m?.supplier && m?.matchDetails)
-        : [],
+      timed('safeMatches', () =>
+        Array.isArray(result?.matches)
+          ? result.matches.filter((m: any) => m?.supplier && m?.matchDetails)
+          : []
+      ),
     [result]
   );
 
@@ -588,38 +631,40 @@ function MatchResultView({
   // unfreezing the page.
   const PRICED_TOP_N = 100;
   const pricedSubset = useMemo(
-    () => safeMatches.slice(0, PRICED_TOP_N),
+    () => timed('pricedSubset', () => safeMatches.slice(0, PRICED_TOP_N)),
     [safeMatches]
   );
   const unpricedTail = useMemo(
-    () => safeMatches.slice(PRICED_TOP_N),
+    () => timed('unpricedTail', () => safeMatches.slice(PRICED_TOP_N)),
     [safeMatches]
   );
 
   const estimatedPrices = useMemo(
     () =>
-      pricedSubset.map((m: any) =>
-        getEstimatedPrice({
-          supplierName: m.supplier.name ?? 'Unknown supplier',
-          supplierId: m.supplier.supplier_id,
-          supplierTechnologies: m.matchDetails.matchedTechnologies ?? [],
-          selectedTechnology: technology,
-          selectedMaterial: material,
-          geometry,
-          quantity,
-          logoUrl: m.supplier.logo_url || undefined,
-        })
+      timed('estimatedPrices', () =>
+        pricedSubset.map((m: any) =>
+          getEstimatedPrice({
+            supplierName: m.supplier.name ?? 'Unknown supplier',
+            supplierId: m.supplier.supplier_id,
+            supplierTechnologies: m.matchDetails.matchedTechnologies ?? [],
+            selectedTechnology: technology,
+            selectedMaterial: material,
+            geometry,
+            quantity,
+            logoUrl: m.supplier.logo_url || undefined,
+          })
+        )
       ),
     [pricedSubset, technology, material, quantity, geometry]
   );
 
   const priceInfo = useMemo(
-    () => resolvePriceInfo(pricedSubset, liveQuotes, estimatedPrices),
+    () => timed('priceInfo', () => resolvePriceInfo(pricedSubset, liveQuotes, estimatedPrices)),
     [pricedSubset, liveQuotes, estimatedPrices]
   );
 
   const sortedMatches = useMemo(
-    () => [...sortMatchesByPrice(pricedSubset, priceInfo), ...unpricedTail],
+    () => timed('sortedMatches', () => [...sortMatchesByPrice(pricedSubset, priceInfo), ...unpricedTail]),
     [pricedSubset, priceInfo, unpricedTail]
   );
 
@@ -646,43 +691,45 @@ function MatchResultView({
   useEffect(() => setVisibleCount(20), [debouncedFilters]);
 
   const visibleMatches = useMemo(() => {
-    const techFilter = debouncedFilters.technologies.map((t) => t.toLowerCase());
-    const matFilter = debouncedFilters.materials.map((m) => m.toLowerCase());
-    const areaFilter = debouncedFilters.areas
-      .filter((a) => !['global', 'worldwide'].includes(a.toLowerCase()))
-      .map((a) => a.toLowerCase());
+    return timed('visibleMatches', () => {
+      const techFilter = debouncedFilters.technologies.map((t) => t.toLowerCase());
+      const matFilter = debouncedFilters.materials.map((m) => m.toLowerCase());
+      const areaFilter = debouncedFilters.areas
+        .filter((a) => !['global', 'worldwide'].includes(a.toLowerCase()))
+        .map((a) => a.toLowerCase());
 
-    if (techFilter.length === 0 && matFilter.length === 0 && areaFilter.length === 0) {
-      return sortedMatches;
-    }
+      if (techFilter.length === 0 && matFilter.length === 0 && areaFilter.length === 0) {
+        return sortedMatches;
+      }
 
-    return sortedMatches.filter((m: any) => {
-      const supplier = m.supplier ?? {};
-      const sTechs: string[] = (supplier.technologies ?? []).map((t: string) => t.toLowerCase());
-      const sMats: string[] = (supplier.materials ?? []).map((x: string) => x.toLowerCase());
-      const sRegion = (supplier.region ?? '').toLowerCase();
-      const sCountry = (supplier.location_country ?? '').toLowerCase();
-      const sCity = (supplier.location_city ?? '').toLowerCase();
+      return sortedMatches.filter((m: any) => {
+        const supplier = m.supplier ?? {};
+        const sTechs: string[] = (supplier.technologies ?? []).map((t: string) => t.toLowerCase());
+        const sMats: string[] = (supplier.materials ?? []).map((x: string) => x.toLowerCase());
+        const sRegion = (supplier.region ?? '').toLowerCase();
+        const sCountry = (supplier.location_country ?? '').toLowerCase();
+        const sCity = (supplier.location_city ?? '').toLowerCase();
 
-      if (techFilter.length > 0) {
-        const hit = techFilter.some((t) =>
-          sTechs.some((st) => st === t || st.includes(t) || t.includes(st))
-        );
-        if (!hit) return false;
-      }
-      if (matFilter.length > 0) {
-        const hit = matFilter.some((mt) =>
-          sMats.some((sm) => sm === mt || sm.includes(mt) || mt.includes(sm))
-        );
-        if (!hit) return false;
-      }
-      if (areaFilter.length > 0) {
-        const hit = areaFilter.some(
-          (a) => sRegion.includes(a) || sCountry.includes(a) || sCity.includes(a) || a.includes(sRegion) || a.includes(sCountry)
-        );
-        if (!hit) return false;
-      }
-      return true;
+        if (techFilter.length > 0) {
+          const hit = techFilter.some((t) =>
+            sTechs.some((st) => st === t || st.includes(t) || t.includes(st))
+          );
+          if (!hit) return false;
+        }
+        if (matFilter.length > 0) {
+          const hit = matFilter.some((mt) =>
+            sMats.some((sm) => sm === mt || sm.includes(mt) || mt.includes(sm))
+          );
+          if (!hit) return false;
+        }
+        if (areaFilter.length > 0) {
+          const hit = areaFilter.some(
+            (a) => sRegion.includes(a) || sCountry.includes(a) || sCity.includes(a) || a.includes(sRegion) || a.includes(sCountry)
+          );
+          if (!hit) return false;
+        }
+        return true;
+      });
     });
   }, [sortedMatches, debouncedFilters]);
 
@@ -728,32 +775,36 @@ function MatchResultView({
 
   const mapSuppliers = useMemo(
     () =>
-      visibleMatches
-        .map((m: any) => {
-          const lat = m.supplier.location_lat ?? geoById.get(m.supplier.supplier_id)?.lat;
-          const lng = m.supplier.location_lng ?? geoById.get(m.supplier.supplier_id)?.lng;
-          if (lat == null || lng == null) return null;
-          const city = m.supplier.location_city || '';
-          const country = m.supplier.location_country || m.supplier.region || '';
-          return {
-            id: m.supplier.supplier_id,
-            name: m.supplier.name ?? 'Unknown supplier',
-            location: {
-              lat,
-              lng,
-              city,
-              country,
-              fullAddress: [city, country].filter(Boolean).join(', '),
-            },
-            technologies: m.supplier.technologies ?? [],
-            materials: m.supplier.materials ?? [],
-            verified: !!m.supplier.verified,
-            rating: 0,
-            website: m.supplier.website || undefined,
-            logoUrl: m.supplier.logo_url || undefined,
-          };
-        })
-        .filter(Boolean) as Array<any>,
+      timed(
+        'mapSuppliers',
+        () =>
+          visibleMatches
+            .map((m: any) => {
+              const lat = m.supplier.location_lat ?? geoById.get(m.supplier.supplier_id)?.lat;
+              const lng = m.supplier.location_lng ?? geoById.get(m.supplier.supplier_id)?.lng;
+              if (lat == null || lng == null) return null;
+              const city = m.supplier.location_city || '';
+              const country = m.supplier.location_country || m.supplier.region || '';
+              return {
+                id: m.supplier.supplier_id,
+                name: m.supplier.name ?? 'Unknown supplier',
+                location: {
+                  lat,
+                  lng,
+                  city,
+                  country,
+                  fullAddress: [city, country].filter(Boolean).join(', '),
+                },
+                technologies: m.supplier.technologies ?? [],
+                materials: m.supplier.materials ?? [],
+                verified: !!m.supplier.verified,
+                rating: 0,
+                website: m.supplier.website || undefined,
+                logoUrl: m.supplier.logo_url || undefined,
+              };
+            })
+            .filter(Boolean) as Array<any>
+      ),
     [visibleMatches, geoById]
   );
 
