@@ -946,6 +946,23 @@ function MatchResultView({
     [visibleMatches, visibleCount, geoById]
   );
 
+  // Group the paginated slice by pricing tier so the list can render with
+  // section headers (Live → Estimated → Other). Sort order within each bucket
+  // is preserved from sortMatchesByPrice; we only re-bucket for rendering.
+  const groupedVisible = useMemo(() => {
+    const slice = visibleMatches.slice(0, visibleCount);
+    const live: any[] = [];
+    const estimate: any[] = [];
+    const other: any[] = [];
+    for (const m of slice) {
+      const kind = priceInfo.get(m.supplier.supplier_id)?.kind ?? 'none';
+      if (kind === 'live') live.push(m);
+      else if (kind === 'estimate') estimate.push(m);
+      else other.push(m);
+    }
+    return { live, estimate, other };
+  }, [visibleMatches, visibleCount, priceInfo]);
+
   return (
     <>
       <Helmet>
@@ -1016,15 +1033,60 @@ function MatchResultView({
                   </div>
                 }
               >
-                {visibleMatches.slice(0, visibleCount).map((match: any, i: number) => (
-                  <SupplierResultCard
-                    key={match.supplier.supplier_id}
-                    match={match}
-                    rank={i + 1}
-                    price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
-                    isRanking={isRanking}
-                  />
-                ))}
+                {groupedVisible.live.length > 0 && (
+                  <>
+                    <SectionHeader
+                      label="Live prices"
+                      count={groupedVisible.live.length}
+                      description="Real-time quotes from suppliers via Craftcloud"
+                    />
+                    {groupedVisible.live.map((match: any, i: number) => (
+                      <SupplierResultCard
+                        key={match.supplier.supplier_id}
+                        match={match}
+                        rank={i + 1}
+                        price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
+                        isRanking={isRanking}
+                      />
+                    ))}
+                  </>
+                )}
+                {groupedVisible.estimate.length > 0 && (
+                  <>
+                    <SectionHeader
+                      label="Estimated prices"
+                      count={groupedVisible.estimate.length}
+                      description="Based on supplier averages — confirm directly"
+                    />
+                    {groupedVisible.estimate.map((match: any, i: number) => (
+                      <SupplierResultCard
+                        key={match.supplier.supplier_id}
+                        match={match}
+                        rank={groupedVisible.live.length + i + 1}
+                        price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
+                        isRanking={isRanking}
+                      />
+                    ))}
+                  </>
+                )}
+                {groupedVisible.other.length > 0 && (
+                  <>
+                    <SectionHeader
+                      label="Other suppliers"
+                      count={groupedVisible.other.length}
+                      description="Contact directly for a quote"
+                    />
+                    {groupedVisible.other.map((match: any, i: number) => (
+                      <SupplierResultCard
+                        key={match.supplier.supplier_id}
+                        match={match}
+                        rank={groupedVisible.live.length + groupedVisible.estimate.length + i + 1}
+                        price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
+                        isRanking={isRanking}
+                      />
+                    ))}
+                  </>
+                )}
                 {visibleCount < visibleMatches.length && (
                   <div className="flex justify-center pt-2">
                     <Button
@@ -1212,6 +1274,29 @@ const SupplierResultCard = memo(function SupplierResultCard({
   if ((prev.match.matchDetails.matchedMaterials?.length ?? 0) !== (next.match.matchDetails.matchedMaterials?.length ?? 0)) return false;
   return true;
 });
+
+function SectionHeader({
+  label,
+  count,
+  description,
+}: {
+  label: string;
+  count: number;
+  description: string;
+}) {
+  return (
+    <div className="pt-3 pb-1 first:pt-0">
+      <div className="flex items-baseline gap-2">
+        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          {label}
+        </h3>
+        <span className="text-xs text-muted-foreground/60">·</span>
+        <span className="text-xs font-medium text-muted-foreground">{count}</span>
+      </div>
+      <p className="text-[11px] text-muted-foreground/70 mt-0.5">{description}</p>
+    </div>
+  );
+}
 
 function PriceBlock({ price }: { price: SupplierPriceInfo }) {
   if (price.kind === 'live') {
