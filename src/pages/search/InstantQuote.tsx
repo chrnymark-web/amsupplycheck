@@ -541,20 +541,21 @@ function MatchResultView({
     { volumeCm3: number; boundingBox: { x: number; y: number; z: number }; triangleCount: number } | undefined
   >(undefined);
 
-  // Mark the moment MatchResultView mounts and defer the heavy "first paint"
-  // work (Mapbox init + Craftcloud fan-out + map-pin geometry) off the same
-  // tick the cards are landing on. `requestIdleCallback` falls back to
-  // setTimeout(0) on Safari. Without this defer, on the matching→ranking
-  // transition we'd run the cascading memos for 326 matches AND mount Mapbox
-  // AND fire 90+ vendor fetches all in one frame — the freeze the user reports.
+  // Two staged gates so the heavy work doesn't all land on one frame:
+  //   1) `quotesEnabled` — first idle tick after MatchResultView mounts. Lets
+  //      the Craftcloud/Treatstock fan-out start in the background while the
+  //      card list is still staggering in (network-bound, doesn't block paint).
+  //   2) `mapEnabled` — fires LAST, only after the card stagger has reached
+  //      its final size (visibleCount === 20) AND another idle tick passes.
+  //      Mapbox init + WebGL texture allocation + marker batches are the
+  //      single biggest CPU spike on this page, so we hold them back until
+  //      the supplier list is fully painted.
   //
-  // Critically, the rIC `timeout` fallback is `setTimeout`-based and fires in
-  // background tabs even though rIC itself is gated. If we let it commit
-  // while hidden, Mapbox would allocate WebGL textures + tiles in a tab
-  // Chrome is trying to throttle, then the 326-vendor Craftcloud fan-out
-  // would start — the combo has been pushing us into the memory-saver kill
-  // threshold. Defer the commit until the tab is visible again.
-  const [deferredMount, setDeferredMount] = useState(false);
+  // Both gates honor a tab-hidden guard: on hidden tabs Chrome's memory-saver
+  // can kill the page if Mapbox allocates WebGL contexts in the background.
+  const [quotesEnabled, setQuotesEnabled] = useState(false);
+  const [mapEnabled, setMapEnabled] = useState(false);
+
   useEffect(() => {
     trace('trigger:result-mounted');
     let visUnsub: (() => void) | null = null;
@@ -563,14 +564,15 @@ function MatchResultView({
 
     const commit = () => {
       if (isHidden()) {
-        trace('trigger:deferred-mount-blocked-hidden');
+        trace('trigger:quotes-blocked-hidden');
         visUnsub = onVisible(() => {
-          trace('trigger:deferred-mount-resumed');
-          setDeferredMount(true);
+          trace('trigger:quotes-resumed');
+          setQuotesEnabled(true);
         });
         return;
       }
-      setDeferredMount(true);
+      trace('trigger:quotes-enabled');
+      setQuotesEnabled(true);
     };
 
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
@@ -591,10 +593,10 @@ function MatchResultView({
   // Auto-fetch live quotes when the file/quantity changes. Reuses the
   // STL parse from the upload step (parsedMetrics) so we don't block the
   // main thread re-parsing the same file when MatchResultView mounts. Gated
-  // on `deferredMount` so the 90+ vendor fan-out doesn't compete with the
+  // on `quotesEnabled` so the 90+ vendor fan-out doesn't compete with the
   // first card paint.
   useEffect(() => {
-    if (!file || !deferredMount) return;
+    if (!file || !quotesEnabled) return;
     const g = parsedMetrics
       ? {
           volumeCm3: parsedMetrics.volumeCm3,
@@ -604,7 +606,7 @@ function MatchResultView({
       : undefined;
     setGeometry(g);
     getQuotes(file, quantity, g);
-  }, [file, quantity, getQuotes, parsedMetrics, deferredMount]);
+  }, [file, quantity, getQuotes, parsedMetrics, quotesEnabled]);
 
   // Rows lacking a supplier or matchDetails block would crash the unguarded
   // property access below. Partial-ranking polls can briefly produce these.
@@ -717,15 +719,15 @@ function MatchResultView({
   // Pagination: render a window of matches, grow on "Vis flere". Resets
   // whenever the filter set changes so users always start at the top.
   //
-  // Initial value 5 (not 20) so the first paint commits a tiny tree — 5 cards
-  // + map skeleton + header. The next two idle frames bump to 12 and 20, so
-  // the user sees results within the first frame after navigation while the
-  // heavier card renders + Mapbox marker batches stagger in. Like Momondo:
-  // top results first, the rest stream in.
-  const [visibleCount, setVisibleCount] = useState(5);
+  // Initial value 3 (not 20) so the first paint commits a tiny tree — 3 cards
+  // + map skeleton + header. The next four idle frames bump to 6, 10, 15, 20,
+  // so the user sees results within the first frame after navigation while
+  // the heavier card renders stagger in over five tiny commits instead of
+  // landing in one big chunk. Like Momondo: top results first, the rest stream in.
+  const [visibleCount, setVisibleCount] = useState(3);
   useEffect(() => setVisibleCount(20), [debouncedFilters]);
   // First-mount stagger: only runs once. Filter changes reset to 20 above,
-  // not 5, so users who scroll-then-filter don't lose context.
+  // not 3, so users who scroll-then-filter don't lose context.
   useEffect(() => {
     type RIC = (cb: () => void) => number;
     type CIC = (handle: number) => void;
@@ -735,13 +737,62 @@ function MatchResultView({
     const cic: CIC =
       (window as unknown as { cancelIdleCallback?: CIC }).cancelIdleCallback ??
       ((h) => window.clearTimeout(h));
-    const t1 = ric(() => setVisibleCount((c) => Math.max(c, 12)));
-    const t2 = ric(() => setVisibleCount((c) => Math.max(c, 20)));
+    const t1 = ric(() => setVisibleCount((c) => Math.max(c, 6)));
+    const t2 = ric(() => setVisibleCount((c) => Math.max(c, 10)));
+    const t3 = ric(() => setVisibleCount((c) => Math.max(c, 15)));
+    const t4 = ric(() => setVisibleCount((c) => Math.max(c, 20)));
     return () => {
       cic(t1);
       cic(t2);
+      cic(t3);
+      cic(t4);
     };
   }, []);
+
+  // Map gate: fires LAST. Only mount Mapbox once the supplier list has
+  // finished its 3→6→10→15→20 stagger AND another idle tick has passed.
+  // Mapbox WebGL init + marker batches are the single biggest CPU spike on
+  // this page; holding them until the cards are fully painted is what
+  // prevents the page-unresponsive freeze. 1500ms hard timeout is the
+  // backstop in case idle callbacks never fire (constant user input, etc).
+  useEffect(() => {
+    if (visibleCount < 20 || mapEnabled) return;
+    let visUnsub: (() => void) | null = null;
+    let ricHandle: number | null = null;
+    let toHandle: number | null = null;
+    let fallbackHandle: number | null = null;
+
+    const commit = () => {
+      if (isHidden()) {
+        trace('trigger:map-blocked-hidden');
+        visUnsub = onVisible(() => {
+          trace('trigger:map-resumed');
+          setMapEnabled(true);
+        });
+        return;
+      }
+      trace('trigger:map-enabled');
+      setMapEnabled(true);
+    };
+
+    const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+    const cic = (window as unknown as { cancelIdleCallback?: (handle: number) => void }).cancelIdleCallback;
+    if (typeof ric === 'function') {
+      ricHandle = ric(commit, { timeout: 1500 });
+    } else {
+      toHandle = window.setTimeout(commit, 200);
+    }
+    fallbackHandle = window.setTimeout(() => {
+      if (!mapEnabled) commit();
+    }, 1500);
+
+    return () => {
+      if (ricHandle != null) cic?.(ricHandle);
+      if (toHandle != null) window.clearTimeout(toHandle);
+      if (fallbackHandle != null) window.clearTimeout(fallbackHandle);
+      visUnsub?.();
+    };
+  }, [visibleCount, mapEnabled]);
 
   const visibleMatches = useMemo(() => {
     return timed('visibleMatches', () => {
@@ -945,7 +996,7 @@ function MatchResultView({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setVisibleCount((c) => c + 20)}
+                      onClick={() => setVisibleCount((c) => c + 10)}
                     >
                       Show more suppliers ({visibleMatches.length - visibleCount} remaining)
                     </Button>
@@ -962,7 +1013,7 @@ function MatchResultView({
                   </div>
                 }
               >
-                {deferredMount ? (
+                {mapEnabled ? (
                   <SupplierMap
                     suppliers={mapSuppliers}
                     height="100%"

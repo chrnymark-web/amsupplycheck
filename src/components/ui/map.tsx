@@ -79,7 +79,7 @@ const Map: React.FC<MapProps> = ({
     handle: null,
     jobs: [],
   });
-  const MARKER_BATCH_SIZE = 8;
+  const MARKER_BATCH_SIZE = 4;
 
   const scheduleIdle = (cb: () => void): number => {
     const ric = (window as unknown as {
