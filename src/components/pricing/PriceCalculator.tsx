@@ -1,7 +1,8 @@
 import { useState, useCallback, useRef } from 'react';
 import { Upload, Calculator, ChevronDown, ChevronUp, Package, Loader2, ExternalLink, X, Signal, Clock, Zap, Award, ChevronRight, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { parseSTL, type STLResult } from '@/lib/stlParser';
+import { type STLResult } from '@/lib/stlParser';
+import { parseSTLInWorker } from '@/lib/stlParserClient';
 import { supabase } from '@/integrations/supabase/client';
 import { getCraftcloudQuotes } from '@/lib/api/craftcloud';
 import type { LiveQuote } from '@/lib/api/types';
@@ -39,18 +40,24 @@ export function PriceCalculator() {
 
   const handleFile = useCallback(async (f: File) => {
     const ext = f.name.toLowerCase().slice(f.name.lastIndexOf('.'));
-    const accepted = ['.stl', '.obj', '.3mf', '.step', '.stp'];
-    if (!accepted.includes(ext)) {
-      setParseError('Unsupported file type. Upload STL, OBJ, 3MF or STEP.');
+    if (ext !== '.stl') {
+      setParseError('Only STL files are supported here. Use OBJ/3MF/STEP via the supplier search.');
       return;
     }
     if (f.size > 100 * 1024 * 1024) {
       setParseError('File too large. Maximum 100MB.');
       return;
     }
-    // Route to the new instant-quote experience (3D preview + configurator + live prices).
-    navigate('/stl-match', { state: { uploadedFile: f } });
-  }, [navigate]);
+    setFile(f);
+    setParseError('');
+    setStlData(null);
+    try {
+      const parsed = await parseSTLInWorker(f);
+      setStlData(parsed);
+    } catch {
+      setParseError('Could not parse STL geometry. File may be corrupted.');
+    }
+  }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();

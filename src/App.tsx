@@ -116,7 +116,6 @@ const AppRoutes = () => {
             <Route path="/admin/discovered" element={<AdminPage><DiscoveredSuppliers /></AdminPage>} />
             <Route path="/analytics" element={<AdminPage><Analytics /></AdminPage>} />
             <Route path="/match" element={<ProjectMatch />} />
-            <Route path="/stl-match" element={<InstantQuote mode="match" />} />
             <Route path="/stl-match-legacy" element={<STLMatch />} />
             <Route path="/compare-prices" element={<InstantQuote mode="compare" />} />
             <Route path="/compare-prices-legacy" element={<ComparePrices />} />
