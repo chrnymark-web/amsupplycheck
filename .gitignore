@@ -32,6 +32,8 @@ temporary screenshots/
 screenshot.mjs
 screenshot-upload.mjs
 supabase/.temp/
+.claude/
+.playwright-mcp/
 
 # Editor directories and files
 .vscode/*
