@@ -70,29 +70,144 @@ const Map: React.FC<MapProps> = ({
   const onVisibleSuppliersChangeRef = useRef(onVisibleSuppliersChange);
   onVisibleSuppliersChangeRef.current = onVisibleSuppliersChange;
 
+  // In-flight chunked marker batch. We process up to MARKER_BATCH_SIZE marker
+  // creations per requestIdleCallback tick instead of running ~100 synchronous
+  // marker.addTo() calls in a single forEach. The handle lets a subsequent
+  // call to addMarkersToMap() cancel the pending batch and restart with the
+  // new supplier list.
+  const pendingBatchRef = useRef<{ handle: number | null; jobs: Supplier[] }>({
+    handle: null,
+    jobs: [],
+  });
+  const MARKER_BATCH_SIZE = 8;
+
+  const scheduleIdle = (cb: () => void): number => {
+    const ric = (window as unknown as {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+    }).requestIdleCallback;
+    if (typeof ric === 'function') return ric(cb, { timeout: 200 });
+    return window.setTimeout(cb, 0) as unknown as number;
+  };
+  const cancelIdle = (handle: number) => {
+    const cic = (window as unknown as {
+      cancelIdleCallback?: (h: number) => void;
+    }).cancelIdleCallback;
+    if (typeof cic === 'function') cic(handle);
+    else window.clearTimeout(handle);
+  };
+
+  // Fits the map view to the supplier set. Called after the FINAL marker
+  // batch lands, not after the first — otherwise fitBounds would zoom to
+  // whatever 8 markers happened to be in batch 1, then re-zoom 12 times.
+  const fitBoundsToSuppliers = (validSuppliers: Supplier[]) => {
+    if (!map.current || validSuppliers.length <= 1) return;
+    const bounds = new mapboxgl.LngLatBounds();
+    validSuppliers.forEach((s) => bounds.extend([s.location.lng, s.location.lat]));
+    map.current.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 1000 });
+  };
+
+  // Build + add a single marker to the map. Extracted from the previous
+  // forEach body — same DOM, same popup wiring, same listeners.
+  const createMarkerForSupplier = (supplier: Supplier) => {
+    if (!map.current) return;
+
+    const el = document.createElement('div');
+    el.style.cssText = 'cursor:pointer;width:36px;height:36px;border-radius:8px;overflow:hidden;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.25);background:#f5f5f5;';
+
+    const localLogo = getLocalLogoForSupplier(supplier.name);
+    const logoSrc = localLogo || supplier.logoUrl;
+    const whiteLogos = ['parts on demand','partzpro','sybridge','cosine','delva','forecast','forecast3d','craftcloud','3erp','fathom','imaterialise','i.materialise','oceanz','treatstock'];
+    const needsDarkBg = whiteLogos.some(l => supplier.name.toLowerCase().includes(l));
+    const bgColor = needsDarkBg ? '#000' : '#f5f5f5';
+    el.style.background = bgColor;
+
+    if (logoSrc) {
+      el.innerHTML = `<img src="${logoSrc}" alt="${supplier.name}" style="width:100%;height:100%;object-fit:contain;padding:2px;max-width:none;" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;color:#000;\\'>${supplier.name.split(' ').filter(w => w.length > 0).map(w => w[0].toUpperCase()).slice(0, 2).join('')}</div>'"/>`;
+    } else {
+      const initials = supplier.name.split(' ').filter(w => w.length > 0).map(w => w[0].toUpperCase()).slice(0, 2).join('');
+      el.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;color:#000;">${initials}</div>`;
+    }
+
+    if (supplier.verified) {
+      const dot = document.createElement('div');
+      dot.style.cssText = 'position:absolute;bottom:1px;right:1px;width:8px;height:8px;border-radius:50%;background:hsl(87,40%,50%);border:1.5px solid white;z-index:2;';
+      el.appendChild(dot);
+    }
+
+    el.addEventListener('mouseenter', () => {
+      el.style.boxShadow = '0 3px 10px rgba(0,0,0,0.3)';
+      el.style.zIndex = '10';
+    });
+    el.addEventListener('mouseleave', () => {
+      el.style.boxShadow = '0 1px 4px rgba(0,0,0,0.25)';
+      el.style.zIndex = '';
+    });
+
+    if (isMobile) {
+      el.addEventListener('click', () => {
+        trackMapInteraction('marker_click', { supplier_id: supplier.id, supplier_name: supplier.name, verified: supplier.verified });
+        trackSupplierInteraction('click', supplier.id, supplier.name, 'map', { verified: supplier.verified });
+        setSelectedSupplier(supplier);
+      });
+    }
+
+    const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
+      .setLngLat([supplier.location.lng, supplier.location.lat]);
+
+    if (!isMobile) {
+      const popup = new mapboxgl.Popup({ offset: 25, className: 'supplier-popup' })
+        .setHTML(`
+          <div style="padding:12px;min-width:220px;">
+            <h3 style="margin:0 0 6px;font-weight:600;font-size:14px;color:#000;">${supplier.name}</h3>
+            <p style="margin:0 0 12px;color:#666;font-size:12px;">${supplier.location.city}, ${supplier.location.country}</p>
+            <div style="display:flex;gap:8px;">
+              <button id="contact-${supplier.id}" style="flex:1;padding:6px 12px;background:hsl(87,20%,45%);color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;">Contact</button>
+              <button id="view-${supplier.id}" style="flex:1;padding:6px 12px;background:#000;color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;">View Supplier</button>
+            </div>
+          </div>
+        `);
+      popup.on('open', () => {
+        document.getElementById(`contact-${supplier.id}`)?.addEventListener('click', () => {
+          if (supplier.website) {
+            trackOutboundLink(supplier.website, supplier.name, supplier.id);
+            const w = window.open(supplier.website, '_blank');
+            if (!w) window.location.href = supplier.website;
+          }
+        });
+        document.getElementById(`view-${supplier.id}`)?.addEventListener('click', () => {
+          trackSupplierInteraction('view', supplier.id, supplier.name, 'map', { verified: supplier.verified });
+          navigate(`/suppliers/${supplier.id}`);
+        });
+      });
+      marker.setPopup(popup);
+    }
+
+    marker.addTo(map.current);
+    markersRef.current[supplier.id] = marker;
+  };
+
   const addMarkersToMap = () => {
     if (!map.current || !mapLoaded) return;
-    
+
     const currentSuppliers = suppliersRef.current;
-    
+
     // Filter out suppliers with invalid coordinates before adding markers
-    const validSuppliers = currentSuppliers.filter(supplier => {
+    const validSuppliers = currentSuppliers.filter((supplier) => {
       const lat = supplier.location.lat;
       const lng = supplier.location.lng;
-      
+
       // Filter out invalid coordinates
       if (!lat || !lng || lat === 0 || lng === 0) return false;
-      
+
       // Filter out Berlin default coordinates (52.52, 13.40) - both normal AND swapped
       if (Math.abs(lat - 52.52) < 0.01 && Math.abs(lng - 13.40) < 0.01) return false;
       if (Math.abs(lat - 13.40) < 0.01 && Math.abs(lng - 52.52) < 0.01) return false;
-      
+
       return true;
     });
-    
-    // Track which supplier IDs we're processing
-    const currentSupplierIds = new Set(validSuppliers.map(s => s.id));
-    
+
+    const currentSupplierIds = new Set(validSuppliers.map((s) => s.id));
+
     // Remove markers for suppliers that no longer exist
     Object.keys(markersRef.current).forEach((supplierId) => {
       if (!currentSupplierIds.has(supplierId)) {
@@ -101,114 +216,74 @@ const Map: React.FC<MapProps> = ({
       }
     });
 
-    console.log('Adding markers for suppliers:', validSuppliers.length);
-    
-    // If single supplier, center and zoom the map on their location
+    // Single supplier: keep flyTo synchronous (one operation, not worth chunking)
     if (validSuppliers.length === 1) {
       const supplier = validSuppliers[0];
       map.current.flyTo({
         center: [supplier.location.lng, supplier.location.lat],
         zoom: 12,
-        duration: 1500
+        duration: 1500,
       });
     }
-    
-    // Add all markers at once
-    validSuppliers.forEach((supplier, index) => {
-      // Skip if marker already exists
-      if (markersRef.current[supplier.id]) {
-        const existing = markersRef.current[supplier.id];
+
+    // Cancel any in-flight batch — the supplier list has changed; restart from
+    // the new validSuppliers so we don't add stale markers or miss new ones.
+    if (pendingBatchRef.current.handle != null) {
+      cancelIdle(pendingBatchRef.current.handle);
+      pendingBatchRef.current.handle = null;
+    }
+
+    // Update positions for existing markers inline (cheap), and queue
+    // brand-new markers for chunked addition.
+    const toCreate: Supplier[] = [];
+    for (const supplier of validSuppliers) {
+      const existing = markersRef.current[supplier.id];
+      if (existing) {
         const pos = existing.getLngLat();
         if (pos.lng !== supplier.location.lng || pos.lat !== supplier.location.lat) {
           existing.setLngLat([supplier.location.lng, supplier.location.lat]);
         }
-        return;
-      }
-      
-      // Create marker element using innerHTML (proven stable with Mapbox)
-      const el = document.createElement('div');
-      el.style.cssText = 'cursor:pointer;width:36px;height:36px;border-radius:8px;overflow:hidden;border:2px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.25);background:#f5f5f5;';
-
-      const localLogo = getLocalLogoForSupplier(supplier.name);
-      const logoSrc = localLogo || supplier.logoUrl;
-      const whiteLogos = ['parts on demand','partzpro','sybridge','cosine','delva','forecast','forecast3d','craftcloud','3erp','fathom','imaterialise','i.materialise','oceanz','treatstock'];
-      const needsDarkBg = whiteLogos.some(l => supplier.name.toLowerCase().includes(l));
-      const bgColor = needsDarkBg ? '#000' : '#f5f5f5';
-      el.style.background = bgColor;
-
-      if (logoSrc) {
-        el.innerHTML = `<img src="${logoSrc}" alt="${supplier.name}" style="width:100%;height:100%;object-fit:contain;padding:2px;max-width:none;" onerror="this.style.display='none';this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;color:#000;\\'>${supplier.name.split(' ').filter(w => w.length > 0).map(w => w[0].toUpperCase()).slice(0, 2).join('')}</div>'"/>`;
       } else {
-        const initials = supplier.name.split(' ').filter(w => w.length > 0).map(w => w[0].toUpperCase()).slice(0, 2).join('');
-        el.innerHTML = `<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:11px;color:#000;">${initials}</div>`;
+        toCreate.push(supplier);
       }
-
-      if (supplier.verified) {
-        const dot = document.createElement('div');
-        dot.style.cssText = 'position:absolute;bottom:1px;right:1px;width:8px;height:8px;border-radius:50%;background:hsl(87,40%,50%);border:1.5px solid white;z-index:2;';
-        el.appendChild(dot);
-      }
-
-      el.addEventListener('mouseenter', () => {
-        el.style.boxShadow = '0 3px 10px rgba(0,0,0,0.3)';
-        el.style.zIndex = '10';
-      });
-      el.addEventListener('mouseleave', () => {
-        el.style.boxShadow = '0 1px 4px rgba(0,0,0,0.25)';
-        el.style.zIndex = '';
-      });
-
-      if (isMobile) {
-        el.addEventListener('click', () => {
-          trackMapInteraction('marker_click', { supplier_id: supplier.id, supplier_name: supplier.name, verified: supplier.verified });
-          trackSupplierInteraction('click', supplier.id, supplier.name, 'map', { verified: supplier.verified });
-          setSelectedSupplier(supplier);
-        });
-      }
-
-      const marker = new mapboxgl.Marker({ element: el, anchor: 'center' })
-        .setLngLat([supplier.location.lng, supplier.location.lat]);
-
-      if (!isMobile) {
-        const popup = new mapboxgl.Popup({ offset: 25, className: 'supplier-popup' })
-          .setHTML(`
-            <div style="padding:12px;min-width:220px;">
-              <h3 style="margin:0 0 6px;font-weight:600;font-size:14px;color:#000;">${supplier.name}</h3>
-              <p style="margin:0 0 12px;color:#666;font-size:12px;">${supplier.location.city}, ${supplier.location.country}</p>
-              <div style="display:flex;gap:8px;">
-                <button id="contact-${supplier.id}" style="flex:1;padding:6px 12px;background:hsl(87,20%,45%);color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;">Contact</button>
-                <button id="view-${supplier.id}" style="flex:1;padding:6px 12px;background:#000;color:white;border:none;border-radius:6px;font-size:12px;cursor:pointer;">View Supplier</button>
-              </div>
-            </div>
-          `);
-        popup.on('open', () => {
-          document.getElementById(`contact-${supplier.id}`)?.addEventListener('click', () => {
-            if (supplier.website) {
-              trackOutboundLink(supplier.website, supplier.name, supplier.id);
-              const w = window.open(supplier.website, '_blank');
-              if (!w) window.location.href = supplier.website;
-            }
-          });
-          document.getElementById(`view-${supplier.id}`)?.addEventListener('click', () => {
-            trackSupplierInteraction('view', supplier.id, supplier.name, 'map', { verified: supplier.verified });
-            navigate(`/suppliers/${supplier.id}`);
-          });
-        });
-        marker.setPopup(popup);
-      }
-
-      marker.addTo(map.current!);
-      markersRef.current[supplier.id] = marker;
-    });
-    
-    console.log('Finished adding all', Object.keys(markersRef.current).length, 'markers');
-
-    // Fit bounds to show all valid suppliers when there are multiple
-    if (validSuppliers.length > 1) {
-      const bounds = new mapboxgl.LngLatBounds();
-      validSuppliers.forEach(s => bounds.extend([s.location.lng, s.location.lat]));
-      map.current.fitBounds(bounds, { padding: 60, maxZoom: 12, duration: 1000 });
     }
+
+    pendingBatchRef.current.jobs = toCreate;
+
+    if (toCreate.length === 0) {
+      // Nothing new to add; just fit bounds for the (possibly-reduced) set.
+      fitBoundsToSuppliers(validSuppliers);
+      return;
+    }
+
+    console.log(`Adding ${toCreate.length} markers in batches of ${MARKER_BATCH_SIZE}`);
+
+    const processBatch = () => {
+      pendingBatchRef.current.handle = null;
+      if (!map.current) return;
+      const jobs = pendingBatchRef.current.jobs;
+      if (jobs.length === 0) return;
+
+      const batch = jobs.splice(0, MARKER_BATCH_SIZE);
+      for (const supplier of batch) {
+        // Skip suppliers that were removed between batches (e.g. supplier list
+        // shrank mid-stream). We only know the current valid set as of when
+        // addMarkersToMap was called; the cancellation above handles fresh
+        // calls, but we still guard against the supplier being absent now.
+        if (!currentSupplierIds.has(supplier.id)) continue;
+        if (markersRef.current[supplier.id]) continue; // raced
+        createMarkerForSupplier(supplier);
+      }
+
+      if (jobs.length > 0) {
+        pendingBatchRef.current.handle = scheduleIdle(processBatch);
+      } else {
+        // Final batch landed — now fit bounds to the full valid set.
+        fitBoundsToSuppliers(validSuppliers);
+      }
+    };
+
+    pendingBatchRef.current.handle = scheduleIdle(processBatch);
   };
   
 
@@ -378,9 +453,16 @@ const Map: React.FC<MapProps> = ({
     
     return () => {
       ro?.disconnect();
+      // Cancel any in-flight chunked marker batch so we don't try to call
+      // createMarkerForSupplier after the map has been removed.
+      if (pendingBatchRef.current.handle != null) {
+        cancelIdle(pendingBatchRef.current.handle);
+        pendingBatchRef.current.handle = null;
+      }
+      pendingBatchRef.current.jobs = [];
       Object.values(markersRef.current).forEach(marker => marker.remove());
       markersRef.current = {};
-      
+
       if (map.current) {
         map.current.remove();
         map.current = null;

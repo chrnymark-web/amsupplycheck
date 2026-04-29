@@ -1,4 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
+import { memo, useCallback, useDeferredValue, useEffect, useMemo, useRef, useState, lazy, Suspense } from 'react';
 import { Helmet } from 'react-helmet';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
@@ -34,6 +34,7 @@ import {
   resolvePriceInfo,
   sortMatchesByPrice,
   type SupplierPriceInfo,
+  type PriceInfoCache,
 } from '@/lib/supplier-price-matcher';
 import { supabase } from '@/integrations/supabase/client';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -148,6 +149,11 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
   if (mode === 'match' && result) {
     return (
       <>
+        {/* Render the diagnostic button BEFORE MatchResultView so React
+            reconciles the lightweight button first. If MatchResultView's
+            heavy first render were to block the main thread, the button's
+            element is at least at the head of the tree React is committing. */}
+        <DiagnosticsButton />
         <MatchResultView
           result={result}
           file={file}
@@ -159,13 +165,16 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
           onNew={handleRemoveFile}
           parsedMetrics={metrics}
         />
-        <DiagnosticsButton />
       </>
     );
   }
 
   return (
     <>
+      {/* Mounted on every InstantQuote render path when ?debug=perf is in URL.
+          Lives outside MatchResultView so it survives the upload→match
+          transition and is in DOM from the very first paint. */}
+      <DiagnosticsButton />
       <Helmet>
         <title>{pageTitle} | SupplyCheck</title>
         <meta name="description" content={pageDescription} />
@@ -340,7 +349,6 @@ export default function InstantQuote({ mode = 'match' }: InstantQuoteProps) {
           </main>
         )}
       </div>
-      <DiagnosticsButton />
     </>
   );
 }
@@ -515,12 +523,17 @@ function MatchResultView({
   parsedMetrics: STLResult | null;
 }) {
   const navigate = useNavigate();
-  const { getQuotes, liveQuotes, isLoading: liveLoading } = useLiveQuotes({
+  const { getQuotes, liveQuotes: liveQuotesNow, isLoading: liveLoading } = useLiveQuotes({
     currency: 'EUR',
     countryCode: 'DK',
     technology,
     material,
   });
+  // Deferred value lets React schedule the heavy priceInfo recompute in a
+  // low-priority transition lane, so user input (scroll/click/hover) yields
+  // ahead of the cascade. Combined with the differential resolvePriceInfo
+  // below, each Craftcloud partial becomes a small, interruptible update.
+  const liveQuotes = useDeferredValue(liveQuotesNow);
 
   // Parsed geometry is retained so estimates can size to the actual part, not
   // fall back to a tier-table baseline.
@@ -658,8 +671,24 @@ function MatchResultView({
     [pricedSubset, technology, material, quantity, geometry]
   );
 
+  // Cache the prior priceInfo result + the liveQuotes it was computed against,
+  // so the next call can diff vendor-by-vendor and skip name-matching for
+  // matches whose outcome cannot have changed. Worst case (first call, or
+  // pricedSubset reset) falls back to the slow path, so this is purely a
+  // speedup.
+  const priceInfoCacheRef = useRef<PriceInfoCache | null>(null);
   const priceInfo = useMemo(
-    () => timed('priceInfo', () => resolvePriceInfo(pricedSubset, liveQuotes, estimatedPrices)),
+    () =>
+      timed('priceInfo', () => {
+        const result = resolvePriceInfo(
+          pricedSubset,
+          liveQuotes,
+          estimatedPrices,
+          priceInfoCacheRef.current
+        );
+        priceInfoCacheRef.current = { result, liveQuotes };
+        return result;
+      }),
     [pricedSubset, liveQuotes, estimatedPrices]
   );
 
@@ -687,8 +716,32 @@ function MatchResultView({
 
   // Pagination: render a window of matches, grow on "Vis flere". Resets
   // whenever the filter set changes so users always start at the top.
-  const [visibleCount, setVisibleCount] = useState(20);
+  //
+  // Initial value 5 (not 20) so the first paint commits a tiny tree — 5 cards
+  // + map skeleton + header. The next two idle frames bump to 12 and 20, so
+  // the user sees results within the first frame after navigation while the
+  // heavier card renders + Mapbox marker batches stagger in. Like Momondo:
+  // top results first, the rest stream in.
+  const [visibleCount, setVisibleCount] = useState(5);
   useEffect(() => setVisibleCount(20), [debouncedFilters]);
+  // First-mount stagger: only runs once. Filter changes reset to 20 above,
+  // not 5, so users who scroll-then-filter don't lose context.
+  useEffect(() => {
+    type RIC = (cb: () => void) => number;
+    type CIC = (handle: number) => void;
+    const ric: RIC =
+      (window as unknown as { requestIdleCallback?: RIC }).requestIdleCallback ??
+      ((cb) => window.setTimeout(cb, 50) as unknown as number);
+    const cic: CIC =
+      (window as unknown as { cancelIdleCallback?: CIC }).cancelIdleCallback ??
+      ((h) => window.clearTimeout(h));
+    const t1 = ric(() => setVisibleCount((c) => Math.max(c, 12)));
+    const t2 = ric(() => setVisibleCount((c) => Math.max(c, 20)));
+    return () => {
+      cic(t1);
+      cic(t2);
+    };
+  }, []);
 
   const visibleMatches = useMemo(() => {
     return timed('visibleMatches', () => {
