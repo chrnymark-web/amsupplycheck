@@ -14,6 +14,7 @@ import {
   Package,
   Clock,
   ExternalLink,
+  Globe,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -749,14 +750,23 @@ function MatchResultView({
     };
   }, []);
 
-  // Map gate: fires LAST. Only mount Mapbox once the supplier list has
-  // finished its 3→6→10→15→20 stagger AND another idle tick has passed.
-  // Mapbox WebGL init + marker batches are the single biggest CPU spike on
-  // this page; holding them until the cards are fully painted is what
-  // prevents the page-unresponsive freeze. 1500ms hard timeout is the
-  // backstop in case idle callbacks never fire (constant user input, etc).
+  // Map gate: opt-in by default. Mapbox WebGL init + marker creation is the
+  // single biggest CPU spike on this page (Page-Unresponsive on large STLs).
+  // We only mount the map when the user explicitly clicks "Show map", OR if
+  // sessionStorage shows they've already opted in this session (so they don't
+  // have to click again on every fresh quote within the same tab).
+  const MAP_OPT_IN_KEY = 'supplycheck:map-opted-in';
   useEffect(() => {
-    if (visibleCount < 20 || mapEnabled) return;
+    if (mapEnabled) return;
+    if (visibleCount < 20) return;
+    let optedIn = false;
+    try {
+      optedIn = window.sessionStorage.getItem(MAP_OPT_IN_KEY) === 'true';
+    } catch {
+      // sessionStorage can throw in private/locked-down browsers; just stay opt-in.
+    }
+    if (!optedIn) return;
+
     let visUnsub: (() => void) | null = null;
     let ricHandle: number | null = null;
     let toHandle: number | null = null;
@@ -793,6 +803,24 @@ function MatchResultView({
       visUnsub?.();
     };
   }, [visibleCount, mapEnabled]);
+
+  const handleShowMap = useCallback(() => {
+    try {
+      window.sessionStorage.setItem(MAP_OPT_IN_KEY, 'true');
+    } catch {
+      // ignore — flag-set is a nicety, not load-bearing
+    }
+    if (isHidden()) {
+      trace('trigger:map-blocked-hidden');
+      onVisible(() => {
+        trace('trigger:map-resumed');
+        setMapEnabled(true);
+      });
+      return;
+    }
+    trace('trigger:map-enabled');
+    setMapEnabled(true);
+  }, []);
 
   const visibleMatches = useMemo(() => {
     return timed('visibleMatches', () => {
@@ -877,12 +905,18 @@ function MatchResultView({
     };
   }, [safeMatches]);
 
+  // Markers track the cards the user can actually see, not the full filtered
+  // set. With visibleCount staggering 3→6→10→15→20, marker creation grows in
+  // lockstep with cards instead of dumping 100+ markers at once when the map
+  // mounts. This is the single biggest reduction in main-thread work for the
+  // page-unresponsive freeze.
   const mapSuppliers = useMemo(
     () =>
       timed(
         'mapSuppliers',
         () =>
           visibleMatches
+            .slice(0, visibleCount)
             .map((m: any) => {
               const lat = m.supplier.location_lat ?? geoById.get(m.supplier.supplier_id)?.lat;
               const lng = m.supplier.location_lng ?? geoById.get(m.supplier.supplier_id)?.lng;
@@ -909,7 +943,7 @@ function MatchResultView({
             })
             .filter(Boolean) as Array<any>
       ),
-    [visibleMatches, geoById]
+    [visibleMatches, visibleCount, geoById]
   );
 
   return (
@@ -1021,9 +1055,18 @@ function MatchResultView({
                     showControls
                   />
                 ) : (
-                  <div className="h-full min-h-[400px] rounded-xl border border-border/60 bg-card/30 flex items-center justify-center text-xs text-muted-foreground">
-                    <Loader2 className="h-3 w-3 animate-spin mr-2" />
-                    Loading map…
+                  <div className="h-full min-h-[400px] rounded-xl border border-border/60 bg-card/30 flex flex-col items-center justify-center gap-4 p-6 text-center">
+                    <Globe className="h-10 w-10 text-muted-foreground/60" strokeWidth={1.5} />
+                    <div className="space-y-1.5">
+                      <p className="text-sm font-medium">View suppliers on world map</p>
+                      <p className="text-xs text-muted-foreground">
+                        Loads {mapSuppliers.length} location{mapSuppliers.length === 1 ? '' : 's'}
+                      </p>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={handleShowMap}>
+                      <Globe className="h-3.5 w-3.5 mr-1.5" />
+                      Show map
+                    </Button>
                   </div>
                 )}
               </ErrorBoundary>

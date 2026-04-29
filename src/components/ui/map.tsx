@@ -79,7 +79,11 @@ const Map: React.FC<MapProps> = ({
     handle: null,
     jobs: [],
   });
-  const MARKER_BATCH_SIZE = 4;
+  // 1 marker per idle tick. Each marker creates a DOM element + innerHTML
+  // string + image fetch + popup wiring; even a batch of 4 was enough to land
+  // a 100ms+ long-task on slower devices when the map first mounted. Single
+  // markers per tick gives the browser room to interleave paint and input.
+  const MARKER_BATCH_SIZE = 1;
 
   const scheduleIdle = (cb: () => void): number => {
     const ric = (window as unknown as {
