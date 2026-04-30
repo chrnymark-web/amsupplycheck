@@ -13,7 +13,6 @@ import PageVideoBackground from '@/components/layout/PageVideoBackground';
 import CookieConsent from '@/components/layout/CookieConsent';
 import NewsletterSignup from '@/components/forms/NewsletterSignup';
 import FloatingNav from '@/components/layout/FloatingNav';
-import { UploadSTLCTA } from '@/components/upload/UploadSTLCTA';
 import SupplierCardSkeleton from '@/components/supplier/SupplierCardSkeleton';
 import { SearchSuggestions, getPopularQueries } from '@/components/search/SearchSuggestions';
 import AISearchInput from '@/components/search/AISearchInput';
@@ -1342,11 +1341,6 @@ const Index = () => {
           </Card>
           </div>
         </div>
-      </section>
-
-      {/* Upload STL CTA */}
-      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <UploadSTLCTA />
       </section>
 
       {/* Newsletter Signup */}
