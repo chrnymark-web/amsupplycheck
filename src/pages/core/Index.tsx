@@ -1219,37 +1219,6 @@ const Index = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-6">
-            Ready to Find Your Perfect Supplier?
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8">
-            Join dozens of engineers and designers who trust SupplyCheck 
-            to connect them with the best 3D printing suppliers worldwide.
-          </p>
-          <RippleButton
-            size="lg"
-            className="bg-gradient-primary hover:shadow-hover transition-all duration-300 text-lg px-8 py-3"
-            onClick={() => navigate('/suppliers')}
-          >
-            <Search className="h-5 w-5 mr-2" />
-            Browse Suppliers
-            <ArrowRight className="h-5 w-5 ml-2" />
-          </RippleButton>
-          <RippleButton
-            size="lg"
-            variant="outline"
-            className="ml-4 text-lg px-8 py-3"
-            onClick={() => navigate('/knowledge')}
-          >
-            <Zap className="h-5 w-5 mr-2" />
-            Explore Technologies
-          </RippleButton>
-        </div>
-      </section>
-
       {/* Supplier Contact Section */}
       <section id="contact" className="py-20 bg-muted/30">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
