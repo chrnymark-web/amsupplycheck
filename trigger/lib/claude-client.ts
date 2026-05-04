@@ -2,9 +2,10 @@
 // Uses @anthropic-ai/sdk directly (not Lovable gateway)
 
 import Anthropic from "@anthropic-ai/sdk";
+import { buildSignature, readExplanationCache, writeExplanationCache } from "./explanation-cache.js";
 import type { ExtractedRequirements, MatchResult, TechnologyRationale, ProjectRequirements } from "./types.js";
 
-const MODEL = "claude-sonnet-4-20250514";
+const MODEL = "claude-haiku-4-5-20251001";
 
 function getClient(): Anthropic {
   // 30s per-request timeout bounds hanging Claude API calls. Without this the
@@ -107,13 +108,38 @@ Extract the requirements. Prioritize the recommended technologies if they match 
   };
 }
 
-/** Generate match explanations for top suppliers */
+/** Generate match explanations for top suppliers (with persistent cache) */
 export async function generateExplanations(
   matches: MatchResult[],
   requirements: ExtractedRequirements
 ): Promise<string[]> {
   if (matches.length === 0) return [];
 
+  // Look up every match in the cache first. Misses get sent to Claude in a
+  // single batched call to preserve the original "20 explanations, one prompt"
+  // pattern — going one-by-one would multiply request count.
+  const signatures = matches.map((m) => buildSignature(m, requirements, MODEL));
+  const cached = await readExplanationCache(signatures).catch((e) => {
+    console.error("[explanations] cache read error:", e);
+    return new Map<string, string>();
+  });
+
+  const result: string[] = new Array(matches.length).fill("");
+  const missIndices: number[] = [];
+  for (let i = 0; i < matches.length; i++) {
+    const hit = cached.get(signatures[i]);
+    if (hit) {
+      result[i] = hit;
+    } else {
+      missIndices.push(i);
+    }
+  }
+
+  console.log(`[explanations] cache: ${matches.length - missIndices.length}/${matches.length} hits`);
+
+  if (missIndices.length === 0) return result;
+
+  const missMatches = missIndices.map((i) => matches[i]);
   const client = getClient();
 
   const prompt = `Based on this 3D printing project:
@@ -124,7 +150,7 @@ Mechanical needs: ${requirements.mechanicalNeeds?.join(", ") || "Not specified"}
 
 Generate brief, friendly explanations (1-2 sentences each in English) for why each supplier is a good match:
 
-${matches.map((m, i) => `${i + 1}. ${m.supplier.name} - Score: ${m.score}%, Matched: ${m.matchDetails.matchedTechnologies.join(", ")}, ${m.matchDetails.matchedMaterials.join(", ")}${m.matchDetails.matchedCertifications.length ? `, Certs: ${m.matchDetails.matchedCertifications.join(", ")}` : ""}`).join("\n")}`;
+${missMatches.map((m, i) => `${i + 1}. ${m.supplier.name} - Score: ${m.score}%, Matched: ${m.matchDetails.matchedTechnologies.join(", ")}, ${m.matchDetails.matchedMaterials.join(", ")}${m.matchDetails.matchedCertifications.length ? `, Certs: ${m.matchDetails.matchedCertifications.join(", ")}` : ""}`).join("\n")}`;
 
   const response = await client.messages.create({
     model: MODEL,
@@ -155,9 +181,24 @@ ${matches.map((m, i) => `${i + 1}. ${m.supplier.name} - Score: ${m.score}%, Matc
   });
 
   const toolBlock = response.content.find((b: any) => b.type === "tool_use");
-  if (!toolBlock || toolBlock.type !== "tool_use") return [];
+  if (!toolBlock || toolBlock.type !== "tool_use") return result;
 
-  return (toolBlock.input as any).explanations || [];
+  const fresh = ((toolBlock.input as any).explanations || []) as string[];
+  const toCache: { signature: string; explanation: string; model: string }[] = [];
+  for (let i = 0; i < missIndices.length; i++) {
+    const explanation = fresh[i];
+    if (!explanation) continue;
+    const idx = missIndices[i];
+    result[idx] = explanation;
+    toCache.push({ signature: signatures[idx], explanation, model: MODEL });
+  }
+
+  // Fire-and-forget — don't block the user's results on a cache write.
+  writeExplanationCache(toCache).catch((e) =>
+    console.error("[explanations] cache write error:", e)
+  );
+
+  return result;
 }
 
 /** Generate technology rationale explaining WHY specific technologies are recommended */

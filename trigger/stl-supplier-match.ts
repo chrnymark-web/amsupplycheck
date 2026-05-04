@@ -1,5 +1,6 @@
 // Workflow 2: STL-file-based supplier search
-// Downloads STL from Supabase Storage, parses it, matches suppliers via Claude Sonnet
+// Downloads STL from Supabase Storage, parses it, matches suppliers deterministically.
+// Claude is only used downstream for short match explanations (lib/claude-client.ts).
 
 import { schemaTask } from "@trigger.dev/sdk";
 import { z } from "zod";
@@ -10,10 +11,8 @@ import { scoreSuppliers, fuzzyMatch } from "./lib/scoring.js";
 import { generateExplanations } from "./lib/claude-client.js";
 import { getAreaForCountry } from "./lib/area.js";
 import { mapTaskErrorToUserMessage } from "./lib/sanitize-error.js";
-import Anthropic from "@anthropic-ai/sdk";
-import type { EnrichedSupplier, ExtractedRequirements, MatchResult } from "./lib/types.js";
-
-const MODEL = "claude-sonnet-4-20250514";
+import { extractRequirementsFromStl } from "./lib/stl-heuristics.js";
+import type { ExtractedRequirements } from "./lib/types.js";
 
 export const stlSupplierMatch = schemaTask({
   id: "stl-supplier-match",
@@ -70,57 +69,15 @@ export const stlSupplierMatch = schemaTask({
         stl_metrics: stlMetrics,
       });
 
-      // Step 2: Matching suppliers — run Claude requirement extraction and DB fetch in parallel.
-      // They're independent: Claude needs stlMetrics, DB fetch needs nothing from Claude.
+      // Step 2: Matching suppliers. Requirement "extraction" is now deterministic
+      // (see lib/stl-heuristics.ts) — the user's dropdown selections plus a few
+      // size/density heuristics cover everything scoring needs. Skipping Claude
+      // here cuts ~3-5s off the critical path and the entire AI cost of this step.
       await updateSearchStatus(searchResultId, "matching");
 
-      const anthropic = new Anthropic({ timeout: 30_000, maxRetries: 1 });
-      const parallelStart = Date.now();
-      const [allSuppliers, analysisResponse] = await Promise.all([
-        fetchSuppliers(),
-        anthropic.messages.create({
-          model: MODEL,
-          max_tokens: 1024,
-          system: "You are an expert 3D printing consultant. Analyze part specifications and recommend optimal supplier matching criteria.",
-          messages: [{
-            role: "user",
-            content: `Analyze this 3D printed part and extract supplier matching requirements.
-
-PART SPECIFICATIONS:
-- Technology: ${technology || "any (user has not specified — recommend based on geometry)"}
-- Material: ${material || "any (user has not specified — recommend based on geometry)"}
-- Volume: ${stlMetrics.volumeCm3.toFixed(2)} cm³
-- Surface area: ${stlMetrics.surfaceAreaCm2.toFixed(2)} cm²
-- Bounding box: ${stlMetrics.boundingBox.x}mm x ${stlMetrics.boundingBox.y}mm x ${stlMetrics.boundingBox.z}mm
-- Triangle count: ${stlMetrics.triangleCount} (complexity indicator)
-- Quantity: ${quantity || 1}
-${preferredRegion ? `- Preferred region: ${preferredRegion}` : ""}
-
-Based on the part size, complexity, and material, what should we look for in a supplier?`,
-          }],
-          tools: [{
-            name: "extract_stl_requirements",
-            description: "Extract requirements based on STL analysis",
-            input_schema: {
-              type: "object" as const,
-              properties: {
-                requiredTechnologies: { type: "array", items: { type: "string" }, description: "Technologies suitable for this part" },
-                requiredMaterials: { type: "array", items: { type: "string" }, description: "Materials suitable for this part" },
-                preferredRegions: { type: "array", items: { type: "string" }, description: "Preferred regions" },
-                requiredCertifications: { type: "array", items: { type: "string" }, description: "Relevant certifications" },
-                isProductionRun: { type: "boolean", description: "Whether quantity suggests production" },
-                requiresMetal: { type: "boolean" },
-                requiresHighPrecision: { type: "boolean" },
-                requiresFlexibility: { type: "boolean" },
-                projectSummary: { type: "string", description: "Brief summary of the part and its requirements" },
-              },
-              required: ["requiredTechnologies", "requiredMaterials", "preferredRegions", "projectSummary"],
-            },
-          }],
-          tool_choice: { type: "tool" as const, name: "extract_stl_requirements" },
-        }),
-      ]);
-      console.log(`[stl-match] Parallel DB+Claude done in ${Date.now() - parallelStart}ms, ${allSuppliers.length} suppliers`);
+      const fetchStart = Date.now();
+      const allSuppliers = await fetchSuppliers();
+      console.log(`[stl-match] Fetched ${allSuppliers.length} suppliers in ${Date.now() - fetchStart}ms`);
 
       // Pre-filter suppliers by selected technology and/or material.
       // Empty values mean "any" — skip that filter.
@@ -181,36 +138,12 @@ Based on the part size, complexity, and material, what should we look for in a s
         console.log(`[stl-match] Area filter (${area}): ${beforeArea} → ${suppliersToScore.length} suppliers`);
       }
 
-      const toolBlock = analysisResponse.content.find((b: any) => b.type === "tool_use");
-      if (!toolBlock || toolBlock.type !== "tool_use") {
-        throw new Error("Claude did not return requirements extraction");
-      }
-
-      const extractedReqs = toolBlock.input as any;
-      const fallbackTechs = technology ? [technology] : [];
-      const fallbackMats = material ? [material] : [];
-      const summaryFallback =
-        technology && material
-          ? `${technology} part in ${material}`
-          : technology
-          ? `${technology} part`
-          : material
-          ? `Part in ${material}`
-          : "3D-printed part";
-      const requirements: ExtractedRequirements = {
-        requiredTechnologies: extractedReqs.requiredTechnologies || fallbackTechs,
-        requiredMaterials: extractedReqs.requiredMaterials || fallbackMats,
-        preferredRegions: extractedReqs.preferredRegions || (preferredRegion ? [preferredRegion] : []),
-        requiredCertifications: extractedReqs.requiredCertifications || [],
-        isProductionRun: extractedReqs.isProductionRun || (quantity ? quantity >= 100 : false),
-        requiresMetal: extractedReqs.requiresMetal || false,
-        requiresHighPrecision: extractedReqs.requiresHighPrecision || false,
-        requiresFlexibility: extractedReqs.requiresFlexibility || false,
-        industry: "",
-        mechanicalNeeds: [],
-        surfaceRequirement: "",
-        projectSummary: extractedReqs.projectSummary || summaryFallback,
-      };
+      const requirements: ExtractedRequirements = extractRequirementsFromStl(stlMetrics, {
+        technology: technology || undefined,
+        material: material || undefined,
+        quantity,
+        preferredRegion,
+      });
 
       // Score every pre-filtered supplier — return the full ranked list.
       // Cheapest-first ordering happens client-side once live / estimated
