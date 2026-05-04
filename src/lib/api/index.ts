@@ -53,6 +53,7 @@ export async function fetchLiveQuotes(
   if (settled[0].status === 'fulfilled') {
     results.push({ supplier: 'Craftcloud', source: 'craftcloud', quotes: settled[0].value });
   } else {
+    console.error('[live-pricing] Craftcloud failed:', settled[0].reason);
     results.push({ supplier: 'Craftcloud', source: 'craftcloud', quotes: [], error: settled[0].reason?.message });
   }
 
@@ -61,6 +62,7 @@ export async function fetchLiveQuotes(
     if (settled[1].status === 'fulfilled') {
       results.push({ supplier: 'Treatstock', source: 'treatstock', quotes: settled[1].value });
     } else {
+      console.error('[live-pricing] Treatstock failed:', settled[1].reason);
       results.push({ supplier: 'Treatstock', source: 'treatstock', quotes: [], error: settled[1].reason?.message });
     }
   }

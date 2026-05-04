@@ -196,6 +196,9 @@ async function getPriceResults(
   // Return partial results after timeout
   if (signal?.aborted) throw new DOMException('Aborted', 'AbortError');
   const response = await fetch(`${CRAFTCLOUD_BASE_URL}/v5/price/${priceId}`, { signal });
+  if (!response.ok) {
+    throw new Error(`Craftcloud price poll failed: ${response.status}`);
+  }
   return response.json();
 }
 

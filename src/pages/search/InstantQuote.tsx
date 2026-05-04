@@ -15,6 +15,7 @@ import {
   Clock,
   ExternalLink,
   Globe,
+  AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -524,7 +525,7 @@ function MatchResultView({
   parsedMetrics: STLResult | null;
 }) {
   const navigate = useNavigate();
-  const { getQuotes, liveQuotes: liveQuotesNow, isLoading: liveLoading } = useLiveQuotes({
+  const { getQuotes, liveQuotes: liveQuotesNow, isLoading: liveLoading, hasErrors: liveHasErrors, results: liveResults } = useLiveQuotes({
     currency: 'EUR',
     countryCode: 'DK',
     technology,
@@ -1024,6 +1025,17 @@ function MatchResultView({
                 <div className="flex items-center gap-2 rounded-lg border border-border/60 bg-card/30 px-3 py-2 text-xs text-muted-foreground">
                   <Loader2 className="h-3 w-3 animate-spin" />
                   Fetching live prices from 90+ vendors…
+                </div>
+              )}
+              {!liveLoading && liveQuotes.length === 0 && liveHasErrors && (
+                <div className="flex items-start gap-2 rounded-lg border border-amber-500/30 bg-amber-500/5 px-3 py-2 text-xs text-amber-200/90">
+                  <AlertCircle className="h-3.5 w-3.5 shrink-0 mt-0.5" />
+                  <div>
+                    Live pricing is temporarily unavailable. Showing estimated prices only.
+                    {liveResults.filter((r) => r.error).map((r) => (
+                      <div key={r.supplier} className="mt-0.5 opacity-70">{r.supplier}: {r.error}</div>
+                    ))}
+                  </div>
                 </div>
               )}
               <ErrorBoundary
