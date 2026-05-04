@@ -17,6 +17,7 @@ const CRAFTCLOUD_MARKETPLACE_URL = 'https://craftcloud3d.com';
 interface VendorInfo {
   website?: string;
   area?: string;
+  supplierId?: string;
 }
 
 let vendorInfoCache: Promise<Map<string, VendorInfo>> | null = null;
@@ -28,17 +29,18 @@ function loadCraftcloudVendorInfo(): Promise<Map<string, VendorInfo>> {
     try {
       const { data, error } = await supabase
         .from('suppliers')
-        .select('website, metadata')
+        .select('supplier_id, website, metadata')
         .not('metadata->>craftcloud_vendor_id', 'is', null);
       if (error) throw error;
       for (const row of data ?? []) {
+        const supplierId = (row as { supplier_id: string | null }).supplier_id ?? undefined;
         const rawWebsite = (row as { website: string | null }).website;
         const website = rawWebsite && rawWebsite !== CRAFTCLOUD_MARKETPLACE_URL ? rawWebsite : undefined;
         const meta = ((row as { metadata: Record<string, unknown> | null }).metadata ?? {}) as Record<string, unknown>;
         const vid = typeof meta.craftcloud_vendor_id === 'string' ? meta.craftcloud_vendor_id : null;
         const vidAlt = typeof meta.craftcloud_vendor_id_alt === 'string' ? meta.craftcloud_vendor_id_alt : null;
         const area = typeof meta.area === 'string' ? meta.area : undefined;
-        const info: VendorInfo = { website, area };
+        const info: VendorInfo = { website, area, supplierId };
         if (vid) map.set(vid, info);
         if (vidAlt) map.set(vidAlt, info);
       }
@@ -232,7 +234,11 @@ function toQuotes(
 
     return {
       type: 'live' as const,
-      supplierId: `craftcloud-${q.vendorId}`,
+      // When the Craftcloud vendor maps to a SupplyCheck supplier row, use that
+      // UUID so the equality check in resolvePriceInfo (q.supplierId === id)
+      // wins immediately. Falls back to the synthetic id for unmapped vendors,
+      // which the name-match path can still resolve.
+      supplierId: info?.supplierId ?? `craftcloud-${q.vendorId}`,
       supplierName: name,
       supplierLogo: getLocalLogoForSupplier(name),
       material: classified.material,
