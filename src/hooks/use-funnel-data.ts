@@ -37,7 +37,7 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
   const toIso = range.to.toISOString();
   const countHead = { count: 'exact' as const, head: true };
 
-  const [ga4Res, quoteRes, newsletterRes] = await Promise.all([
+  const [ga4Res, quoteRes, newsletterRes, uploadRes] = await Promise.all([
     supabase.functions.invoke('ga4-analytics', {
       body: { dateRange: { startDate, endDate } },
     }),
@@ -51,13 +51,18 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
       .select('*', countHead)
       .gte('created_at', fromIso)
       .lte('created_at', toIso),
+    supabase
+      .from('upload_events')
+      .select('*', countHead)
+      .gte('created_at', fromIso)
+      .lte('created_at', toIso),
   ]);
 
   const funnel = ga4Res.data?.funnelData;
   const ga4Available = !ga4Res.error && !!funnel;
 
   const visits = funnel?.landingViews ?? 0;
-  const filesUploaded = funnel?.filesUploaded ?? 0;
+  const filesUploaded = uploadRes.count ?? 0;
   const supplierViews = funnel?.supplierViews ?? 0;
   const affiliateClicks = funnel?.conversions ?? 0;
   const quoteRequests = quoteRes.count ?? 0;

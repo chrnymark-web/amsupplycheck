@@ -1253,6 +1253,42 @@ export type Database = {
           },
         ]
       }
+      upload_events: {
+        Row: {
+          created_at: string
+          file_extension: string | null
+          file_name: string | null
+          file_size_bytes: number
+          id: string
+          session_id: string | null
+          source_page: string
+          storage_path: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          file_extension?: string | null
+          file_name?: string | null
+          file_size_bytes: number
+          id?: string
+          session_id?: string | null
+          source_page: string
+          storage_path?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          file_extension?: string | null
+          file_name?: string | null
+          file_size_bytes?: number
+          id?: string
+          session_id?: string | null
+          source_page?: string
+          storage_path?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string | null

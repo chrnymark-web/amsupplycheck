@@ -14,6 +14,7 @@ import SupplierLogo from "@/components/ui/supplier-logo";
 import type { MatchResult } from "@/hooks/use-supplier-matching";
 import { useTechnologyToMaterials } from "@/hooks/use-compatibility-matrix";
 import { trackEvent } from "@/lib/analytics";
+import { supabase } from "@/integrations/supabase/client";
 
 const REGIONS = [
   { value: "", label: "No preference" },
@@ -117,6 +118,13 @@ export default function STLMatch() {
       file_size_bytes: f.size,
       file_extension: "stl",
       page: "stl_match",
+    });
+    void supabase.from("upload_events").insert({
+      file_name: f.name,
+      file_size_bytes: f.size,
+      file_extension: "stl",
+      source_page: "stl_match",
+      user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
     });
     setFile(f);
   }, []);
