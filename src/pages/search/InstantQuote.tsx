@@ -638,22 +638,34 @@ function MatchResultView({
     [safeMatches]
   );
 
-  // Cap the heavy pricing/sorting work to the top-N matches by backend score.
-  // resolvePriceInfo runs an O(matches × liveQuotes) name-matcher with token
-  // splitting and stop-word filtering — running it across all 326 matches on
-  // every live-quote partial pinned the main thread in foreground tabs. The
-  // backend already returns matches in score order, so the first PRICED_TOP_N
-  // are exactly the ones the user is most likely to scroll to via "Vis flere".
-  // Matches beyond the cap render unpriced, which is a fair UX trade for
-  // unfreezing the page.
+  // Cap the heavy pricing/sorting work to the top-N matches by backend score,
+  // PLUS any beyond-top-N matches that have a live quote (those hit the fast
+  // direct-ID path in resolvePriceInfo, so the extra cost is negligible — a
+  // mapped Craftcloud vendor ranked 200th would otherwise render unpriced and
+  // bury an actual live price below the fold).
   const PRICED_TOP_N = 100;
+  const liveSupplierIds = useMemo(
+    () => new Set(liveQuotes.map((q) => q.supplierId)),
+    [liveQuotes]
+  );
   const pricedSubset = useMemo(
-    () => timed('pricedSubset', () => safeMatches.slice(0, PRICED_TOP_N)),
-    [safeMatches]
+    () => timed('pricedSubset', () => {
+      const top = safeMatches.slice(0, PRICED_TOP_N);
+      if (liveSupplierIds.size === 0) return top;
+      const inTop = new Set(top.map((m: any) => m.supplier.supplier_id));
+      const extras = safeMatches
+        .slice(PRICED_TOP_N)
+        .filter((m: any) => liveSupplierIds.has(m.supplier.supplier_id) && !inTop.has(m.supplier.supplier_id));
+      return extras.length > 0 ? [...top, ...extras] : top;
+    }),
+    [safeMatches, liveSupplierIds]
   );
   const unpricedTail = useMemo(
-    () => timed('unpricedTail', () => safeMatches.slice(PRICED_TOP_N)),
-    [safeMatches]
+    () => timed('unpricedTail', () => {
+      if (liveSupplierIds.size === 0) return safeMatches.slice(PRICED_TOP_N);
+      return safeMatches.slice(PRICED_TOP_N).filter((m: any) => !liveSupplierIds.has(m.supplier.supplier_id));
+    }),
+    [safeMatches, liveSupplierIds]
   );
 
   const estimatedPrices = useMemo(
