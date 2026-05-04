@@ -40,7 +40,7 @@ import {
 import { supabase } from '@/integrations/supabase/client';
 import ErrorBoundary from '@/components/ErrorBoundary';
 import logo from '@/assets/amsupplycheck-logo-white.png';
-import { trace, endTrace, timed, readLastDiagnostics, PERF_STORAGE_KEY } from '@/lib/perf-trace';
+import { trace, endTrace, extendTraceWindow, timed, readLastDiagnostics, PERF_STORAGE_KEY } from '@/lib/perf-trace';
 import { isHidden, onVisible } from '@/lib/visibility';
 
 const STLViewer = lazy(() => import('@/components/stl-viewer/STLViewer'));
@@ -1165,8 +1165,10 @@ function MatchResultView({
 }
 
 // Fires once when cards first commit. Waits for the next animation frame so
-// the perf mark lands AFTER paint, not just after React's commit phase. Ends
-// the trace and triggers the console.table dump on the user's machine.
+// the perf mark lands AFTER paint, not just after React's commit phase. Keeps
+// the trace running 60s past cards-painted so the freeze watchdog catches any
+// post-render stall — the previous endTrace-at-paint version was blind to the
+// symptom users actually hit.
 function CardsPaintedMark({ count }: { count: number }) {
   const firedRef = useRef(false);
   useEffect(() => {
@@ -1174,7 +1176,7 @@ function CardsPaintedMark({ count }: { count: number }) {
     firedRef.current = true;
     const raf = requestAnimationFrame(() => {
       trace('trigger:cards-painted');
-      endTrace();
+      extendTraceWindow(60_000);
     });
     return () => cancelAnimationFrame(raf);
   }, [count]);

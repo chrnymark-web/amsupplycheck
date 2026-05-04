@@ -159,6 +159,15 @@ export function timed<T>(label: string, fn: () => T): T {
   return r;
 }
 
+// Defers endTrace() by `ms` so the freeze watchdog and longtask observer keep
+// running through the post-render window. The original endTrace() at
+// cards-painted blinded us to any freeze that hits AFTER the suppliers + prices
+// are visible — exactly the symptom users report.
+export function extendTraceWindow(ms: number) {
+  if (!session) return;
+  setTimeout(() => endTrace('post-render-window-elapsed'), ms);
+}
+
 export function endTrace(finalMark?: string) {
   if (!session) return;
   if (finalMark) trace(finalMark);
