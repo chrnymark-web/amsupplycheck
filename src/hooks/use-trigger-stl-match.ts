@@ -207,7 +207,9 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
         if (dbStatus === "failed") {
           cancelPollingRef.current = true;
           setStatus("failed");
-          setError(data.error_message || "Search failed");
+          const raw = data.error_message || "";
+          const looksLikeApiJson = /^\d{3}\s*\{/.test(raw);
+          setError(looksLikeApiJson ? "Søgningen fejlede. Prøv igen." : (raw || "Søgningen fejlede"));
           endTrace('trigger:failed');
           return;
         }

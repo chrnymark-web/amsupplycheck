@@ -9,6 +9,7 @@ import { fetchSuppliers, updateSearchStatus, saveSearchResults } from "./lib/sup
 import { scoreSuppliers, fuzzyMatch } from "./lib/scoring.js";
 import { generateExplanations } from "./lib/claude-client.js";
 import { getAreaForCountry } from "./lib/area.js";
+import { mapTaskErrorToUserMessage } from "./lib/sanitize-error.js";
 import Anthropic from "@anthropic-ai/sdk";
 import type { EnrichedSupplier, ExtractedRequirements, MatchResult } from "./lib/types.js";
 
@@ -260,11 +261,10 @@ Based on the part size, complexity, and material, what should we look for in a s
         technologyRationale: null,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error(`[stl-match] Failed:`, error);
 
       await saveSearchResults(searchResultId, {
-        error_message: errorMessage,
+        error_message: mapTaskErrorToUserMessage(error),
         duration_ms: Date.now() - startTime,
       });
 

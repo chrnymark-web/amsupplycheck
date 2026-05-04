@@ -48,7 +48,9 @@ export function useTriggerSupplierMatch(): TriggerSupplierMatchReturn {
     },
     onError: (run) => {
       setStatus("failed");
-      setError(run.error?.message || "Task failed");
+      const raw = run.error?.message || "";
+      const looksLikeApiJson = /^\d{3}\s*\{/.test(raw);
+      setError(looksLikeApiJson ? "Søgningen fejlede. Prøv igen." : (raw || "Task failed"));
     },
   });
 
@@ -104,7 +106,9 @@ export function useTriggerSupplierMatch(): TriggerSupplierMatchReturn {
 
           if (dbStatus === "failed") {
             setStatus("failed");
-            setError(data.error_message || "Search failed");
+            const raw = data.error_message || "";
+            const looksLikeApiJson = /^\d{3}\s*\{/.test(raw);
+            setError(looksLikeApiJson ? "Søgningen fejlede. Prøv igen." : (raw || "Søgningen fejlede"));
             return;
           }
 

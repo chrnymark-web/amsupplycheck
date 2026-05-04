@@ -6,6 +6,7 @@ import { z } from "zod";
 import { fetchSuppliers, updateSearchStatus, saveSearchResults } from "./lib/supplier-fetcher.js";
 import { scoreSuppliers, buildRecommendedTechnologies, buildRecommendedCertifications } from "./lib/scoring.js";
 import { analyzeRequirements, generateExplanations, generateTechnologyRationale } from "./lib/claude-client.js";
+import { mapTaskErrorToUserMessage } from "./lib/sanitize-error.js";
 import type { SupplierMatchOutput } from "./lib/types.js";
 
 export const supplierMatch = schemaTask({
@@ -101,11 +102,10 @@ export const supplierMatch = schemaTask({
       console.log(`[supplier-match] Completed in ${durationMs}ms with ${matches.length} matches`);
       return output;
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
       console.error(`[supplier-match] Failed:`, error);
 
       await saveSearchResults(searchResultId, {
-        error_message: errorMessage,
+        error_message: mapTaskErrorToUserMessage(error),
         duration_ms: Date.now() - startTime,
       });
 
