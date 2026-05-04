@@ -36,7 +36,6 @@ import {
   resolvePriceInfo,
   sortMatchesByPrice,
   type SupplierPriceInfo,
-  type PriceInfoCache,
 } from '@/lib/supplier-price-matcher';
 import { supabase } from '@/integrations/supabase/client';
 import ErrorBoundary from '@/components/ErrorBoundary';
@@ -687,22 +686,10 @@ function MatchResultView({
     [pricedSubset, technology, material, quantity, geometry]
   );
 
-  // Cache the prior priceInfo result + the liveQuotes it was computed against,
-  // so the next call can diff vendor-by-vendor and skip name-matching for
-  // matches whose outcome cannot have changed. Worst case (first call, or
-  // pricedSubset reset) falls back to the slow path, so this is purely a
-  // speedup.
-  const priceInfoCacheRef = useRef<PriceInfoCache | null>(null);
   const priceInfo = useMemo(
     () =>
       timed('priceInfo', () => {
-        const result = resolvePriceInfo(
-          pricedSubset,
-          liveQuotes,
-          estimatedPrices,
-          priceInfoCacheRef.current
-        );
-        priceInfoCacheRef.current = { result, liveQuotes };
+        const result = resolvePriceInfo(pricedSubset, liveQuotes, estimatedPrices);
         if (import.meta.env.DEV || (typeof window !== 'undefined' && window.location.search.includes('debug=1'))) {
           const rawVendors = new Set(liveQuotes.map((q) => q.supplierId)).size;
           let matchedInTopN = 0;
