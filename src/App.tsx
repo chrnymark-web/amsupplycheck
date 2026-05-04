@@ -1,4 +1,4 @@
-import { Suspense, lazy, ReactNode } from "react";
+import { Suspense, lazy, ReactNode, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "react-router-dom";
 import { SupplierChatbot } from "./components/chat/SupplierChatbot";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { supabase } from "@/integrations/supabase/client";
 
 // Lazy load pages - core
 const Index = lazy(() => import("./pages/core/Index"));
@@ -67,13 +68,89 @@ const SupplierRedirect = () => {
   return <Navigate to={`/suppliers/${id}`} replace />;
 };
 
-// Wrapper that adds noindex to admin pages
-const AdminPage = ({ children }: { children: ReactNode }) => (
-  <>
-    <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>
-    {children}
-  </>
-);
+// Wrapper that gates admin pages: requires a Supabase session AND user_roles.role === 'admin'.
+// Also adds noindex meta. Non-admins see an access-denied screen; unauthed users redirect to /auth.
+type AdminAuthState = "checking" | "unauthed" | "non-admin" | "admin";
+
+const AdminPage = ({ children }: { children: ReactNode }) => {
+  const location = useLocation();
+  const [state, setState] = useState<AdminAuthState>("checking");
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const check = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (cancelled) return;
+      if (!session) {
+        setState("unauthed");
+        return;
+      }
+      const { data: roleRow } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", session.user.id)
+        .maybeSingle();
+      if (cancelled) return;
+      setState(roleRow?.role === "admin" ? "admin" : "non-admin");
+    };
+
+    check();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        setState("unauthed");
+      } else {
+        setState("checking");
+        check();
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const head = <Helmet><meta name="robots" content="noindex, nofollow" /></Helmet>;
+
+  if (state === "checking") {
+    return (
+      <>
+        {head}
+        <div className="min-h-screen flex items-center justify-center text-sm text-muted-foreground">
+          Checking access…
+        </div>
+      </>
+    );
+  }
+
+  if (state === "unauthed") {
+    const redirect = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/auth?redirect=${redirect}`} replace />;
+  }
+
+  if (state === "non-admin") {
+    return (
+      <>
+        {head}
+        <div className="min-h-screen flex flex-col items-center justify-center gap-3 p-6 text-center">
+          <h1 className="text-xl font-semibold">Access denied</h1>
+          <p className="text-sm text-muted-foreground max-w-sm">
+            Your account does not have admin access. Contact the site owner if you think this is a mistake.
+          </p>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      {head}
+      {children}
+    </>
+  );
+};
 
 // Configure React Query for optimal caching
 const queryClient = new QueryClient({
