@@ -691,6 +691,19 @@ function MatchResultView({
           priceInfoCacheRef.current
         );
         priceInfoCacheRef.current = { result, liveQuotes };
+        if (import.meta.env.DEV || (typeof window !== 'undefined' && window.location.search.includes('debug=1'))) {
+          const rawVendors = new Set(liveQuotes.map((q) => q.supplierId)).size;
+          let matchedInTopN = 0;
+          for (const v of result.values()) if (v.kind === 'live') matchedInTopN++;
+          console.log('[stl-match yield]', JSON.stringify({
+            rawQuotes: liveQuotes.length,
+            rawVendors,
+            topN: PRICED_TOP_N,
+            pricedSubset: pricedSubset.length,
+            matchedInTopN,
+            totalMatches: safeMatches.length,
+          }));
+        }
         return result;
       }),
     [pricedSubset, liveQuotes, estimatedPrices]
