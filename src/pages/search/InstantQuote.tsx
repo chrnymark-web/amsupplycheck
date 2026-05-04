@@ -14,7 +14,6 @@ import {
   Package,
   Clock,
   ExternalLink,
-  Globe,
   AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -739,8 +738,8 @@ function MatchResultView({
   // the heavier card renders stagger in over five tiny commits instead of
   // landing in one big chunk. Like Momondo: top results first, the rest stream in.
   const [visibleCount, setVisibleCount] = useState(3);
-  useEffect(() => setVisibleCount(20), [debouncedFilters]);
-  // First-mount stagger: only runs once. Filter changes reset to 20 above,
+  useEffect(() => setVisibleCount(100), [debouncedFilters]);
+  // First-mount stagger: only runs once. Filter changes reset to 100 above,
   // not 3, so users who scroll-then-filter don't lose context.
   useEffect(() => {
     type RIC = (cb: () => void) => number;
@@ -751,10 +750,10 @@ function MatchResultView({
     const cic: CIC =
       (window as unknown as { cancelIdleCallback?: CIC }).cancelIdleCallback ??
       ((h) => window.clearTimeout(h));
-    const t1 = ric(() => setVisibleCount((c) => Math.max(c, 6)));
-    const t2 = ric(() => setVisibleCount((c) => Math.max(c, 10)));
-    const t3 = ric(() => setVisibleCount((c) => Math.max(c, 15)));
-    const t4 = ric(() => setVisibleCount((c) => Math.max(c, 20)));
+    const t1 = ric(() => setVisibleCount((c) => Math.max(c, 10)));
+    const t2 = ric(() => setVisibleCount((c) => Math.max(c, 25)));
+    const t3 = ric(() => setVisibleCount((c) => Math.max(c, 50)));
+    const t4 = ric(() => setVisibleCount((c) => Math.max(c, 100)));
     return () => {
       cic(t1);
       cic(t2);
@@ -763,27 +762,45 @@ function MatchResultView({
     };
   }, []);
 
-  // Map gate: opt-in by default. Mapbox WebGL init + marker creation is the
-  // single biggest CPU spike on this page (Page-Unresponsive on large STLs).
-  // We only mount the map when the user explicitly clicks "Show map", OR if
-  // sessionStorage shows they've already opted in this session (so they don't
-  // have to click again on every fresh quote within the same tab).
-  const MAP_OPT_IN_KEY = 'supplycheck:map-opted-in';
+  // Map markers stagger independently of cards. Cards are cheap React mounts;
+  // markers are not — each one is DOM + innerHTML + popup wiring + image fetch.
+  // map.tsx caps marker creation at 1 per idle tick (batching higher landed
+  // 100ms+ longtasks per the comment there). Pumping 100 markers at once
+  // would queue 100 ticks (~1.6s wall-clock) and starve the marker loop while
+  // user might be filtering/scrolling. Instead we grow the marker set in the
+  // same staggered pattern as cards.
+  const [mapVisibleCount, setMapVisibleCount] = useState(10);
+  useEffect(() => setMapVisibleCount(10), [debouncedFilters]);
   useEffect(() => {
-    if (mapEnabled) return;
-    if (visibleCount < 20) return;
-    let optedIn = false;
-    try {
-      optedIn = window.sessionStorage.getItem(MAP_OPT_IN_KEY) === 'true';
-    } catch {
-      // sessionStorage can throw in private/locked-down browsers; just stay opt-in.
-    }
-    if (!optedIn) return;
+    type RIC = (cb: () => void) => number;
+    type CIC = (handle: number) => void;
+    const ric: RIC =
+      (window as unknown as { requestIdleCallback?: RIC }).requestIdleCallback ??
+      ((cb) => window.setTimeout(cb, 80) as unknown as number);
+    const cic: CIC =
+      (window as unknown as { cancelIdleCallback?: CIC }).cancelIdleCallback ??
+      ((h) => window.clearTimeout(h));
+    const t1 = ric(() => setMapVisibleCount((c) => Math.max(c, 25)));
+    const t2 = ric(() => setMapVisibleCount((c) => Math.max(c, 50)));
+    const t3 = ric(() => setMapVisibleCount((c) => Math.max(c, 100)));
+    return () => {
+      cic(t1);
+      cic(t2);
+      cic(t3);
+    };
+  }, []);
+
+  // Map flips on automatically on the first idle tick after `quotesEnabled`.
+  // Cards still get paint-priority for one frame (the idle gap is ~16-100ms),
+  // then Mapbox.GL gets the next idle slot for its WebGL context init
+  // (~80-150ms). Tab-hidden guard defers init until the user returns, since
+  // Chrome's memory-saver can kill backgrounded WebGL contexts.
+  useEffect(() => {
+    if (!quotesEnabled || mapEnabled) return;
 
     let visUnsub: (() => void) | null = null;
     let ricHandle: number | null = null;
     let toHandle: number | null = null;
-    let fallbackHandle: number | null = null;
 
     const commit = () => {
       if (isHidden()) {
@@ -801,39 +818,17 @@ function MatchResultView({
     const ric = (window as unknown as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
     const cic = (window as unknown as { cancelIdleCallback?: (handle: number) => void }).cancelIdleCallback;
     if (typeof ric === 'function') {
-      ricHandle = ric(commit, { timeout: 1500 });
+      ricHandle = ric(commit, { timeout: 300 });
     } else {
-      toHandle = window.setTimeout(commit, 200);
+      toHandle = window.setTimeout(commit, 100);
     }
-    fallbackHandle = window.setTimeout(() => {
-      if (!mapEnabled) commit();
-    }, 1500);
 
     return () => {
       if (ricHandle != null) cic?.(ricHandle);
       if (toHandle != null) window.clearTimeout(toHandle);
-      if (fallbackHandle != null) window.clearTimeout(fallbackHandle);
       visUnsub?.();
     };
-  }, [visibleCount, mapEnabled]);
-
-  const handleShowMap = useCallback(() => {
-    try {
-      window.sessionStorage.setItem(MAP_OPT_IN_KEY, 'true');
-    } catch {
-      // ignore — flag-set is a nicety, not load-bearing
-    }
-    if (isHidden()) {
-      trace('trigger:map-blocked-hidden');
-      onVisible(() => {
-        trace('trigger:map-resumed');
-        setMapEnabled(true);
-      });
-      return;
-    }
-    trace('trigger:map-enabled');
-    setMapEnabled(true);
-  }, []);
+  }, [quotesEnabled, mapEnabled]);
 
   const visibleMatches = useMemo(() => {
     return timed('visibleMatches', () => {
@@ -918,18 +913,18 @@ function MatchResultView({
     };
   }, [safeMatches]);
 
-  // Markers track the cards the user can actually see, not the full filtered
-  // set. With visibleCount staggering 3→6→10→15→20, marker creation grows in
-  // lockstep with cards instead of dumping 100+ markers at once when the map
-  // mounts. This is the single biggest reduction in main-thread work for the
-  // page-unresponsive freeze.
+  // Markers track `mapVisibleCount`, NOT `visibleCount`. Cards stagger to 100
+  // quickly (5 idle ticks) but markers stagger more conservatively because
+  // marker creation in map.tsx is capped at 1 per idle tick (raising that cap
+  // landed >100ms longtasks per the comment there). Decoupling lets the list
+  // fill in fast while markers pump in over a couple of seconds.
   const mapSuppliers = useMemo(
     () =>
       timed(
         'mapSuppliers',
         () =>
           visibleMatches
-            .slice(0, visibleCount)
+            .slice(0, mapVisibleCount)
             .map((m: any) => {
               const lat = m.supplier.location_lat ?? geoById.get(m.supplier.supplier_id)?.lat;
               const lng = m.supplier.location_lng ?? geoById.get(m.supplier.supplier_id)?.lng;
@@ -956,7 +951,7 @@ function MatchResultView({
             })
             .filter(Boolean) as Array<any>
       ),
-    [visibleMatches, visibleCount, geoById]
+    [visibleMatches, mapVisibleCount, geoById]
   );
 
   // Group the paginated slice by pricing tier so the list can render with
@@ -1141,19 +1136,10 @@ function MatchResultView({
                     showControls
                   />
                 ) : (
-                  <div className="h-full min-h-[400px] rounded-xl border border-border/60 bg-card/30 flex flex-col items-center justify-center gap-4 p-6 text-center">
-                    <Globe className="h-10 w-10 text-muted-foreground/60" strokeWidth={1.5} />
-                    <div className="space-y-1.5">
-                      <p className="text-sm font-medium">View suppliers on world map</p>
-                      <p className="text-xs text-muted-foreground">
-                        Loads {mapSuppliers.length} location{mapSuppliers.length === 1 ? '' : 's'}
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm" onClick={handleShowMap}>
-                      <Globe className="h-3.5 w-3.5 mr-1.5" />
-                      Show map
-                    </Button>
-                  </div>
+                  <div
+                    className="h-full min-h-[400px] rounded-xl border border-border/60 bg-card/30 animate-pulse"
+                    aria-label="Loading map"
+                  />
                 )}
               </ErrorBoundary>
             </aside>
