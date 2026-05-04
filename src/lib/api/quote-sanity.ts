@@ -49,30 +49,25 @@ function median(values: number[]): number {
 
 type PeerResult = { flag: 'ok' | 'suspect-low' | 'suspect-high'; reason: string } | null;
 
-function checkPeerOutlier(unitPrice: number, allPrices: number[]): PeerResult {
-  if (allPrices.length < 3) return null; // insufficient data
+// Median is hoisted into runSanityChecks and passed in: leave-one-out doesn't
+// move the median enough to matter at the 0.25× / 4× thresholds we flag at,
+// and computing it per-quote turned this into O(N³) — for a 20mm cube
+// Craftcloud returns ~8874 quotes, which pinned the main thread for 10+ seconds
+// post-stream. Now it's O(N) per call.
+function checkPeerOutlier(unitPrice: number, peerCount: number, peerMedian: number): PeerResult {
+  if (peerCount < 3) return null;
+  if (peerMedian <= 0) return null;
 
-  // Exclude the current quote's price to avoid self-influence on the median
-  const peerPrices = allPrices.filter((_, i) => {
-    // Remove the first occurrence that matches unitPrice
-    const idx = allPrices.indexOf(unitPrice);
-    return i !== idx;
-  });
-  // If removing left us with too few peers, use all
-  const prices = peerPrices.length >= 2 ? peerPrices : allPrices;
-  const med = median(prices);
-  if (med <= 0) return null;
-
-  if (unitPrice < med * 0.25) {
+  if (unitPrice < peerMedian * 0.25) {
     return {
       flag: 'suspect-low',
-      reason: `Price is ${Math.round((unitPrice / med) * 100)}% of median (${med.toFixed(2)})`,
+      reason: `Price is ${Math.round((unitPrice / peerMedian) * 100)}% of median (${peerMedian.toFixed(2)})`,
     };
   }
-  if (unitPrice > med * 4.0) {
+  if (unitPrice > peerMedian * 4.0) {
     return {
       flag: 'suspect-high',
-      reason: `Price is ${Math.round((unitPrice / med) * 100)}% of median (${med.toFixed(2)})`,
+      reason: `Price is ${Math.round((unitPrice / peerMedian) * 100)}% of median (${peerMedian.toFixed(2)})`,
     };
   }
   return { flag: 'ok', reason: '' };
@@ -230,9 +225,11 @@ export function runSanityChecks(
   if (quotes.length === 0) return;
 
   const allPrices = quotes.map((q) => q.unitPrice);
+  const peerMedian = median(allPrices);
+  const peerCount = allPrices.length;
 
   for (const quote of quotes) {
-    const peer = checkPeerOutlier(quote.unitPrice, allPrices);
+    const peer = checkPeerOutlier(quote.unitPrice, peerCount, peerMedian);
     const estimate = geometry
       ? checkAgainstEstimate(quote.unitPrice, quote.technology, quote.material, geometry)
       : null;

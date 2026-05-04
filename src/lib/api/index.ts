@@ -32,37 +32,12 @@ export async function fetchLiveQuotes(
 ): Promise<{ quotes: LiveQuote[]; results: QuoteResult[] }> {
   const results: QuoteResult[] = [];
 
-  // Rate-limit partials so we don't fire 100+ React cascades over the streaming
-  // window. Each Craftcloud vendor response triggers a partial; without this
-  // throttle the cumulative cascade work + DOM-mutation pressure pinned the
-  // main thread for 10+ seconds in user traces (no individual task >50ms, but
-  // constant small-task saturation that the longtask observer couldn't see).
-  // Trailing-edge timer guarantees the last partial always lands.
-  const PARTIAL_FLUSH_INTERVAL_MS = 1500;
-  let lastFlushAt = 0;
-  let pendingTimer: ReturnType<typeof setTimeout> | null = null;
-  let pendingSnapshot: LiveQuote[] | null = null;
-
-  const flushPartial = () => {
-    pendingTimer = null;
-    if (!pendingSnapshot || !onPartial) return;
-    const snapshot = pendingSnapshot;
-    pendingSnapshot = null;
-    lastFlushAt = performance.now();
-    runSanityChecks(snapshot, request.geometry);
-    onPartial([...snapshot].sort((a, b) => a.unitPrice - b.unitPrice));
-  };
-
   const partialHandler = onPartial
     ? (partial: LiveQuote[]) => {
-        pendingSnapshot = partial;
-        const elapsed = performance.now() - lastFlushAt;
-        if (elapsed >= PARTIAL_FLUSH_INTERVAL_MS) {
-          if (pendingTimer != null) { clearTimeout(pendingTimer); pendingTimer = null; }
-          flushPartial();
-        } else if (pendingTimer == null) {
-          pendingTimer = setTimeout(flushPartial, PARTIAL_FLUSH_INTERVAL_MS - elapsed);
-        }
+        // Run sanity checks on the partial set before emitting so the UI can
+        // dim suspect rows in-flight, matching the final-result behavior.
+        runSanityChecks(partial, request.geometry);
+        onPartial([...partial].sort((a, b) => a.unitPrice - b.unitPrice));
       }
     : undefined;
 
