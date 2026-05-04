@@ -5,21 +5,21 @@ import type { DateRange } from '@/components/admin/date-range-picker';
 
 export type FunnelData = {
   visits: number;
-  searches: number;
+  filesUploaded: number;
   supplierViews: number;
   affiliateClicks: number;
   quoteRequests: number;
   newsletterSignups: number;
   totalConversions: number;
   rates: {
-    visitToSearch: number;
-    searchToView: number;
+    visitToUpload: number;
+    uploadToView: number;
     viewToAnyConversion: number;
     overall: number;
   };
   dropOff: {
-    visitToSearch: number;
-    searchToView: number;
+    visitToUpload: number;
+    uploadToView: number;
     viewToConversion: number;
   };
   ga4Available: boolean;
@@ -57,7 +57,7 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
   const ga4Available = !ga4Res.error && !!funnel;
 
   const visits = funnel?.landingViews ?? 0;
-  const searches = funnel?.searches ?? 0;
+  const filesUploaded = funnel?.filesUploaded ?? 0;
   const supplierViews = funnel?.supplierViews ?? 0;
   const affiliateClicks = funnel?.conversions ?? 0;
   const quoteRequests = quoteRes.count ?? 0;
@@ -66,21 +66,21 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
 
   return {
     visits,
-    searches,
+    filesUploaded,
     supplierViews,
     affiliateClicks,
     quoteRequests,
     newsletterSignups,
     totalConversions,
     rates: {
-      visitToSearch: pct(searches, visits),
-      searchToView: pct(supplierViews, searches),
+      visitToUpload: pct(filesUploaded, visits),
+      uploadToView: pct(supplierViews, filesUploaded),
       viewToAnyConversion: pct(totalConversions, supplierViews),
       overall: pct(totalConversions, visits),
     },
     dropOff: {
-      visitToSearch: Math.max(visits - searches, 0),
-      searchToView: Math.max(searches - supplierViews, 0),
+      visitToUpload: Math.max(visits - filesUploaded, 0),
+      uploadToView: Math.max(filesUploaded - supplierViews, 0),
       viewToConversion: Math.max(supplierViews - totalConversions, 0),
     },
     ga4Available,

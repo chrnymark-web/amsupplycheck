@@ -1028,15 +1028,16 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
     console.log('📊 GA4 Events Data with source:', JSON.stringify(eventsDataWithSource, null, 2));
     
     // Initialize counters for each source
-    const sourceData: Record<string, { landingViews: number; selectItems: number; searches: number; supplierViews: number; conversions: number }> = {
-      search: { landingViews: 0, selectItems: 0, searches: 0, supplierViews: 0, conversions: 0 },
-      map: { landingViews: 0, selectItems: 0, searches: 0, supplierViews: 0, conversions: 0 },
-      direct: { landingViews: 0, selectItems: 0, searches: 0, supplierViews: 0, conversions: 0 },
+    const sourceData: Record<string, { landingViews: number; selectItems: number; searches: number; filesUploaded: number; supplierViews: number; conversions: number }> = {
+      search: { landingViews: 0, selectItems: 0, searches: 0, filesUploaded: 0, supplierViews: 0, conversions: 0 },
+      map: { landingViews: 0, selectItems: 0, searches: 0, filesUploaded: 0, supplierViews: 0, conversions: 0 },
+      direct: { landingViews: 0, selectItems: 0, searches: 0, filesUploaded: 0, supplierViews: 0, conversions: 0 },
     };
 
     let totalLandingViews = 0;
     let totalSelectItems = 0;
     let totalSearches = 0;
+    let totalFilesUploaded = 0;
     let totalSupplierViews = 0;
     let totalConversions = 0;
 
@@ -1050,9 +1051,9 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
       
       // Ensure we have a data structure for this source
       if (!sourceData[source]) {
-        sourceData[source] = { landingViews: 0, selectItems: 0, searches: 0, supplierViews: 0, conversions: 0 };
+        sourceData[source] = { landingViews: 0, selectItems: 0, searches: 0, filesUploaded: 0, supplierViews: 0, conversions: 0 };
       }
-      
+
       if (eventName === 'page_view' || eventName === 'session_start') {
         sourceData[source].landingViews += count;
         totalLandingViews += count;
@@ -1062,6 +1063,9 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
       } else if (eventName === 'search_page_view') {
         sourceData[source].searches += count;
         totalSearches += count;
+      } else if (eventName === 'file_uploaded') {
+        sourceData[source].filesUploaded += count;
+        totalFilesUploaded += count;
       } else if (eventName === 'supplier_pageview') {
         sourceData[source].supplierViews += count;
         totalSupplierViews += count;
@@ -1071,7 +1075,7 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
       }
     });
 
-    console.log('📊 Total funnel counts:', { totalLandingViews, totalSelectItems, totalSearches, totalSupplierViews, totalConversions });
+    console.log('📊 Total funnel counts:', { totalLandingViews, totalSelectItems, totalSearches, totalFilesUploaded, totalSupplierViews, totalConversions });
     console.log('📊 Funnel by source:', sourceData);
 
     // Calculate overall conversion rates
@@ -1119,6 +1123,7 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
       landingViews: totalLandingViews,
       selectItems: totalSelectItems,
       searches: totalSearches,
+      filesUploaded: totalFilesUploaded,
       supplierViews: totalSupplierViews,
       conversions: totalConversions,
       landingToSelectRate: parseFloat(landingToSelectRate),
@@ -1153,6 +1158,7 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
   let totalLandingViews = 0;
   let totalSelectItems = 0;
   let totalSearches = 0;
+  let totalFilesUploaded = 0;
   let totalSupplierViews = 0;
   let totalConversions = 0;
 
@@ -1160,15 +1166,17 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
   eventsData.rows?.forEach((row: any) => {
     const eventName = row.dimensionValues[0].value;
     const count = parseInt(row.metricValues[0].value);
-    
+
     console.log(`Event: ${eventName} = ${count}`);
-    
+
     if (eventName === 'page_view' || eventName === 'session_start') {
       totalLandingViews += count;
     } else if (eventName === 'select_item') {
       totalSelectItems += count;
     } else if (eventName === 'search_page_view') {
       totalSearches += count;
+    } else if (eventName === 'file_uploaded') {
+      totalFilesUploaded += count;
     } else if (eventName === 'supplier_pageview') {
       totalSupplierViews += count;
     } else if (eventName === 'affiliate_click') {
@@ -1176,7 +1184,7 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
     }
   });
 
-  console.log('📊 Total funnel counts:', { totalLandingViews, totalSelectItems, totalSearches, totalSupplierViews, totalConversions });
+  console.log('📊 Total funnel counts:', { totalLandingViews, totalSelectItems, totalSearches, totalFilesUploaded, totalSupplierViews, totalConversions });
 
   // Calculate overall conversion rates
   const landingToSelectRate = totalLandingViews > 0 ? ((totalSelectItems / totalLandingViews) * 100).toFixed(1) : '0';
@@ -1192,6 +1200,7 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
     landingViews: totalLandingViews,
     selectItems: totalSelectItems,
     searches: totalSearches,
+    filesUploaded: totalFilesUploaded,
     supplierViews: totalSupplierViews,
     conversions: totalConversions,
     landingToSelectRate: parseFloat(landingToSelectRate),
@@ -1229,19 +1238,22 @@ function processDailyTrends(dailyTrendData: any) {
         landingViews: 0,
         selectItems: 0,
         searches: 0,
+        filesUploaded: 0,
         supplierViews: 0,
         conversions: 0,
       });
     }
 
     const entry = dateMap.get(date);
-    
+
     if (eventName === 'page_view' || eventName === 'session_start') {
       entry.landingViews += count;
     } else if (eventName === 'select_item') {
       entry.selectItems += count;
     } else if (eventName === 'search_page_view') {
       entry.searches += count;
+    } else if (eventName === 'file_uploaded') {
+      entry.filesUploaded += count;
     } else if (eventName === 'supplier_pageview') {
       entry.supplierViews += count;
     } else if (eventName === 'affiliate_click') {
@@ -1256,6 +1268,7 @@ function processDailyTrends(dailyTrendData: any) {
       landingViews: day.landingViews,
       selectItems: day.selectItems,
       searches: day.searches,
+      filesUploaded: day.filesUploaded,
       supplierViews: day.supplierViews,
       conversions: day.conversions,
       landingToSelectRate: day.landingViews > 0 ? parseFloat(((day.selectItems / day.landingViews) * 100).toFixed(1)) : 0,

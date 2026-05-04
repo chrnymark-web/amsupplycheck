@@ -148,25 +148,25 @@ function FunnelSection({ funnel, loading, error }: {
             textColor="text-cyan-600"
             loading={loading}
           />
-          <FunnelArrow rate={funnel?.rates.visitToSearch} loading={loading} />
+          <FunnelArrow rate={funnel?.rates.visitToUpload} loading={loading} />
 
           <FunnelStageCard
-            label="Searches"
-            value={funnel?.searches ?? 0}
-            eventName="search_page_view"
-            dropOff={funnel?.dropOff.visitToSearch}
+            label="Files uploaded"
+            value={funnel?.filesUploaded ?? 0}
+            eventName="file_uploaded"
+            dropOff={funnel?.dropOff.visitToUpload}
             gradient="from-blue-500/20 to-blue-600/20"
             borderColor="border-blue-500"
             textColor="text-blue-600"
             loading={loading}
           />
-          <FunnelArrow rate={funnel?.rates.searchToView} loading={loading} />
+          <FunnelArrow rate={funnel?.rates.uploadToView} loading={loading} />
 
           <FunnelStageCard
             label="Supplier Views"
             value={funnel?.supplierViews ?? 0}
             eventName="supplier_pageview"
-            dropOff={funnel?.dropOff.searchToView}
+            dropOff={funnel?.dropOff.uploadToView}
             gradient="from-green-500/20 to-green-600/20"
             borderColor="border-green-500"
             textColor="text-green-600"

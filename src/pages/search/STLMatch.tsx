@@ -13,6 +13,7 @@ import { useTriggerSTLMatch } from "@/hooks/use-trigger-stl-match";
 import SupplierLogo from "@/components/ui/supplier-logo";
 import type { MatchResult } from "@/hooks/use-supplier-matching";
 import { useTechnologyToMaterials } from "@/hooks/use-compatibility-matrix";
+import { trackEvent } from "@/lib/analytics";
 
 const REGIONS = [
   { value: "", label: "No preference" },
@@ -112,6 +113,11 @@ export default function STLMatch() {
   const handleFile = useCallback((f: File) => {
     if (!f.name.toLowerCase().endsWith(".stl")) return;
     if (f.size > 100 * 1024 * 1024) return;
+    trackEvent("file_uploaded", {
+      file_size_bytes: f.size,
+      file_extension: "stl",
+      page: "stl_match",
+    });
     setFile(f);
   }, []);
 
