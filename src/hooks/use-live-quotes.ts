@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
 import { fetchLiveQuotes } from '@/lib/api';
 import type { QuoteRequest, LiveQuote, QuoteOption, QuoteResult, Currency, QuoteGeometry } from '@/lib/api/types';
 import { filterQuotesByTech } from '@/lib/materialTechClassifier';
@@ -144,7 +144,12 @@ export function useLiveQuotes(options: UseLiveQuotesOptions = {}) {
         const data = await fetchLiveQuotes(request, (partial) => {
           if (seq !== requestSeqRef.current) return;
           // Partial handler receives the growing raw set; filter+select before render.
-          setQuotes(selectBestPerVendor(partial, technology, material));
+          // Wrap in startTransition so the downstream resolvePriceInfo memo
+          // (O(matches × liveQuotes) name-matcher) doesn't block input — React
+          // can pause the render to handle scroll/click/keystrokes.
+          startTransition(() => {
+            setQuotes(selectBestPerVendor(partial, technology, material));
+          });
         });
 
         QUOTE_CACHE.set(key, {
@@ -155,8 +160,10 @@ export function useLiveQuotes(options: UseLiveQuotesOptions = {}) {
         trimCache();
 
         if (seq !== requestSeqRef.current) return;
-        setQuotes(selectBestPerVendor(data.quotes, technology, material));
-        setResults(data.results);
+        startTransition(() => {
+          setQuotes(selectBestPerVendor(data.quotes, technology, material));
+          setResults(data.results);
+        });
       } catch (err) {
         if (seq !== requestSeqRef.current) return;
         // AbortError fires when the wall-clock timeout cap trips. The partial
