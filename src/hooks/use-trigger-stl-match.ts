@@ -209,7 +209,7 @@ export function useTriggerSTLMatch(): TriggerSTLMatchReturn {
           setStatus("failed");
           const raw = data.error_message || "";
           const looksLikeApiJson = /^\d{3}\s*\{/.test(raw);
-          setError(looksLikeApiJson ? "Søgningen fejlede. Prøv igen." : (raw || "Søgningen fejlede"));
+          setError(looksLikeApiJson ? "Search failed. Please try again." : (raw || "Search failed"));
           endTrace('trigger:failed');
           return;
         }
