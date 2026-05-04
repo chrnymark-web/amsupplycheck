@@ -72,6 +72,39 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_name: string
+          id: string
+          page_path: string | null
+          props: Json
+          referrer: string | null
+          session_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_name: string
+          id?: string
+          page_path?: string | null
+          props?: Json
+          referrer?: string | null
+          session_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_name?: string
+          id?: string
+          page_path?: string | null
+          props?: Json
+          referrer?: string | null
+          session_id?: string
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       certifications: {
         Row: {
           created_at: string

@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route, Navigate, useParams, useLocation } from "
 import { SupplierChatbot } from "./components/chat/SupplierChatbot";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { supabase } from "@/integrations/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 // Lazy load pages - core
 const Index = lazy(() => import("./pages/core/Index"));
@@ -166,6 +167,14 @@ const queryClient = new QueryClient({
 
 const AppRoutes = () => {
   const location = useLocation();
+
+  useEffect(() => {
+    trackEvent("page_view", {
+      page_path: location.pathname,
+      page_search: location.search || "",
+    });
+  }, [location.pathname, location.search]);
+
   return (
     <ErrorBoundary key={location.pathname}>
       <Routes>

@@ -132,9 +132,9 @@ function FunnelSection({ funnel, loading, error }: {
           </div>
         ) : null}
 
-        {!error && funnel && !funnel.ga4Available && !loading && (
+        {!error && funnel && !funnel.hasTrafficData && !loading && (
           <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-400 mb-4">
-            GA4 traffic data unavailable — visits / search / supplier-views will show 0. Quote and newsletter counts come from Supabase and are accurate.
+            No traffic events recorded in the selected period — visits and supplier views will show 0. Tracking captures new events going forward only.
           </div>
         )}
 

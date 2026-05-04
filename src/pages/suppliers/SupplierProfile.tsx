@@ -1,7 +1,8 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useParams, Link, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { useSupplierDetail } from '@/hooks/use-suppliers';
+import { trackEvent } from '@/lib/analytics';
 import Navbar from '@/components/ui/navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -51,6 +52,15 @@ const SupplierProfile: React.FC = () => {
       return null;
     }
   }, [location.state, slug]);
+
+  useEffect(() => {
+    if (!supplier?.id) return;
+    trackEvent("supplier_pageview", {
+      supplier_id: supplier.id,
+      supplier_slug: slug || "",
+      supplier_name: supplier.name,
+    });
+  }, [supplier?.id, supplier?.name, slug]);
 
   if (isLoading) {
     return (

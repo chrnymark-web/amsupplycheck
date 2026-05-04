@@ -1,9 +1,43 @@
 // Google Analytics tracking via GTM dataLayer
 // This file provides a centralized way to track events across the application
-// All events are pushed to dataLayer and picked up by Google Tag Manager
+// All events are pushed to dataLayer and picked up by Google Tag Manager.
+// High-signal events are ALSO written to Supabase analytics_events for the
+// admin funnel — that table is the source of truth, GA4 is for marketing.
+import { supabase } from '@/integrations/supabase/client';
 
 // Enable debug mode to see detailed tracking information
 export const GA_DEBUG_MODE = localStorage.getItem('ga_debug') === 'true';
+
+// Events that are also persisted to Supabase analytics_events.
+// Keep this list tight — only events that drive the admin funnel and product analytics.
+const HIGH_SIGNAL_EVENTS = new Set<string>([
+  'page_view',
+  'supplier_pageview',
+  'outbound_click',
+  'search',
+  'cta_click',
+  'newsletter_signup_submit',
+  'quote_request_submit',
+  'select_item',
+]);
+
+const SESSION_ID_KEY = 'sc_analytics_session_id';
+
+function getSessionId(): string {
+  if (typeof window === 'undefined') return 'ssr';
+  try {
+    let id = sessionStorage.getItem(SESSION_ID_KEY);
+    if (!id) {
+      id = (window.crypto && 'randomUUID' in window.crypto)
+        ? window.crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+      sessionStorage.setItem(SESSION_ID_KEY, id);
+    }
+    return id;
+  } catch {
+    return 'no-storage';
+  }
+}
 
 declare global {
   interface Window {
@@ -151,6 +185,17 @@ export const trackEvent = (eventName: string, params?: EventParams): void => {
     params: enrichedParams,
     success: false,
   };
+
+  if (HIGH_SIGNAL_EVENTS.has(eventName) && typeof window !== 'undefined') {
+    void supabase.from('analytics_events').insert({
+      event_name: eventName,
+      props: enrichedParams as Record<string, unknown>,
+      session_id: getSessionId(),
+      page_path: window.location.pathname,
+      referrer: document.referrer || null,
+      user_agent: navigator.userAgent,
+    });
+  }
 
   try {
     if (typeof window !== 'undefined' && window.dataLayer) {

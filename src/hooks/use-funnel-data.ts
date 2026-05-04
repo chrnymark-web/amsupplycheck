@@ -22,7 +22,7 @@ export type FunnelData = {
     uploadToView: number;
     viewToConversion: number;
   };
-  ga4Available: boolean;
+  hasTrafficData: boolean;
 };
 
 function pct(numerator: number, denominator: number): number {
@@ -37,10 +37,22 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
   const toIso = range.to.toISOString();
   const countHead = { count: 'exact' as const, head: true };
 
-  const [ga4Res, quoteRes, newsletterRes, uploadRes] = await Promise.all([
-    supabase.functions.invoke('ga4-analytics', {
-      body: { dateRange: { startDate, endDate } },
-    }),
+  const eventCount = (eventName: string) =>
+    supabase
+      .from('analytics_events')
+      .select('*', countHead)
+      .eq('event_name', eventName)
+      .gte('created_at', fromIso)
+      .lte('created_at', toIso);
+
+  const [
+    quoteRes,
+    newsletterRes,
+    uploadRes,
+    pageViewRes,
+    supplierViewRes,
+    outboundRes,
+  ] = await Promise.all([
     supabase
       .from('quote_requests')
       .select('*', countHead)
@@ -56,17 +68,18 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
       .select('*', countHead)
       .gte('created_at', fromIso)
       .lte('created_at', toIso),
+    eventCount('page_view'),
+    eventCount('supplier_pageview'),
+    eventCount('outbound_click'),
   ]);
 
-  const funnel = ga4Res.data?.funnelData;
-  const ga4Available = !ga4Res.error && !!funnel;
-
-  const visits = funnel?.landingViews ?? 0;
+  const visits = pageViewRes.count ?? 0;
   const filesUploaded = uploadRes.count ?? 0;
-  const supplierViews = funnel?.supplierViews ?? 0;
-  const affiliateClicks = funnel?.conversions ?? 0;
+  const supplierViews = supplierViewRes.count ?? 0;
+  const affiliateClicks = outboundRes.count ?? 0;
   const quoteRequests = quoteRes.count ?? 0;
   const newsletterSignups = newsletterRes.count ?? 0;
+  const hasTrafficData = visits > 0 || supplierViews > 0;
   const totalConversions = affiliateClicks + quoteRequests + newsletterSignups;
 
   return {
@@ -88,7 +101,7 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
       uploadToView: Math.max(filesUploaded - supplierViews, 0),
       viewToConversion: Math.max(supplierViews - totalConversions, 0),
     },
-    ga4Available,
+    hasTrafficData,
   };
 }
 
