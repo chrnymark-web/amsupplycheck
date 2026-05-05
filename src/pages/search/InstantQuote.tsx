@@ -15,6 +15,7 @@ import {
   Clock,
   ExternalLink,
   AlertCircle,
+  Star,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -954,21 +955,26 @@ function MatchResultView({
     [visibleMatches, mapVisibleCount, geoById]
   );
 
-  // Group the paginated slice by pricing tier so the list can render with
-  // section headers (Live → Estimated → Other). Sort order within each bucket
-  // is preserved from sortMatchesByPrice; we only re-bucket for rendering.
+  // Group the paginated slice into 4 buckets: paying partners pinned at the
+  // top regardless of price tier, then the existing Live → Estimated → Other
+  // breakdown for non-partners.
   const groupedVisible = useMemo(() => {
     const slice = visibleMatches.slice(0, visibleCount);
+    const partner: any[] = [];
     const live: any[] = [];
     const estimate: any[] = [];
     const other: any[] = [];
     for (const m of slice) {
+      if (m.supplier.is_partner) {
+        partner.push(m);
+        continue;
+      }
       const kind = priceInfo.get(m.supplier.supplier_id)?.kind ?? 'none';
       if (kind === 'live') live.push(m);
       else if (kind === 'estimate') estimate.push(m);
       else other.push(m);
     }
-    return { live, estimate, other };
+    return { partner, live, estimate, other };
   }, [visibleMatches, visibleCount, priceInfo]);
 
   return (
@@ -1052,6 +1058,24 @@ function MatchResultView({
                   </div>
                 }
               >
+                {groupedVisible.partner.length > 0 && (
+                  <>
+                    <SectionHeader
+                      label="SupplyCheck partners"
+                      count={groupedVisible.partner.length}
+                      description="Verified paying partners — get an instant quote directly from the supplier"
+                    />
+                    {groupedVisible.partner.map((match: any, i: number) => (
+                      <SupplierResultCard
+                        key={match.supplier.supplier_id}
+                        match={match}
+                        rank={i + 1}
+                        price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
+                        isRanking={isRanking}
+                      />
+                    ))}
+                  </>
+                )}
                 {groupedVisible.live.length > 0 && (
                   <>
                     <SectionHeader
@@ -1063,7 +1087,7 @@ function MatchResultView({
                       <SupplierResultCard
                         key={match.supplier.supplier_id}
                         match={match}
-                        rank={i + 1}
+                        rank={groupedVisible.partner.length + i + 1}
                         price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
                         isRanking={isRanking}
                       />
@@ -1081,7 +1105,7 @@ function MatchResultView({
                       <SupplierResultCard
                         key={match.supplier.supplier_id}
                         match={match}
-                        rank={groupedVisible.live.length + i + 1}
+                        rank={groupedVisible.partner.length + groupedVisible.live.length + i + 1}
                         price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
                         isRanking={isRanking}
                       />
@@ -1099,7 +1123,7 @@ function MatchResultView({
                       <SupplierResultCard
                         key={match.supplier.supplier_id}
                         match={match}
-                        rank={groupedVisible.live.length + groupedVisible.estimate.length + i + 1}
+                        rank={groupedVisible.partner.length + groupedVisible.live.length + groupedVisible.estimate.length + i + 1}
                         price={priceInfo.get(match.supplier.supplier_id) ?? { kind: 'none' }}
                         isRanking={isRanking}
                       />
@@ -1206,7 +1230,15 @@ const SupplierResultCard = memo(function SupplierResultCard({
       <div className="flex-1 min-w-0">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-sm font-semibold truncate">{supplier.name}</p>
+            <p className="text-sm font-semibold truncate flex items-center gap-1.5">
+              {supplier.name}
+              {supplier.is_partner && (
+                <Star
+                  className="h-3.5 w-3.5 text-supplier-partner fill-current shrink-0"
+                  aria-label="Paying SupplyCheck partner"
+                />
+              )}
+            </p>
             <p className="text-[11px] text-muted-foreground truncate">
               {supplier.location_city ? `${supplier.location_city}, ` : ''}
               {supplier.location_country || supplier.region}
@@ -1254,7 +1286,21 @@ const SupplierResultCard = memo(function SupplierResultCard({
             Visit Supplier Page
             <ArrowRight className="h-3 w-3" />
           </span>
-          {supplier.website && (
+          {supplier.is_partner && supplier.instant_quote_url ? (
+            <Button
+              size="sm"
+              className="h-8 text-xs bg-supplier-partner text-black hover:bg-supplier-partner/90"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                window.open(supplier.instant_quote_url, '_blank', 'noopener,noreferrer');
+              }}
+            >
+              <Star className="h-3 w-3 mr-1 fill-current" />
+              Get instant quote
+              <ExternalLink className="ml-1 h-3 w-3" />
+            </Button>
+          ) : supplier.website ? (
             <Button
               variant="default"
               size="sm"
@@ -1268,7 +1314,7 @@ const SupplierResultCard = memo(function SupplierResultCard({
               Contact Directly
               <ExternalLink className="ml-1 h-3 w-3" />
             </Button>
-          )}
+          ) : null}
         </div>
       </div>
     </Link>
