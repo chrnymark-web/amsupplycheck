@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import SupplierLogo from '@/components/ui/supplier-logo';
-import { MapPin, ExternalLink, Verified, Crown, ArrowLeft, Mail, Globe, Building2, Factory, HelpCircle, Clock, Zap, Calculator, ThumbsUp, ThumbsDown, DollarSign, Users, ArrowRight, Compass, BookOpen, Award, Tag, Star } from 'lucide-react';
+import { MapPin, ExternalLink, Verified, Crown, ArrowLeft, Mail, Globe, Building2, Factory, HelpCircle, Clock, Zap, Calculator, ThumbsUp, ThumbsDown, DollarSign, Users, ArrowRight, Compass, BookOpen, Award, Tag, Star, Camera } from 'lucide-react';
 import { getDisplayNameFromMaterialKey, getDisplayNameFromTechnologyKey } from '@/lib/supplierData';
 import { TECHNOLOGY_GLOSSARY } from '@/lib/technologyGlossary';
 import { getSupplierPriceTier } from '@/lib/supplierPricing';
@@ -30,6 +30,13 @@ interface DescriptionExtended {
   pros?: string[];
   cons?: string[];
   price_range?: string;
+  partnerships?: string[];
+}
+
+interface GalleryImage {
+  url: string;
+  alt: string;
+  caption?: string;
 }
 
 interface SupplierTag {
@@ -61,6 +68,8 @@ interface Supplier {
   rating: number | null;
   review_count: number | null;
   logo_url: string | null;
+  hero_image_url?: string | null;
+  gallery_images?: GalleryImage[] | null;
   region: string | null;
   lead_time_indicator: string | null;
   has_rush_service: boolean | null;
@@ -138,7 +147,9 @@ const SupplierDetail = () => {
           setSupplier({
             ...data,
             instant_quote_url: (data.metadata as Record<string, unknown> | null)?.instant_quote_url as string ?? null,
-            description_extended: data.description_extended as DescriptionExtended | null
+            description_extended: data.description_extended as DescriptionExtended | null,
+            hero_image_url: (data as Record<string, unknown>).hero_image_url as string | null ?? null,
+            gallery_images: ((data as Record<string, unknown>).gallery_images as GalleryImage[] | null) ?? null,
           });
           
           // Track GA4 view_item event
@@ -499,101 +510,227 @@ const SupplierDetail = () => {
             </Button>
           </Link>
 
-        <Card className="bg-gradient-card border-border shadow-card hover:shadow-hover transition-all duration-300">
-          <CardHeader className="pb-6">
-            <div className="flex flex-col md:flex-row items-start gap-6">
-              <div className="group">
-                <SupplierLogo 
-                  name={supplier.name} 
-                  logoUrl={supplier.logo_url}
-                  size="2xl"
-                  className="group-hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-2 mb-2">
-                  <h1 className="text-3xl font-bold text-foreground">{supplier.name} Review & Instant Quote Comparison</h1>
-                  {supplier.verified && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Verified className="h-6 w-6 text-supplier-verified cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Verified Supplier</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                  {supplier.premium && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Crown className="h-6 w-6 text-supplier-premium cursor-help" />
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Premium Supplier</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                </div>
-                
-                {(supplier.location_city || supplier.location_country) && (
-                  <div className="flex items-center gap-2 text-muted-foreground mb-4">
-                    <MapPin className="h-4 w-4" />
-                    <span>
-                      {supplier.location_city && `${supplier.location_city}, `}
-                      {supplier.location_country}
-                    </span>
+        <Card className="bg-gradient-card border-border shadow-card hover:shadow-hover transition-shadow duration-300 overflow-hidden">
+          {supplier.hero_image_url ? (
+            <div className="relative isolate">
+              <img
+                src={supplier.hero_image_url}
+                alt={`${supplier.name} facility`}
+                className="absolute inset-0 w-full h-full object-cover"
+                loading="eager"
+              />
+              {/* Layered dark gradient — not flat black, per design guardrails */}
+              <div
+                className="absolute inset-0"
+                style={{
+                  background:
+                    'linear-gradient(180deg, hsl(220 30% 8% / 0.55) 0%, hsl(220 30% 8% / 0.72) 60%, hsl(220 30% 8% / 0.92) 100%)',
+                }}
+              />
+              {/* Brand-tinted radial for depth */}
+              <div
+                className="absolute inset-0 opacity-50 mix-blend-screen"
+                style={{
+                  background:
+                    'radial-gradient(ellipse 60% 50% at 15% 20%, hsl(var(--primary) / 0.28) 0%, transparent 65%)',
+                }}
+              />
+
+              <div className="relative px-6 md:px-10 pt-10 md:pt-14 pb-8 md:pb-10 min-h-[380px] md:min-h-[460px] flex flex-col justify-end">
+                <div className="flex flex-col md:flex-row items-start gap-6">
+                  <div className="group rounded-2xl bg-white p-3 ring-1 ring-white/40 shadow-2xl">
+                    <SupplierLogo
+                      name={supplier.name}
+                      logoUrl={supplier.logo_url}
+                      size="2xl"
+                      className="group-hover:scale-105 transition-transform duration-300"
+                    />
                   </div>
-                )}
 
-                <div className="flex flex-wrap gap-3">
-                  {supplier.is_partner && supplier.instant_quote_url ? (
-                    <a
-                      href={supplier.instant_quote_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={handleContactClick}
-                      className="inline-flex items-center justify-center bg-supplier-partner text-black font-medium hover:scale-105 hover:shadow-hover transition-transform duration-300 h-10 px-4 rounded-md"
-                    >
-                      <Star className="h-4 w-4 mr-2 fill-current" />
-                      Get instant quote
-                      <ExternalLink className="h-4 w-4 ml-2" />
-                    </a>
-                  ) : supplier.website ? (
-                    <a
-                      href={supplier.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={handleContactClick}
-                      className="inline-flex items-center justify-center bg-gradient-primary text-primary-foreground hover:shadow-hover hover:scale-105 transition-all duration-300 h-10 px-4 rounded-md"
-                    >
-                      <Mail className="h-4 w-4 mr-2" />
-                      Contact Supplier
-                      <ExternalLink className="h-4 w-4 ml-2" />
-                    </a>
-                  ) : (
-                    <span className="inline-flex items-center justify-center bg-muted text-muted-foreground h-10 px-4 rounded-md cursor-not-allowed">
-                      <Mail className="h-4 w-4 mr-2" />
-                      Contact Supplier
-                    </span>
-                  )}
+                  <div className="flex-1 min-w-0">
+                    {supplier.is_partner && (
+                      <Badge className="bg-supplier-partner text-black border-0 mb-3 shadow-lg shadow-yellow-900/20">
+                        <Star className="h-3.5 w-3.5 mr-1.5 fill-current" />
+                        SupplyCheck Partner
+                      </Badge>
+                    )}
 
-                  {supplier.website && (
-                    <a
-                      href={supplier.website}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={handleContactClick}
-                      className="inline-flex items-center justify-center border border-input bg-background hover:bg-accent hover:scale-105 transition-all duration-300 h-10 px-4 rounded-md"
-                    >
-                      <Globe className="h-4 w-4 mr-2" />
-                      Visit Website
-                    </a>
-                  )}
+                    <div className="flex flex-wrap items-center gap-2 mb-2">
+                      <h1 className="text-3xl md:text-4xl font-bold text-white drop-shadow-md tracking-tight">
+                        {supplier.name} Review & Instant Quote Comparison
+                      </h1>
+                      {supplier.verified && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Verified className="h-6 w-6 text-supplier-verified cursor-help drop-shadow" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Verified Supplier</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      {supplier.premium && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Crown className="h-6 w-6 text-supplier-premium cursor-help drop-shadow" />
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Premium Supplier</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+
+                    {(supplier.location_city || supplier.location_country) && (
+                      <div className="flex items-center gap-2 text-white/85 mb-5">
+                        <MapPin className="h-4 w-4" />
+                        <span>
+                          {supplier.location_city && `${supplier.location_city}, `}
+                          {supplier.location_country}
+                        </span>
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap gap-3">
+                      {supplier.is_partner && supplier.instant_quote_url ? (
+                        <a
+                          href={supplier.instant_quote_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={handleContactClick}
+                          className="inline-flex items-center justify-center bg-supplier-partner text-black font-medium hover:scale-105 active:scale-100 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none transition-transform duration-200 h-10 px-4 rounded-md shadow-lg shadow-yellow-900/30"
+                        >
+                          <Star className="h-4 w-4 mr-2 fill-current" />
+                          Get instant quote
+                          <ExternalLink className="h-4 w-4 ml-2" />
+                        </a>
+                      ) : supplier.website ? (
+                        <a
+                          href={supplier.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={handleContactClick}
+                          className="inline-flex items-center justify-center bg-white text-foreground font-medium hover:scale-105 active:scale-100 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none transition-transform duration-200 h-10 px-4 rounded-md"
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          Contact Supplier
+                          <ExternalLink className="h-4 w-4 ml-2" />
+                        </a>
+                      ) : null}
+
+                      {supplier.website && (
+                        <a
+                          href={supplier.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={handleContactClick}
+                          className="inline-flex items-center justify-center border border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:scale-105 active:scale-100 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none transition-transform duration-200 h-10 px-4 rounded-md"
+                        >
+                          <Globe className="h-4 w-4 mr-2" />
+                          Visit Website
+                        </a>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </CardHeader>
+          ) : (
+            <CardHeader className="pb-6">
+              <div className="flex flex-col md:flex-row items-start gap-6">
+                <div className="group">
+                  <SupplierLogo
+                    name={supplier.name}
+                    logoUrl={supplier.logo_url}
+                    size="2xl"
+                    className="group-hover:scale-105 transition-transform duration-300"
+                  />
+                </div>
+
+                <div className="flex-1">
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h1 className="text-3xl font-bold text-foreground">{supplier.name} Review & Instant Quote Comparison</h1>
+                    {supplier.verified && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Verified className="h-6 w-6 text-supplier-verified cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Verified Supplier</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                    {supplier.premium && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Crown className="h-6 w-6 text-supplier-premium cursor-help" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Premium Supplier</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+
+                  {(supplier.location_city || supplier.location_country) && (
+                    <div className="flex items-center gap-2 text-muted-foreground mb-4">
+                      <MapPin className="h-4 w-4" />
+                      <span>
+                        {supplier.location_city && `${supplier.location_city}, `}
+                        {supplier.location_country}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-3">
+                    {supplier.is_partner && supplier.instant_quote_url ? (
+                      <a
+                        href={supplier.instant_quote_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleContactClick}
+                        className="inline-flex items-center justify-center bg-supplier-partner text-black font-medium hover:scale-105 hover:shadow-hover transition-transform duration-300 h-10 px-4 rounded-md"
+                      >
+                        <Star className="h-4 w-4 mr-2 fill-current" />
+                        Get instant quote
+                        <ExternalLink className="h-4 w-4 ml-2" />
+                      </a>
+                    ) : supplier.website ? (
+                      <a
+                        href={supplier.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleContactClick}
+                        className="inline-flex items-center justify-center bg-gradient-primary text-primary-foreground hover:shadow-hover hover:scale-105 transition-all duration-300 h-10 px-4 rounded-md"
+                      >
+                        <Mail className="h-4 w-4 mr-2" />
+                        Contact Supplier
+                        <ExternalLink className="h-4 w-4 ml-2" />
+                      </a>
+                    ) : (
+                      <span className="inline-flex items-center justify-center bg-muted text-muted-foreground h-10 px-4 rounded-md cursor-not-allowed">
+                        <Mail className="h-4 w-4 mr-2" />
+                        Contact Supplier
+                      </span>
+                    )}
+
+                    {supplier.website && (
+                      <a
+                        href={supplier.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={handleContactClick}
+                        className="inline-flex items-center justify-center border border-input bg-background hover:bg-accent hover:scale-105 transition-all duration-300 h-10 px-4 rounded-md"
+                      >
+                        <Globe className="h-4 w-4 mr-2" />
+                        Visit Website
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </CardHeader>
+          )}
 
           <CardContent className="space-y-8">
             {/* Lead Time Section */}
@@ -732,6 +869,38 @@ const SupplierDetail = () => {
                     </p>
                   </div>
                 )}
+              </div>
+            )}
+
+            {supplier.gallery_images && supplier.gallery_images.length > 0 && (
+              <div>
+                <h2 className="text-xl font-semibold text-foreground mb-4 flex items-center gap-2">
+                  <Camera className="h-5 w-5 text-primary" />
+                  Photos
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {supplier.gallery_images.map((photo, index) => (
+                    <figure
+                      key={index}
+                      className="group rounded-2xl overflow-hidden bg-muted/40 ring-1 ring-border/60 shadow-[0_10px_30px_-12px_hsl(var(--primary)/0.25),0_4px_8px_-4px_hsl(220_30%_8%/0.18)] hover:shadow-[0_18px_40px_-10px_hsl(var(--primary)/0.35),0_6px_12px_-4px_hsl(220_30%_8%/0.25)] hover:-translate-y-0.5 transition-transform duration-300"
+                    >
+                      <div className="relative aspect-[4/3] overflow-hidden bg-black/5">
+                        <img
+                          src={photo.url}
+                          alt={photo.alt}
+                          loading="lazy"
+                          className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                        />
+                        <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                      </div>
+                      {photo.caption && (
+                        <figcaption className="px-4 py-3 text-sm text-muted-foreground">
+                          {photo.caption}
+                        </figcaption>
+                      )}
+                    </figure>
+                  ))}
+                </div>
               </div>
             )}
 
