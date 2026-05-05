@@ -75,16 +75,6 @@ export function resolvePriceInfo(
 
   for (const m of matches) {
     const id = m.supplier.supplier_id;
-
-    // Paying partners route conversions through their own quote portal, so we
-    // never show a Craftcloud-mediated price on their card. Skip the live
-    // lookup and resolve them directly to estimate-or-none.
-    if (m.supplier.is_partner) {
-      const est = estimateById.get(id);
-      result.set(id, est ? { kind: 'estimate', estimate: est } : { kind: 'none' });
-      continue;
-    }
-
     let cheapest: LiveQuote | null = byId.get(id) ?? null;
 
     if (fuzzyToks.length > 0) {
