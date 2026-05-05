@@ -1,12 +1,31 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+export interface GalleryImage {
+  url: string;
+  alt: string;
+  caption?: string;
+}
+
+export interface DescriptionExtended {
+  overview?: string;
+  unique_value?: string;
+  industries_served?: string[];
+  certifications?: string[];
+  capacity_notes?: string;
+  pros?: string[];
+  cons?: string[];
+  price_range?: string;
+  partnerships?: string[];
+}
+
 export interface SupplierListItem {
   id: string;
   supplier_id: string;
   name: string;
   website: string | null;
   description: string | null;
+  description_extended?: DescriptionExtended | null;
   location_city: string | null;
   location_country: string | null;
   location_lat: number | null;
@@ -16,6 +35,8 @@ export interface SupplierListItem {
   is_partner: boolean;
   instant_quote_url: string | null;
   logo_url: string | null;
+  hero_image_url?: string | null;
+  gallery_images?: GalleryImage[] | null;
   technologies: { id: string; name: string; slug: string; category: string | null }[];
   materials: { id: string; name: string; slug: string; category: string | null }[];
   certifications: { id: string; name: string; slug: string }[];
@@ -317,6 +338,7 @@ export function useSupplierDetail(supplierSlug: string) {
         name: resolvedSupplier.name,
         website: resolvedSupplier.website,
         description: resolvedSupplier.description,
+        description_extended: (resolvedSupplier as Record<string, unknown>).description_extended as DescriptionExtended | null ?? null,
         location_city: resolvedSupplier.location_city,
         location_country: resolvedSupplier.location_country,
         location_lat: resolvedSupplier.location_lat ? Number(resolvedSupplier.location_lat) : null,
@@ -326,6 +348,8 @@ export function useSupplierDetail(supplierSlug: string) {
         is_partner: resolvedSupplier.is_partner ?? false,
         instant_quote_url: (resolvedSupplier.metadata as Record<string, unknown> | null)?.instant_quote_url as string ?? null,
         logo_url: resolvedSupplier.logo_url,
+        hero_image_url: ((resolvedSupplier as Record<string, unknown>).hero_image_url as string | null) ?? null,
+        gallery_images: ((resolvedSupplier as Record<string, unknown>).gallery_images as GalleryImage[] | null) ?? null,
         technologies: (techs.data || []) as any[],
         materials: (mats.data || []) as any[],
         certifications: (certs.data || []) as any[],

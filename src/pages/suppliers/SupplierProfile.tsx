@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import SupplierLogo from '@/components/ui/supplier-logo';
-import { MapPin, ExternalLink, Verified, ArrowLeft, Globe, Factory, Shield, Tag, Cpu, Building2, Clock, Package, Signal } from 'lucide-react';
+import { MapPin, ExternalLink, Verified, ArrowLeft, Globe, Factory, Shield, Tag, Cpu, Building2, Clock, Package, Signal, Star, Camera, Briefcase, Zap } from 'lucide-react';
 import type { LiveQuote } from '@/lib/api/types';
 import { slugifyVendorName } from '@/lib/utils';
 
@@ -249,39 +249,216 @@ const SupplierProfile: React.FC = () => {
 
       <Navbar />
 
-      <main className="min-h-screen bg-background pt-20">
-        <div className="max-w-5xl mx-auto px-4 py-8">
-          {/* Back link */}
-          <Link to="/suppliers" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
-            <ArrowLeft className="h-4 w-4" /> Back to suppliers
-          </Link>
+      <main className="min-h-screen bg-background">
+        {/* Hero banner — only when hero_image_url is populated */}
+        {supplier.hero_image_url && (
+          <section className="relative isolate overflow-hidden pt-20">
+            <img
+              src={supplier.hero_image_url}
+              alt={`${supplier.name} facility`}
+              className="absolute inset-0 w-full h-full object-cover"
+              loading="eager"
+            />
+            {/* Layered dark gradient — not flat black */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background:
+                  'linear-gradient(180deg, hsl(220 30% 8% / 0.55) 0%, hsl(220 30% 8% / 0.72) 55%, hsl(220 30% 8% / 0.95) 100%)',
+              }}
+            />
+            {/* Brand-tinted radial for depth */}
+            <div
+              className="absolute inset-0 opacity-50 mix-blend-screen pointer-events-none"
+              style={{
+                background:
+                  'radial-gradient(ellipse 60% 50% at 15% 20%, hsl(var(--primary) / 0.30) 0%, transparent 65%)',
+              }}
+            />
+
+            <div className="relative max-w-5xl mx-auto px-4 pt-10 md:pt-14 pb-10 md:pb-12 min-h-[360px] md:min-h-[440px] flex flex-col justify-end">
+              <Link
+                to="/suppliers"
+                className="inline-flex items-center gap-1.5 text-sm text-white/80 hover:text-white mb-6 w-fit transition-colors"
+              >
+                <ArrowLeft className="h-4 w-4" /> Back to suppliers
+              </Link>
+
+              <div className="flex flex-col md:flex-row items-start gap-5 md:gap-6">
+                <div className="rounded-2xl bg-white p-3 ring-1 ring-white/40 shadow-2xl">
+                  <SupplierLogo name={supplier.name} logoUrl={supplier.logo_url || undefined} size="2xl" />
+                </div>
+
+                <div className="flex-1 min-w-0">
+                  {supplier.is_partner && (
+                    <Badge className="bg-supplier-partner text-black border-0 mb-3 shadow-lg shadow-yellow-900/20">
+                      <Star className="h-3.5 w-3.5 mr-1.5 fill-current" />
+                      SupplyCheck Partner
+                    </Badge>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-2 mb-2">
+                    <h1 className="text-3xl md:text-4xl font-bold text-white tracking-tight drop-shadow-md">
+                      {supplier.name}
+                    </h1>
+                    {supplier.verified && <Verified className="h-6 w-6 text-primary drop-shadow" />}
+                  </div>
+
+                  {(supplier.location_city || supplier.location_country) && (
+                    <div className="flex items-center gap-1.5 text-white/85 mb-5">
+                      <MapPin className="h-4 w-4" />
+                      <span>
+                        {[supplier.location_city, supplier.country?.name || supplier.location_country]
+                          .filter(Boolean)
+                          .join(', ')}
+                      </span>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-3">
+                    {supplier.is_partner && supplier.instant_quote_url ? (
+                      <a
+                        href={supplier.instant_quote_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 bg-supplier-partner text-black font-medium hover:scale-105 active:scale-100 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none transition-transform duration-200 h-10 px-4 rounded-md shadow-lg shadow-yellow-900/30"
+                      >
+                        <Star className="h-4 w-4 fill-current" />
+                        Get instant quote
+                        <ExternalLink className="h-4 w-4" />
+                      </a>
+                    ) : null}
+                    {supplier.website && (
+                      <a
+                        href={supplier.website}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 border border-white/30 bg-white/10 text-white backdrop-blur-sm hover:bg-white/20 hover:scale-105 active:scale-100 focus-visible:ring-2 focus-visible:ring-white focus-visible:outline-none transition-transform duration-200 h-10 px-4 rounded-md"
+                      >
+                        <Globe className="h-4 w-4" />
+                        Visit Website
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <div className={`max-w-5xl mx-auto px-4 py-8 ${supplier.hero_image_url ? '' : 'pt-20'}`}>
+          {/* Back link — hidden when hero is present (already shown in hero) */}
+          {!supplier.hero_image_url && (
+            <Link to="/suppliers" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6 transition-colors">
+              <ArrowLeft className="h-4 w-4" /> Back to suppliers
+            </Link>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Main content */}
             <div className="lg:col-span-2 space-y-6">
-              {/* Header card */}
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-5">
-                    <SupplierLogo name={supplier.name} logoUrl={supplier.logo_url || undefined} size="2xl" />
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <h1 className="text-2xl font-bold text-foreground">{supplier.name}</h1>
-                        {supplier.verified && <Verified className="h-5 w-5 text-primary" />}
-                      </div>
-                      {(supplier.location_city || supplier.location_country) && (
-                        <div className="flex items-center gap-1.5 text-muted-foreground mb-3">
-                          <MapPin className="h-4 w-4" />
-                          <span>{[supplier.location_city, supplier.country?.name || supplier.location_country].filter(Boolean).join(', ')}</span>
+              {/* Header card — only when no hero banner */}
+              {!supplier.hero_image_url && (
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6">
+                    <div className="flex items-start gap-5">
+                      <SupplierLogo name={supplier.name} logoUrl={supplier.logo_url || undefined} size="2xl" />
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-1">
+                          <h1 className="text-2xl font-bold text-foreground">{supplier.name}</h1>
+                          {supplier.verified && <Verified className="h-5 w-5 text-primary" />}
                         </div>
-                      )}
-                      {supplier.description && (
-                        <p className="text-muted-foreground leading-relaxed">{supplier.description}</p>
-                      )}
+                        {(supplier.location_city || supplier.location_country) && (
+                          <div className="flex items-center gap-1.5 text-muted-foreground mb-3">
+                            <MapPin className="h-4 w-4" />
+                            <span>{[supplier.location_city, supplier.country?.name || supplier.location_country].filter(Boolean).join(', ')}</span>
+                          </div>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* About / description */}
+              {(supplier.description || supplier.description_extended?.overview) && (
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Building2 className="h-5 w-5 text-primary" /> About {supplier.name}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <p className="text-muted-foreground leading-relaxed">
+                      {supplier.description_extended?.overview || supplier.description}
+                    </p>
+                    {supplier.description_extended?.unique_value && (
+                      <div className="bg-accent/40 p-4 rounded-lg border-l-4 border-primary">
+                        <h3 className="font-semibold mb-1 text-foreground flex items-center gap-2">
+                          <Zap className="h-4 w-4 text-primary" /> What sets them apart
+                        </h3>
+                        <p className="text-muted-foreground">{supplier.description_extended.unique_value}</p>
+                      </div>
+                    )}
+                    {supplier.description_extended?.industries_served && supplier.description_extended.industries_served.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold mb-2 text-foreground flex items-center gap-2">
+                          <Briefcase className="h-4 w-4 text-primary" /> Industries served
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {supplier.description_extended.industries_served.map((industry, i) => (
+                            <Badge key={i} variant="outline" className="text-sm px-3 py-1">
+                              {industry}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {supplier.description_extended?.capacity_notes && (
+                      <div className="bg-muted/40 p-4 rounded-lg">
+                        <h3 className="font-semibold mb-1 text-foreground">Production capacity</h3>
+                        <p className="text-muted-foreground">{supplier.description_extended.capacity_notes}</p>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              )}
+
+              {/* Photo gallery */}
+              {supplier.gallery_images && supplier.gallery_images.length > 0 && (
+                <Card className="bg-card border-border">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2 text-lg">
+                      <Camera className="h-5 w-5 text-primary" /> Photos
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {supplier.gallery_images.map((photo, i) => (
+                        <figure
+                          key={i}
+                          className="group rounded-xl overflow-hidden bg-muted/40 ring-1 ring-border/60 shadow-[0_10px_30px_-12px_hsl(var(--primary)/0.20),0_4px_8px_-4px_hsl(220_30%_8%/0.18)] hover:shadow-[0_18px_40px_-10px_hsl(var(--primary)/0.32),0_6px_12px_-4px_hsl(220_30%_8%/0.25)] hover:-translate-y-0.5 transition-transform duration-300"
+                        >
+                          <div className="relative aspect-[4/3] overflow-hidden">
+                            <img
+                              src={photo.url}
+                              alt={photo.alt}
+                              loading="lazy"
+                              className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-500 ease-[cubic-bezier(0.22,1,0.36,1)]"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/40 to-transparent pointer-events-none" />
+                          </div>
+                          {photo.caption && (
+                            <figcaption className="px-4 py-3 text-sm text-muted-foreground">
+                              {photo.caption}
+                            </figcaption>
+                          )}
+                        </figure>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
 
               {/* Technologies */}
               {supplier.technologies.length > 0 && (
