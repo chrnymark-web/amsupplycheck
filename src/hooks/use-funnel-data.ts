@@ -66,6 +66,7 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
     supabase
       .from('upload_events')
       .select('*', countHead)
+      .neq('source_page', 'backfill')
       .gte('created_at', fromIso)
       .lte('created_at', toIso),
     eventCount('page_view'),

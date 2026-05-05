@@ -34,6 +34,7 @@ async function fetchEventBreakdown(range: DateRange): Promise<EventBreakdown> {
     supabase
       .from('upload_events')
       .select('*', countHead)
+      .neq('source_page', 'backfill')
       .gte('created_at', fromIso)
       .lte('created_at', toIso),
     ...eventNames.map(eventCount),
