@@ -5,7 +5,6 @@ export type AuditSupplier = {
   id: string;
   supplier_id: string;
   name: string;
-  slug: string | null;
   website: string | null;
   last_validation_confidence: number | null;
   last_validated_at: string | null;
@@ -29,7 +28,16 @@ export type AuditPR = {
 };
 
 const SELECT_COLUMNS =
-  'id, supplier_id, name, slug, website, last_validation_confidence, last_validated_at, validation_failures';
+  'id, supplier_id, name, website, last_validation_confidence, last_validated_at, validation_failures';
+
+function pgErr(e: unknown): Error {
+  if (e instanceof Error) return e;
+  if (e && typeof e === 'object') {
+    const o = e as { message?: string; details?: string; hint?: string; code?: string };
+    return new Error(o.message || o.details || o.hint || o.code || JSON.stringify(e));
+  }
+  return new Error(String(e));
+}
 
 async function fetchQueue(): Promise<AuditSupplier[]> {
   const { data, error } = await supabase
@@ -40,7 +48,7 @@ async function fetchQueue(): Promise<AuditSupplier[]> {
     .order('last_validated_at', { ascending: true, nullsFirst: true })
     .limit(20);
 
-  if (error) throw error;
+  if (error) throw pgErr(error);
   return (data ?? []) as AuditSupplier[];
 }
 
@@ -53,11 +61,13 @@ export function useAuditQueue() {
 }
 
 const HISTOGRAM_BUCKETS: { label: string; range: [number, number] }[] = [
-  { label: '0–20', range: [0, 20] },
-  { label: '20–40', range: [20, 40] },
-  { label: '40–60', range: [40, 60] },
-  { label: '60–80', range: [60, 80] },
-  { label: '80–100', range: [80, 100.0001] },
+  { label: '0', range: [0, 0] },
+  { label: '1–25', range: [1, 25] },
+  { label: '26–50', range: [26, 50] },
+  { label: '51–75', range: [51, 75] },
+  { label: '76–94', range: [76, 94] },
+  { label: '95–99', range: [95, 99] },
+  { label: '100', range: [100, 100] },
 ];
 
 async function fetchHistogram(): Promise<{ buckets: ConfidenceBucket[]; total: number }> {
@@ -65,7 +75,7 @@ async function fetchHistogram(): Promise<{ buckets: ConfidenceBucket[]; total: n
     .from('suppliers')
     .select('last_validation_confidence');
 
-  if (error) throw error;
+  if (error) throw pgErr(error);
 
   const buckets: ConfidenceBucket[] = HISTOGRAM_BUCKETS.map(b => ({
     label: b.label,
@@ -80,7 +90,7 @@ async function fetchHistogram(): Promise<{ buckets: ConfidenceBucket[]; total: n
       nullCount++;
       continue;
     }
-    const idx = HISTOGRAM_BUCKETS.findIndex(b => c >= b.range[0] && c < b.range[1]);
+    const idx = HISTOGRAM_BUCKETS.findIndex(b => c >= b.range[0] && c <= b.range[1]);
     if (idx >= 0) buckets[idx].count++;
   }
 
@@ -106,7 +116,7 @@ async function fetchRecentAudits(): Promise<AuditSupplier[]> {
     .order('last_validated_at', { ascending: false })
     .limit(30);
 
-  if (error) throw error;
+  if (error) throw pgErr(error);
   return (data ?? []) as AuditSupplier[];
 }
 

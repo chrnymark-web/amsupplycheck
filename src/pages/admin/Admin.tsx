@@ -364,9 +364,9 @@ function ConfidenceHistogramSection() {
             {data?.buckets.map((b: ConfidenceBucket) => {
               const tone = b.range === null
                 ? 'bg-muted-foreground/40'
-                : b.range[0] < 40
+                : b.range[1] < 26
                   ? 'bg-red-500/70'
-                  : b.range[0] < 70
+                  : b.range[1] < 76
                     ? 'bg-yellow-500/70'
                     : 'bg-green-500/70';
               return (
