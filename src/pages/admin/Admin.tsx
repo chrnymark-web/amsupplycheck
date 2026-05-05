@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Globe, CheckCircle, Zap, Star, Search, ArrowRight, BarChart3, Eye,
-  Target, MousePointerClick, Mail, FileText, ShieldCheck, ExternalLink, GitPullRequest,
+  Target, Mail, ShieldCheck, ExternalLink, GitPullRequest,
 } from 'lucide-react';
 import { useAdminStats, type TopItem } from '@/hooks/use-admin-stats';
 import { useSupplierInventory } from '@/hooks/use-supplier-inventory';
@@ -145,7 +145,7 @@ function FunnelSection({ funnel, loading, error }: {
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1.4fr] gap-3 items-stretch">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto_1fr_auto_1fr_auto_1fr] gap-3 items-stretch">
           <FunnelStageCard
             label="Visits"
             value={funnel?.visits ?? 0}
@@ -179,42 +179,18 @@ function FunnelSection({ funnel, loading, error }: {
             textColor="text-green-600"
             loading={loading}
           />
-          <FunnelArrow rate={funnel?.rates.viewToAnyConversion} loading={loading} />
+          <FunnelArrow rate={funnel?.rates.viewToClick} loading={loading} />
 
-          <div className="bg-gradient-to-br from-yellow-500/20 to-amber-500/20 border-2 border-yellow-500 rounded-lg p-4">
-            <div className="text-xs font-medium text-center text-muted-foreground mb-2">Conversions</div>
-            <div className="grid grid-cols-3 gap-2">
-              <div className="text-center">
-                {loading
-                  ? <Skeleton className="h-7 w-10 mx-auto" />
-                  : <div className="text-2xl font-bold text-yellow-700 dark:text-yellow-500">{funnel?.affiliateClicks ?? 0}</div>}
-                <div className="mt-1 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
-                  <MousePointerClick className="h-3 w-3" /> Click
-                </div>
-              </div>
-              <div className="text-center">
-                {loading
-                  ? <Skeleton className="h-7 w-10 mx-auto" />
-                  : <div className="text-2xl font-bold text-amber-600">{funnel?.quoteRequests ?? 0}</div>}
-                <div className="mt-1 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
-                  <FileText className="h-3 w-3" /> Quote
-                </div>
-              </div>
-              <div className="text-center">
-                {loading
-                  ? <Skeleton className="h-7 w-10 mx-auto" />
-                  : <div className="text-2xl font-bold text-orange-600">{funnel?.newsletterSignups ?? 0}</div>}
-                <div className="mt-1 flex items-center justify-center gap-1 text-[11px] text-muted-foreground">
-                  <Mail className="h-3 w-3" /> Signup
-                </div>
-              </div>
-            </div>
-            {!loading && funnel && (
-              <div className="mt-3 pt-3 border-t border-yellow-500/30 text-center text-xs text-muted-foreground">
-                Total: <span className="font-semibold text-foreground">{funnel.totalConversions.toLocaleString()}</span>
-              </div>
-            )}
-          </div>
+          <FunnelStageCard
+            label="Conversions"
+            value={funnel?.affiliateClicks ?? 0}
+            eventName="outbound_click"
+            dropOff={funnel?.dropOff.viewToClick}
+            gradient="from-yellow-500/20 to-amber-500/20"
+            borderColor="border-yellow-500"
+            textColor="text-yellow-600"
+            loading={loading}
+          />
         </div>
       </CardContent>
     </Card>

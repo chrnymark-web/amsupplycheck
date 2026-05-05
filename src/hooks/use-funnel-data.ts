@@ -1,5 +1,4 @@
 import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import type { DateRange } from '@/components/admin/date-range-picker';
 
@@ -8,19 +7,16 @@ export type FunnelData = {
   filesUploaded: number;
   supplierViews: number;
   affiliateClicks: number;
-  quoteRequests: number;
-  newsletterSignups: number;
-  totalConversions: number;
   rates: {
     visitToUpload: number;
     uploadToView: number;
-    viewToAnyConversion: number;
+    viewToClick: number;
     overall: number;
   };
   dropOff: {
     visitToUpload: number;
     uploadToView: number;
-    viewToConversion: number;
+    viewToClick: number;
   };
   hasTrafficData: boolean;
 };
@@ -31,8 +27,6 @@ function pct(numerator: number, denominator: number): number {
 }
 
 async function fetchFunnel(range: DateRange): Promise<FunnelData> {
-  const startDate = format(range.from, 'yyyy-MM-dd');
-  const endDate = format(range.to, 'yyyy-MM-dd');
   const fromIso = range.from.toISOString();
   const toIso = range.to.toISOString();
   const countHead = { count: 'exact' as const, head: true };
@@ -46,23 +40,11 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
       .lte('created_at', toIso);
 
   const [
-    quoteRes,
-    newsletterRes,
     uploadRes,
     pageViewRes,
     supplierViewRes,
     outboundRes,
   ] = await Promise.all([
-    supabase
-      .from('quote_requests')
-      .select('*', countHead)
-      .gte('created_at', fromIso)
-      .lte('created_at', toIso),
-    supabase
-      .from('newsletter_signups')
-      .select('*', countHead)
-      .gte('created_at', fromIso)
-      .lte('created_at', toIso),
     supabase
       .from('upload_events')
       .select('*', countHead)
@@ -78,29 +60,23 @@ async function fetchFunnel(range: DateRange): Promise<FunnelData> {
   const filesUploaded = uploadRes.count ?? 0;
   const supplierViews = supplierViewRes.count ?? 0;
   const affiliateClicks = outboundRes.count ?? 0;
-  const quoteRequests = quoteRes.count ?? 0;
-  const newsletterSignups = newsletterRes.count ?? 0;
   const hasTrafficData = visits > 0 || supplierViews > 0;
-  const totalConversions = affiliateClicks + quoteRequests + newsletterSignups;
 
   return {
     visits,
     filesUploaded,
     supplierViews,
     affiliateClicks,
-    quoteRequests,
-    newsletterSignups,
-    totalConversions,
     rates: {
       visitToUpload: pct(filesUploaded, visits),
       uploadToView: pct(supplierViews, filesUploaded),
-      viewToAnyConversion: pct(totalConversions, supplierViews),
-      overall: pct(totalConversions, visits),
+      viewToClick: pct(affiliateClicks, supplierViews),
+      overall: pct(affiliateClicks, visits),
     },
     dropOff: {
       visitToUpload: Math.max(visits - filesUploaded, 0),
       uploadToView: Math.max(filesUploaded - supplierViews, 0),
-      viewToConversion: Math.max(supplierViews - totalConversions, 0),
+      viewToClick: Math.max(supplierViews - affiliateClicks, 0),
     },
     hasTrafficData,
   };
