@@ -158,6 +158,34 @@ FROM public.suppliers WHERE supplier_id = '<slug>';
 
 Plus a frontend smoke test: search for one of the new technology+region combinations on supplycheck.io and confirm the supplier shows up.
 
+### 8. Report changes to user (always finish with a summary table)
+
+After the migration is pushed, end the turn with a table the user can scan in 5 seconds — what was dropped, mapped, added, kept, and why. This is required, not optional.
+
+Use this exact structure (Danish or English depending on conversation language):
+
+**Teknologier (N, var M):**
+| Action | Slug(s) | Reason |
+|---|---|---|
+| Droppet | `mjf`, `polyjet` | Wrong/trademark issue — see why |
+| Mappet | `cjp` → `binder-jetting` | Functional mapping rationale |
+| Beholdt | `sla`, `sls`, `dmls`, ... | Confirmed verbatim on website |
+
+**Materialer (N, var M):**
+| Action | Slug(s) | Reason |
+|---|---|---|
+| Droppet | `plastic`, `metal` | Non-canonical generic strings |
+| Tilføjet | `ss-316l`, `copper`, ... | Explicit website headings |
+| Beholdt | `titanium`, `wax`, ... | (verbatim on site) |
+
+**Other fields:**
+- **Description:** rewritten / unchanged
+- **Address:** changed to `...` / unchanged (kilde)
+- **Confidence:** X → Y
+- **Migration file:** `supabase/migrations/<file>.sql`
+
+End with one line on how to verify (search supplier on supplycheck.io, or filter by a new tech to confirm it appears, and by a dropped tech to confirm it doesn't).
+
 ## Pitfalls
 
 | Trap | Reality |
@@ -171,6 +199,43 @@ Plus a frontend smoke test: search for one of the new technology+region combinat
 | Editing via Admin UI instead of migration | Loses audit trail. Migration is the convention (30+ `correct_*.sql` examples). |
 | Including JCP "eligible" / press-release certs | Eligibility ≠ certified. Only include certs the website actively claims. |
 | Adding non-canonical slugs to arrays | Supplier won't match the compatibility matrix. Put unmatchable grades in `description_extended.metal_grades`. |
+
+## Auto mode (no AskUserQuestion — for unattended cron runs)
+
+When invoked from `.claude/routines/daily-supplier-audit.md` (or any other unattended context where AskUserQuestion is not available), apply these **safe defaults** instead of asking:
+
+| Ambiguity | Auto default |
+|---|---|
+| Address conflict (website vs. DB) | **Keep DB value unchanged.** Note the conflict in PR-body under "Human review needed". |
+| Vague material language ("high-performance polymers", "fiber reinforced") | **Skip — do not add.** Only map materials that appear with explicit canonical names (PA12, ABS, carbon-fiber, etc.) on the website. |
+| Old/press-release certifications | **Keep existing certs untouched. Add only certs the website actively claims today** with a visible logo/page section. |
+| Ambiguous tech terms (e.g. "additive manufacturing", "rapid prototyping") | **Skip.** Only map tech that has a word-for-word canonical-slug match (`fdm`, `sla`, `dmls`, etc.). |
+| No clear technologies named at all | **Skip the supplier entirely.** Mark `last_validation_confidence` unchanged, log "skipped: no explicit tech named" in PR body. Don't write a migration. |
+| Diff is empty (DB already matches website) | **No PR.** Just bump `last_validated_at = now()` and `last_validation_confidence = 100` in a one-line migration so the supplier exits the audit queue. PR title: `Audit: <name> (verified clean)`. |
+
+**Auto-mode output differences:**
+- **Don't `git push origin main`** — push to a branch `auto-audit/<slug>-<YYYYMMDD>` and open a **draft PR**.
+- **PR body** must include:
+  - Current DB state vs. proposed state (the same table you'd put in the user-facing summary)
+  - Source URLs from Firecrawl (which pages were scraped)
+  - "Human review needed" section listing every default that was applied (every conflict that was skipped, kept, or flagged)
+- **No frontend smoke test** — the cron has no browser. Smoke test happens after the human merges and runs `npx supabase db push` manually.
+- **Telegram notification** at the end (see routine prompt for format).
+
+**Auto-mode queue logic** (used by the routine to pick today's supplier):
+
+```sql
+SELECT id, name, website
+FROM public.suppliers
+WHERE website IS NOT NULL AND website <> ''
+  AND slug NOT IN (<slugs of suppliers with open or recently-closed auto-audit/* PRs>)
+ORDER BY
+  COALESCE(last_validation_confidence, 0) ASC,
+  last_validated_at ASC NULLS FIRST
+LIMIT 1;
+```
+
+Suppliers with the lowest confidence (or never validated) get audited first. Suppliers already proposed via an open auto-audit PR are skipped to avoid duplicate work.
 
 ## Reference files in repo
 
