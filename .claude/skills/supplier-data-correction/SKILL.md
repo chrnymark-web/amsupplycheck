@@ -44,6 +44,32 @@ and the supplier's UUID."
 
 Note the UUID — migrations target by UUID, not slug.
 
+### 2.5 Disqualification check (is this a 3D printing provider at all?)
+
+Before doing any slug-mapping work, decide whether this supplier belongs in SupplyCheck. If the website clearly shows the company is **not** a 3D printing service provider, the correct outcome is **removal**, not correction.
+
+**Disqualifying signals** (website CLEARLY shows ONE of these — no inference, no "probably"):
+
+| Signal | Example |
+|---|---|
+| Different industry entirely | Site sells real estate, restaurant supplies, clothing, SaaS — no mention of 3D printing anywhere |
+| Consumer 3D model marketplace | Site only hosts/sells STL files for download; no service offering |
+| Printer reseller only | Sells 3D printers/filament but offers no print-on-demand service |
+| Domain parked or for sale | "This domain is for sale", GoDaddy parking, Sedo, etc. |
+| 404 / NXDOMAIN consistently | DNS or HTTP errors on root domain across multiple Firecrawl attempts |
+| Rebranded away | Old domain redirects to a completely unrelated business |
+
+**NOT disqualifying — skip instead, do not remove:**
+
+- Temporary 5xx, timeout, TLS error
+- Site under construction / coming-soon page
+- Bilingual / non-English site we can't fully parse
+- Hobbyist blog (might be a small one-person operator)
+- Reseller/distributor that **also** claims a service offering, even briefly
+- Mentions 3D printing tangentially but service offering is unclear
+
+When in doubt, skip. Removal is destructive and goes through human PR review, but mistakes are still costly.
+
 ### 3. Verify canonical slugs
 
 The arrays `suppliers.technologies` and `suppliers.materials` MUST contain slugs that exist in `public.technologies.slug` and `public.materials.slug`. Legacy strings like `stainless-steel`, `nickel`, `bronze-infiltrated-steel` are **not canonical** — supplier won't match the compatibility matrix.
@@ -137,6 +163,40 @@ COMMIT;
 
 Critical: `last_validation_confidence` is INTEGER 0-100 (use 95, not 0.95). `WHERE id = '<UUID>'` for precision. Junction tables MUST also be synced — some downstream views read from them, not the arrays.
 
+### 5b. Removal migration (when supplier is disqualified per §2.5)
+
+If §2.5 concluded the supplier is **not** a 3D printing provider, write a removal migration instead of the correction template. File path: `supabase/migrations/YYYYMMDDHHMMSS_remove_<supplier_slug>.sql`.
+
+Junction tables (`supplier_technologies`, `supplier_materials`, `supplier_certifications`, `supplier_pricing`, etc.) all reference `suppliers(id)` with `ON DELETE CASCADE`, so a single DELETE row cleans up everything.
+
+```sql
+-- Remove <Supplier Name> from SupplyCheck — not a 3D printing service provider.
+--
+-- Verified YYYY-MM-DD against:
+--   https://<domain>/<page>   (what was found — non-3D-printing context)
+--   https://<domain>/<page>   (additional evidence)
+--
+-- Disqualifying signal (per SKILL.md §2.5):
+--   <one of: different-industry / model-marketplace / printer-reseller-only /
+--    parked-domain / 404 / rebranded-away>
+--
+-- Why not correction:
+--   <one-line — e.g. "No 3D printing service offering anywhere on site;
+--    company sells consumer furniture exclusively.">
+--
+-- Cascading deletes via FK ON DELETE CASCADE:
+--   supplier_technologies, supplier_materials, supplier_certifications,
+--   supplier_pricing, and any other junction tables.
+
+BEGIN;
+
+DELETE FROM public.suppliers WHERE id = '<supplier-UUID>';
+
+COMMIT;
+```
+
+Removal migrations are **always** opened as draft PR (auto-mode) or surfaced to the user for confirmation (interactive mode) — never pushed directly to main. The PR title uses prefix `Audit: <name> (REMOVE — not 3D printing)` so it stands out from correction PRs.
+
 ### 6. Commit + push (auto-deploy)
 
 Per project memory `feedback_deploy_all`: auto-deploy after every site change, don't ask.
@@ -212,6 +272,7 @@ When invoked from `.claude/routines/daily-supplier-audit.md` (or any other unatt
 | Ambiguous tech terms (e.g. "additive manufacturing", "rapid prototyping") | **Skip.** Only map tech that has a word-for-word canonical-slug match (`fdm`, `sla`, `dmls`, etc.). |
 | No clear technologies named at all | **Skip the supplier entirely.** Mark `last_validation_confidence` unchanged, log "skipped: no explicit tech named" in PR body. Don't write a migration. |
 | Diff is empty (DB already matches website) | **No PR.** Just bump `last_validated_at = now()` and `last_validation_confidence = 100` in a one-line migration so the supplier exits the audit queue. PR title: `Audit: <name> (verified clean)`. |
+| **Disqualified per §2.5** (not a 3D printing provider) | **Removal migration** per §5b. Branch: `auto-audit/<slug>-<YYYYMMDD>`. PR title: `Audit: <name> (REMOVE — not 3D printing)`. PR body must include the disqualifying signal, source URLs, and a "Why not correction" line. **One signal must be unambiguous** — if it's a borderline call, fall through to "skip" instead. |
 
 **Auto-mode output differences:**
 - **Don't `git push origin main`** — push to a branch `auto-audit/<slug>-<YYYYMMDD>` and open a **draft PR**.

@@ -32,15 +32,16 @@ For unattended ambiguities, use the **Auto mode** rules in SKILL.md ("Auto mode 
 
 ## Step 3 — Generate the proposed migration
 
-Use the SKILL.md template at step 5. Three special cases:
+First run the **§2.5 disqualification check** from SKILL.md. If the website clearly shows the supplier is not a 3D printing service provider, take the **REMOVE** path. Otherwise use the standard correction templates (§5).
 
 | Case | What to write |
 |---|---|
-| Real diff exists | Full migration as SKILL.md section 5 specifies. Set `last_validation_confidence = 95`, `validation_failures = 0`. |
-| DB already matches website | One-line migration that only updates `last_validated_at = now(), last_validation_confidence = 100` for that UUID. PR title: `Audit: <name> (verified clean)`. |
+| Real diff exists | Full migration as SKILL.md section 5 specifies. Set `last_validation_confidence = 95`, `validation_failures = 0`. File: `..._correct_<supplier_id>.sql` |
+| DB already matches website | One-line migration that only updates `last_validated_at = now(), last_validation_confidence = 100` for that UUID. PR title: `Audit: <name> (verified clean)`. File: `..._correct_<supplier_id>.sql` |
+| **Disqualified — not a 3D printing provider** (per SKILL.md §2.5) | Removal migration per SKILL.md §5b: `DELETE FROM public.suppliers WHERE id = '<UUID>';` (junction tables cascade). PR title: `Audit: <name> (REMOVE — not 3D printing)`. File: `..._remove_<supplier_id>.sql`. **The disqualifying signal must be unambiguous** — if borderline, fall through to "skipped" instead. |
 | Website unreadable / no explicit tech named | NO migration. Skip to Step 6 with the "skipped" Telegram template. |
 
-File goes to: `supabase/migrations/$(date -u +%Y%m%d%H%M%S)_correct_<supplier_id_with_underscores>.sql`
+File goes to: `supabase/migrations/$(date -u +%Y%m%d%H%M%S)_<correct\|remove>_<supplier_id_with_underscores>.sql`
 
 Verify timestamp is greater than the latest existing migration: `ls supabase/migrations/*.sql | tail -1`.
 
@@ -65,6 +66,15 @@ The PR body must include, in this order:
 2. **Proposed changes** — the SKILL.md "summary table" (Teknologier, Materialer, Other fields).
 3. **Human review needed** — every Auto-mode default that was applied. Format: `- Address conflict (kept "X" from DB; website says "Y") — verify before merging.`
 4. **Verify after merge** — copy the `SELECT supplier_id, technologies, materials, last_validation_confidence FROM public.suppliers WHERE supplier_id = '<id>';` line from SKILL.md step 7.
+
+**Removal-PR body** (different structure — REMOVE case has no slug-mapping table):
+
+1. **⚠️ Destructive — review carefully** — header banner; merge cascade-deletes junction-table rows.
+2. **Disqualifying signal** — one of the §2.5 categories (different-industry / model-marketplace / printer-reseller-only / parked-domain / 404 / rebranded-away).
+3. **Evidence** — verbatim quotes / screenshots-via-Firecrawl-text from the website that prove the signal.
+4. **Source URLs** — every Firecrawl-scraped page that supports the conclusion.
+5. **Why not correction** — one line explaining why no slug-mapping is salvageable.
+6. **Pre-merge checklist** — `[ ]` Verify website still shows non-3D-printing context · `[ ]` Confirm no recent quote_requests for this supplier · `[ ]` Sanity check: open the homepage URL.
 
 Capture the PR URL from `gh pr create` output (it prints it on stdout).
 
@@ -91,6 +101,20 @@ Approve: merge PR + run npx supabase db push next session.
 ✅ ${SUPPLIER_NAME} — DB matcher hjemmesiden
 ${PR_URL}    # one-line "verified clean" PR
 Bare merge — kan auto-merge'es.
+```
+
+**Removal proposed (not a 3D printing provider):**
+```
+🗑️ Audit foreslår fjernelse — ${SUPPLIER_NAME}
+${PR_URL}
+
+Grund: ${DISQUALIFYING_SIGNAL}    # e.g. "Sælger forbrugerelektronik; ingen 3D print service nævnt"
+
+Evidence:
+${SHORT_EVIDENCE}    # 2-3 lines, verbatim quotes from website
+
+⚠️  Destructive — review carefully before merge.
+After merge: npx supabase db push (junction tables cascade).
 ```
 
 **Skipped:**
@@ -140,3 +164,4 @@ Specific fallbacks:
 - **Don't call `AskUserQuestion`.** Use Auto-mode defaults from SKILL.md.
 - **Don't open more than one PR per run.** One supplier per day, period.
 - **Don't write to `supplier_technologies` / `supplier_materials` junction tables for "verified clean" runs** — only the main `suppliers` row update.
+- **Don't propose removal on borderline cases.** SKILL.md §2.5 disqualification requires an unambiguous signal. If the website is partially 3D-printing-related, a reseller that *might* offer service, or temporarily unreadable — fall through to "skipped" instead. Removal is destructive even with PR review; bias toward skipping.
