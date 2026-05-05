@@ -13,6 +13,8 @@ export interface EnrichedSupplier {
   region: string | null;
   verified: boolean;
   premium: boolean;
+  is_partner: boolean;
+  instant_quote_url: string | null;
   logo_url: string | null;
   technologies: { id: string; name: string; slug: string; category: string | null }[];
   materials: { id: string; name: string; slug: string; category: string | null }[];
@@ -63,6 +65,8 @@ export interface MatchResult {
     location_lng: number | null;
     verified: boolean;
     premium: boolean;
+    is_partner: boolean;
+    instant_quote_url: string | null;
     logo_url: string | null;
   };
   score: number;

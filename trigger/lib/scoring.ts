@@ -242,6 +242,8 @@ export function scoreSuppliers(
           location_lng: supplier.location_lng,
           verified: supplier.verified,
           premium: supplier.premium,
+          is_partner: supplier.is_partner,
+          instant_quote_url: supplier.instant_quote_url,
           logo_url: supplier.logo_url,
         },
         score: Math.round(totalScore * 100),
@@ -259,6 +261,13 @@ export function scoreSuppliers(
     }
   }
 
-  matches.sort((a, b) => b.score - a.score);
+  // Paying partners pinned to top, ahead of raw score, so the slice never
+  // drops them. Within each tier (partner / non-partner) score decides order.
+  matches.sort((a, b) => {
+    if (a.supplier.is_partner !== b.supplier.is_partner) {
+      return a.supplier.is_partner ? -1 : 1;
+    }
+    return b.score - a.score;
+  });
   return maxResults ? matches.slice(0, maxResults) : matches;
 }
