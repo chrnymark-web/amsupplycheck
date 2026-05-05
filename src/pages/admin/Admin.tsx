@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import { useAdminStats, type TopItem } from '@/hooks/use-admin-stats';
 import { useFunnelData, type FunnelData } from '@/hooks/use-funnel-data';
+import { useGA4Funnel } from '@/hooks/use-ga4-funnel';
 import { DateRangePicker, rangeForDays, type DateRange } from '@/components/admin/date-range-picker';
 
 function StatCard({ icon: Icon, label, value, sub, color = 'text-primary', loading }: {
@@ -214,7 +215,7 @@ function FunnelSection({ funnel, loading, error }: {
   );
 }
 
-type Tab = 'overview' | 'suppliers' | 'analytics' | 'applications';
+type Tab = 'overview' | 'suppliers' | 'analytics' | 'compare' | 'applications';
 
 export default function Admin() {
   const [tab, setTab] = useState<Tab>('overview');
@@ -223,6 +224,7 @@ export default function Admin() {
 
   const { data: stats, isLoading: statsLoading, isError: statsError, error: statsErr } = useAdminStats(range);
   const { data: funnel, isLoading: funnelLoading, error: funnelError } = useFunnelData(range);
+  const { data: ga4, isLoading: ga4Loading, error: ga4Error } = useGA4Funnel(range, tab === 'compare');
 
   const total = stats?.suppliers.total ?? 0;
   const verified = stats?.suppliers.verified ?? 0;
@@ -247,7 +249,7 @@ export default function Admin() {
             </div>
           </div>
           <nav className="flex gap-1">
-            {(['overview', 'suppliers', 'analytics', 'applications'] as Tab[]).map(t => (
+            {(['overview', 'suppliers', 'analytics', 'compare', 'applications'] as Tab[]).map(t => (
               <Button
                 key={t}
                 variant={tab === t ? 'default' : 'ghost'}
@@ -491,6 +493,80 @@ export default function Admin() {
                 </CardContent>
               </Card>
             </div>
+          </div>
+        )}
+
+        {tab === 'compare' && (
+          <div className="space-y-6">
+            <div className="flex items-end justify-between gap-4">
+              <div>
+                <h1 className="text-2xl font-bold text-foreground">Platform vs GA4</h1>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Side-by-side check of internal Supabase events against Google Analytics. Gaps usually mean adblock, consent banner, or GA4's 24–48h reporting delay.
+                </p>
+              </div>
+            </div>
+
+            {ga4Error && (
+              <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                Failed to load GA4 data: {ga4Error instanceof Error ? ga4Error.message : 'Unknown error'}
+              </div>
+            )}
+
+            {ga4 && !ga4.available && !ga4Loading && !ga4Error && (
+              <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-400">
+                GA4 returned no funnel data for this period. The edge function may be misconfigured or GA4 has no events yet.
+              </div>
+            )}
+
+            <Card className="bg-card border-border overflow-hidden">
+              <div className="grid grid-cols-[1.5fr_1fr_1fr_1fr] gap-0 text-sm">
+                <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border">Funnel stage</div>
+                <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground text-right border-b border-border">Platform (Supabase)</div>
+                <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground text-right border-b border-border">GA4</div>
+                <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground text-right border-b border-border">Delta</div>
+
+                {[
+                  { label: 'Visits', event: 'page_view', platform: funnel?.visits ?? 0, ga4: ga4?.visits ?? 0 },
+                  { label: 'Files uploaded', event: 'file_uploaded', platform: funnel?.filesUploaded ?? 0, ga4: ga4?.filesUploaded ?? 0 },
+                  { label: 'Supplier views', event: 'supplier_pageview', platform: funnel?.supplierViews ?? 0, ga4: ga4?.supplierViews ?? 0 },
+                  { label: 'Affiliate clicks', event: 'outbound_click', platform: funnel?.affiliateClicks ?? 0, ga4: ga4?.conversions ?? 0 },
+                ].map(row => {
+                  const delta = row.platform - row.ga4;
+                  const pct = row.ga4 > 0 ? Math.round((delta / row.ga4) * 100) : null;
+                  const deltaColor = delta > 0 ? 'text-green-500' : delta < 0 ? 'text-red-500' : 'text-muted-foreground';
+                  const deltaSign = delta > 0 ? '+' : '';
+                  const isLoading = funnelLoading || ga4Loading;
+                  return (
+                    <React.Fragment key={row.label}>
+                      <div className="px-4 py-3 border-b border-border last:border-b-0">
+                        <div className="font-medium text-foreground">{row.label}</div>
+                        <div className="text-xs text-muted-foreground">{row.event}</div>
+                      </div>
+                      <div className="px-4 py-3 text-right border-b border-border last:border-b-0">
+                        {isLoading ? <Skeleton className="h-5 w-16 ml-auto" /> : <span className="font-semibold text-foreground">{row.platform.toLocaleString()}</span>}
+                      </div>
+                      <div className="px-4 py-3 text-right border-b border-border last:border-b-0">
+                        {isLoading ? <Skeleton className="h-5 w-16 ml-auto" /> : <span className="font-semibold text-foreground">{row.ga4.toLocaleString()}</span>}
+                      </div>
+                      <div className="px-4 py-3 text-right border-b border-border last:border-b-0">
+                        {isLoading ? <Skeleton className="h-5 w-20 ml-auto" /> : (
+                          <span className={`font-semibold ${deltaColor}`}>
+                            {deltaSign}{delta.toLocaleString()}
+                            {pct !== null && <span className="ml-1 text-xs opacity-70">({deltaSign}{pct}%)</span>}
+                          </span>
+                        )}
+                      </div>
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            </Card>
+
+            <p className="text-xs text-muted-foreground/70">
+              Positive delta = platform sees more events than GA4 (typical: GA4 loses traffic to adblock and consent rejections).
+              Negative delta = GA4 reports more than platform (possible: tracker not fired, GA4 has older data than current deploy, or GTM auto-events that aren't mirrored to Supabase).
+            </p>
           </div>
         )}
 
