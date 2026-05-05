@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useMemo } from "react";
 import { Helmet } from "react-helmet";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Upload, Sparkles, Loader2, MapPin, Package, ExternalLink, CheckCircle2, Award, X } from "lucide-react";
+import { ArrowLeft, Upload, Sparkles, Loader2, MapPin, Package, ExternalLink, CheckCircle2, Award, X, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -56,6 +56,9 @@ function STLMatchCard({ match, rank }: { match: MatchResult; rank: number }) {
           </div>
         </div>
         <div className="flex gap-2 mt-3">
+          {supplier.is_partner && (
+            <Badge variant="outline" className="text-xs bg-amber-50 border-amber-300 text-amber-800"><Star className="h-3 w-3 mr-1 fill-current" />Partner</Badge>
+          )}
           {supplier.verified && (
             <Badge variant="outline" className="text-xs"><CheckCircle2 className="h-3 w-3 mr-1" />Verified</Badge>
           )}

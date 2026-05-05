@@ -17,6 +17,7 @@ interface MatchResult {
     location_country?: string | null;
     verified?: boolean;
     premium?: boolean;
+    is_partner?: boolean;
     logo_url?: string | null;
   };
   score: number;

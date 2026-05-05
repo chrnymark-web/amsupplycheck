@@ -99,6 +99,8 @@ export interface EstimatePriceInput {
   /** Part quantity. Defaults to 1. */
   quantity?: number;
   logoUrl?: string;
+  /** Mark estimate as belonging to a paying SupplyCheck partner — pinned to top of rankings. */
+  isPartner?: boolean;
 }
 
 // Generate an estimated price for a supplier without a live API. Now geometry-
@@ -115,6 +117,7 @@ export function getEstimatedPrice(input: EstimatePriceInput): EstimatedPrice {
     geometry,
     quantity = 1,
     logoUrl,
+    isPartner,
   } = input;
 
   const techKeys = selectedTechnology
@@ -166,6 +169,7 @@ export function getEstimatedPrice(input: EstimatePriceInput): EstimatedPrice {
     supplierId,
     supplierName,
     supplierLogo: logoUrl,
+    isPartner: isPartner || false,
     priceTier: tier.symbol,
     priceTierLabel: tier.label,
     priceRangeLow: Math.round(central * (1 - RANGE_SPREAD)) * quantity,

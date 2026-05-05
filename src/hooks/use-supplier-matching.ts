@@ -28,6 +28,7 @@ export interface MatchedSupplier {
   location_lng?: number | null;
   verified: boolean;
   premium: boolean;
+  is_partner: boolean;
   logo_url: string | null;
 }
 

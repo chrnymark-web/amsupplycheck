@@ -46,12 +46,19 @@ export default function ComparePrices() {
   // free baseline; tech still drives visible ratios.
   const estimatedPrices: EstimatedPrice[] = useMemo(() => {
     const normSelected = normalizeTechKey(technology);
-    return suppliers
+    // Partner-first ordering BEFORE the slice — otherwise a partner ranked
+    // 21st by name could be cut. Then price-ascending within each tier.
+    const eligible = suppliers
       .filter((s) => {
         if (!normSelected) return true;
         return s.technologies.some((t) => normalizeTechKey(t.name) === normSelected);
       })
-      .slice(0, 20)
+      .sort((a, b) => {
+        if (!!a.is_partner !== !!b.is_partner) return a.is_partner ? -1 : 1;
+        return 0;
+      })
+      .slice(0, 20);
+    return eligible
       .map((s) =>
         getEstimatedPrice({
           supplierName: s.name,
@@ -60,9 +67,13 @@ export default function ComparePrices() {
           selectedTechnology: technology || undefined,
           quantity,
           logoUrl: s.logo_url || undefined,
+          isPartner: s.is_partner,
         })
       )
-      .sort((a, b) => a.priceRangeLow - b.priceRangeLow);
+      .sort((a, b) => {
+        if (!!a.isPartner !== !!b.isPartner) return a.isPartner ? -1 : 1;
+        return a.priceRangeLow - b.priceRangeLow;
+      });
   }, [suppliers, technology, quantity]);
 
   return (

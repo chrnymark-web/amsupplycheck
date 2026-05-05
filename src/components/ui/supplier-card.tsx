@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import SupplierLogo from '@/components/ui/supplier-logo';
-import { MapPin, Verified, ExternalLink, Crown, Clock, Factory, Layers } from 'lucide-react';
+import { MapPin, Verified, ExternalLink, Crown, Clock, Factory, Layers, Star } from 'lucide-react';
 import { getDisplayNameFromMaterialKey, getDisplayNameFromTechnologyKey } from '@/lib/supplierData';
 import { trackSupplierInteraction, trackOutboundLink, trackSelectItem, supplierToGA4Item, trackSupplierImpression } from '@/lib/analytics';
 import { TechInfoBadge } from '@/components/comparison/TechnologyTooltip';
@@ -22,6 +22,7 @@ interface Supplier {
   materials: string[];
   verified: boolean;
   premium: boolean;
+  isPartner?: boolean;
   rating: number;
   reviewCount: number;
   description: string;
@@ -149,6 +150,12 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
                 <h3 className="text-sm font-semibold text-foreground group-hover:text-primary transition-all duration-300 truncate">
                   {supplier.name}
                 </h3>
+                {supplier.isPartner && (
+                  <Star
+                    className="h-3 w-3 text-supplier-partner fill-current flex-shrink-0 group-hover:scale-110 transition-transform duration-300"
+                    aria-label="Paying SupplyCheck partner"
+                  />
+                )}
                 {supplier.verified && (
                   <Verified className="h-3 w-3 text-supplier-verified flex-shrink-0 group-hover:scale-110 transition-transform duration-300" />
                 )}

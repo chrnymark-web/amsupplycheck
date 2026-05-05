@@ -120,6 +120,10 @@ export function sortMatchesByPrice(
     return Infinity;
   };
   return [...matches].sort((a, b) => {
+    // Paying partners pinned to top, ahead of every other tier.
+    const ap = a.supplier.is_partner ? 0 : 1;
+    const bp = b.supplier.is_partner ? 0 : 1;
+    if (ap !== bp) return ap - bp;
     const ta = tier(a.supplier.supplier_id);
     const tb = tier(b.supplier.supplier_id);
     if (ta !== tb) return ta - tb;

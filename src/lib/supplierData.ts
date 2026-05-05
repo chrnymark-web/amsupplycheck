@@ -88,6 +88,7 @@ export interface ParsedSupplier {
   certifications?: string[];
   verified: boolean;
   premium: boolean;
+  isPartner?: boolean;
   rating: number;
   reviewCount: number;
   description: string;

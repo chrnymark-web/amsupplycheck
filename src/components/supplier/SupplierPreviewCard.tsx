@@ -1,7 +1,7 @@
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import SupplierLogo from '@/components/ui/supplier-logo';
-import { MapPin, Verified, Crown, ArrowRight } from 'lucide-react';
+import { MapPin, Verified, Crown, ArrowRight, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface SupplierPreviewProps {
@@ -16,6 +16,7 @@ interface SupplierPreviewProps {
     materials: string[];
     verified: boolean;
     premium: boolean;
+    isPartner?: boolean;
     logoUrl?: string;
   };
   onClick?: () => void;
@@ -49,6 +50,9 @@ const SupplierPreviewCard: React.FC<SupplierPreviewProps> = ({
           <span className="text-sm font-medium text-foreground truncate group-hover:text-primary transition-colors">
             {supplier.name}
           </span>
+          {supplier.isPartner && (
+            <Star className="h-3 w-3 text-supplier-partner fill-current flex-shrink-0" aria-label="Paying SupplyCheck partner" />
+          )}
           {supplier.verified && (
             <Verified className="h-3 w-3 text-supplier-verified flex-shrink-0" />
           )}

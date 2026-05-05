@@ -51,6 +51,7 @@ export default {
         supplier: {
           verified: "hsl(var(--supplier-verified))",
           premium: "hsl(var(--supplier-premium))",
+          partner: "hsl(var(--supplier-partner))",
         },
         price: {
           highlight: "hsl(var(--price-highlight))",

@@ -13,6 +13,7 @@ export interface SupplierListItem {
   location_lng: number | null;
   verified: boolean;
   premium: boolean;
+  is_partner: boolean;
   logo_url: string | null;
   technologies: { id: string; name: string; slug: string; category: string | null }[];
   materials: { id: string; name: string; slug: string; category: string | null }[];
@@ -43,8 +44,9 @@ async function fetchSuppliers(): Promise<SupplierListItem[]> {
   // Fetch suppliers
   const { data: suppliers, error: supError } = await supabase
     .from('suppliers')
-    .select('id, supplier_id, name, website, description, location_city, location_country, location_lat, location_lng, verified, premium, logo_url, country_id')
+    .select('id, supplier_id, name, website, description, location_city, location_country, location_lat, location_lng, verified, premium, is_partner, logo_url, country_id')
     .eq('verified', true)
+    .order('is_partner', { ascending: false })
     .order('name');
 
   if (supError) throw supError;
@@ -118,6 +120,7 @@ async function fetchSuppliers(): Promise<SupplierListItem[]> {
     location_lng: s.location_lng,
     verified: s.verified ?? false,
     premium: s.premium ?? false,
+    is_partner: s.is_partner ?? false,
     logo_url: s.logo_url,
     technologies: supTechs.get(s.id) || [],
     materials: supMats.get(s.id) || [],
@@ -318,6 +321,7 @@ export function useSupplierDetail(supplierSlug: string) {
         location_lng: resolvedSupplier.location_lng ? Number(resolvedSupplier.location_lng) : null,
         verified: resolvedSupplier.verified ?? false,
         premium: resolvedSupplier.premium ?? false,
+        is_partner: resolvedSupplier.is_partner ?? false,
         logo_url: resolvedSupplier.logo_url,
         technologies: (techs.data || []) as any[],
         materials: (mats.data || []) as any[],

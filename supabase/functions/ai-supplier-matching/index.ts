@@ -107,6 +107,7 @@ interface MatchResult {
     location_country: string | null;
     verified: boolean;
     premium: boolean;
+    is_partner: boolean;
     logo_url: string | null;
   };
   score: number;
@@ -189,7 +190,7 @@ serve(async (req) => {
     // Get all suppliers from database
     const { data: suppliers, error: suppliersError } = await supabase
       .from('suppliers')
-      .select('supplier_id, name, website, description, technologies, materials, region, location_city, location_country, verified, premium, logo_url');
+      .select('supplier_id, name, website, description, technologies, materials, region, location_city, location_country, verified, premium, is_partner, logo_url');
 
     if (suppliersError) {
       console.error('Error fetching suppliers:', suppliersError);
@@ -504,6 +505,7 @@ Extract the requirements. Prioritize the recommended technologies if they match 
             location_country: supplier.location_country,
             verified: supplier.verified || false,
             premium: supplier.premium || false,
+            is_partner: supplier.is_partner || false,
             logo_url: supplier.logo_url,
           },
           score: Math.round(totalScore * 100),
@@ -521,8 +523,14 @@ Extract the requirements. Prioritize the recommended technologies if they match 
       }
     }
 
-    // Sort by score descending
-    matches.sort((a, b) => b.score - a.score);
+    // Paying partners pinned to top; AI score sorts within each tier so a
+    // partner ranked #9 by raw score is never cut by the slice below.
+    matches.sort((a, b) => {
+      if (a.supplier.is_partner !== b.supplier.is_partner) {
+        return a.supplier.is_partner ? -1 : 1;
+      }
+      return b.score - a.score;
+    });
 
     // Get top matches
     const topMatches = matches.slice(0, 8);

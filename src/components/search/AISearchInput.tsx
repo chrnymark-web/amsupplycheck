@@ -22,6 +22,7 @@ interface SupplierForPreview {
   materials: string[];
   verified: boolean;
   premium: boolean;
+  isPartner?: boolean;
   logoUrl?: string;
   region?: string;
 }

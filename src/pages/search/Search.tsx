@@ -132,6 +132,7 @@ const Search = () => {
           certifications: supplier.certifications || [],
           verified: supplier.verified || false,
           premium: supplier.premium || false,
+          isPartner: supplier.is_partner || false,
           rating: Number(supplier.rating) || 0,
           reviewCount: supplier.review_count || 0,
           description: supplier.description || '',
@@ -496,6 +497,8 @@ const Search = () => {
       }
       if (sortBy === 'name') return a.name.localeCompare(b.name);
       if (sortBy === 'location') return (a.location.country || '').localeCompare(b.location.country || '');
+      // Paying partners pinned to top, then relevance within each tier.
+      if (!!a.isPartner !== !!b.isPartner) return a.isPartner ? -1 : 1;
       // Relevance: name match > premium > verified > filter overlap
       const queryLower = (searchQuery || '').toLowerCase();
       const aNameMatch = queryLower && a.name.toLowerCase().includes(queryLower) ? 100 : 0;

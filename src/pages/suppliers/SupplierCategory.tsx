@@ -67,7 +67,10 @@ const SupplierCategory = () => {
         query = query.eq('region', category.filters.region);
       }
 
-      query = query.order('premium', { ascending: false }).order('rating', { ascending: false });
+      query = query
+        .order('is_partner', { ascending: false })
+        .order('premium', { ascending: false })
+        .order('rating', { ascending: false });
 
       const { data, error } = await query;
 
@@ -188,6 +191,7 @@ const SupplierCategory = () => {
                   materials: s.materials || [],
                   verified: s.verified || false,
                   premium: s.premium || false,
+                  isPartner: s.is_partner || false,
                   rating: s.rating || 0,
                   reviewCount: s.review_count || 0,
                   website: s.website || undefined,

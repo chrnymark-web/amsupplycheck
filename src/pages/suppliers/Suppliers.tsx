@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import SupplierLogo from '@/components/ui/supplier-logo';
-import { Search, MapPin, Verified, ExternalLink, X, SlidersHorizontal, GitCompare, ChevronDown, ChevronUp, Factory, Shield, Tag, Globe } from 'lucide-react';
+import { Search, MapPin, Verified, ExternalLink, X, SlidersHorizontal, GitCompare, ChevronDown, ChevronUp, Factory, Shield, Tag, Globe, Star } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -31,6 +31,9 @@ const SupplierCard: React.FC<{ supplier: SupplierListItem; onCompareToggle?: (id
               <h3 className="text-base font-semibold text-foreground group-hover:text-primary transition-colors truncate">
                 {supplier.name}
               </h3>
+              {supplier.is_partner && (
+                <Star className="h-4 w-4 text-supplier-partner fill-current flex-shrink-0" aria-label="Paying SupplyCheck partner" />
+              )}
               {supplier.verified && <Verified className="h-4 w-4 text-primary flex-shrink-0" />}
             </div>
             

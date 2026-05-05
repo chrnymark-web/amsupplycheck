@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Helmet } from 'react-helmet';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Sparkles, Package, MapPin, Award, Target, Loader2, ExternalLink, CheckCircle2, Factory, Cog, Paintbrush, Ruler, Shield } from 'lucide-react';
+import { ArrowLeft, Sparkles, Package, MapPin, Award, Target, Loader2, ExternalLink, CheckCircle2, Factory, Cog, Paintbrush, Ruler, Shield, Star } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -84,6 +84,12 @@ function MatchCard({ match, rank }: { match: MatchResult; rank: number }) {
 
         {/* Verification badges */}
         <div className="flex gap-2 mt-3">
+          {supplier.is_partner && (
+            <Badge variant="outline" className="text-xs bg-amber-50 border-amber-300 text-amber-800">
+              <Star className="h-3 w-3 mr-1 fill-current" />
+              Partner
+            </Badge>
+          )}
           {supplier.verified && (
             <Badge variant="outline" className="text-xs">
               <CheckCircle2 className="h-3 w-3 mr-1" />

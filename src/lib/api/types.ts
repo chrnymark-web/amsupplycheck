@@ -60,6 +60,7 @@ export interface EstimatedPrice {
   supplierId: string;
   supplierName: string;
   supplierLogo?: string;
+  isPartner?: boolean;      // True if paying SupplyCheck partner — pinned to top
   priceTier: string;        // '€' | '€€' | '€€€' | '€€€€'
   priceTierLabel: string;   // 'Low cost' | 'Medium cost' | etc
   priceRangeLow: number;    // Estimated low price in EUR
