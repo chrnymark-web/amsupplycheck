@@ -46,29 +46,41 @@ Note the UUID — migrations target by UUID, not slug.
 
 ### 2.5 Disqualification check (is this a 3D printing provider at all?)
 
-Before doing any slug-mapping work, decide whether this supplier belongs in SupplyCheck. If the website clearly shows the company is **not** a 3D printing service provider, the correct outcome is **removal**, not correction.
+Before doing any slug-mapping work, decide whether this supplier belongs in SupplyCheck. **Removal is the exception, not the default.** A supplier should only be removed if the company has **no 3D printing service offering whatsoever** — not even a side-business slice.
 
-**Disqualifying signals** (website CLEARLY shows ONE of these — no inference, no "probably"):
+**Bias is heavily toward keeping.** A supplier earns its spot in SupplyCheck if any of the following is true:
 
-| Signal | Example |
+- They print parts on demand for customers (full or partial business line)
+- They are a 3D-printing **platform / aggregator** that routes orders to actual providers (e.g. Craftcloud, Hubs, JLC3DP, Treatstock — these are valid SupplyCheck entries)
+- They are a manufacturer where 3D printing is one of several processes (CNC + AM + injection molding etc.)
+- They are a reseller, design firm, or prototyping shop that **also** offers any form of printing service, even just a few materials
+
+If you can find ONE page on the website that offers a 3D printing service in any form, **keep them** and proceed with normal correction (§3 onward).
+
+**Disqualifying signals** — the supplier should be removed ONLY if the website clearly shows ONE of these, and there is **no countervailing service offering anywhere on the site**:
+
+| Signal | What it looks like |
 |---|---|
-| Different industry entirely | Site sells real estate, restaurant supplies, clothing, SaaS — no mention of 3D printing anywhere |
-| Consumer 3D model marketplace | Site only hosts/sells STL files for download; no service offering |
-| Printer reseller only | Sells 3D printers/filament but offers no print-on-demand service |
-| Domain parked or for sale | "This domain is for sale", GoDaddy parking, Sedo, etc. |
-| 404 / NXDOMAIN consistently | DNS or HTTP errors on root domain across multiple Firecrawl attempts |
-| Rebranded away | Old domain redirects to a completely unrelated business |
+| Completely different industry | Site sells real estate, restaurants, clothing, SaaS, financial services — zero mention of 3D printing anywhere on any page |
+| Pure consumer file marketplace with no print path | Site only hosts/sells STL/3MF files for download AND has no "Order this printed" or print-on-demand option (Thingiverse-clone with no service hookup). If they offer ANY print-on-demand → keep. |
+| Hardware-only retailer | Sells 3D printers, filament, resin and **does not** offer printing service AND **does not** route orders to providers. If they offer "we'll print this for you" or aggregate providers → keep. |
+| Domain parked or for sale | "This domain is for sale", GoDaddy parking, Sedo, expired-domain registrar |
+| 404 / NXDOMAIN consistently | DNS or HTTP errors on root domain across multiple Firecrawl attempts AND no known new domain |
+| Rebranded into unrelated business | Old domain redirects to a completely unrelated business with no 3D printing legacy |
 
 **NOT disqualifying — skip instead, do not remove:**
 
 - Temporary 5xx, timeout, TLS error
 - Site under construction / coming-soon page
 - Bilingual / non-English site we can't fully parse
-- Hobbyist blog (might be a small one-person operator)
-- Reseller/distributor that **also** claims a service offering, even briefly
-- Mentions 3D printing tangentially but service offering is unclear
+- Hobbyist blog (might be a small one-person operator who takes orders)
+- Reseller, distributor, or platform that mentions printing service even tangentially
+- Company where 3D printing is a small but real part of their business
+- Mentions 3D printing in any positive-context (case studies, product listings, capabilities) even if service offering is unclear
 
-When in doubt, skip. Removal is destructive and goes through human PR review, but mistakes are still costly.
+**The acid test:** Could a user looking for "someone who can 3D print my part" plausibly contact this company and get a yes? If maybe → keep. If clearly no → remove. If in any doubt → skip and let the human decide.
+
+Removal is destructive and goes through human PR review, but mistakes erode trust in the audit cron — bias heavily toward keep / skip.
 
 ### 3. Verify canonical slugs
 

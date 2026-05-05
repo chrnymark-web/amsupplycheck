@@ -38,7 +38,7 @@ First run the **§2.5 disqualification check** from SKILL.md. If the website cle
 |---|---|
 | Real diff exists | Full migration as SKILL.md section 5 specifies. Set `last_validation_confidence = 95`, `validation_failures = 0`. File: `..._correct_<supplier_id>.sql` |
 | DB already matches website | One-line migration that only updates `last_validated_at = now(), last_validation_confidence = 100` for that UUID. PR title: `Audit: <name> (verified clean)`. File: `..._correct_<supplier_id>.sql` |
-| **Disqualified — not a 3D printing provider** (per SKILL.md §2.5) | Removal migration per SKILL.md §5b: `DELETE FROM public.suppliers WHERE id = '<UUID>';` (junction tables cascade). PR title: `Audit: <name> (REMOVE — not 3D printing)`. File: `..._remove_<supplier_id>.sql`. **The disqualifying signal must be unambiguous** — if borderline, fall through to "skipped" instead. |
+| **Disqualified — zero 3D printing offering** (per SKILL.md §2.5) | Removal migration per SKILL.md §5b: `DELETE FROM public.suppliers WHERE id = '<UUID>';` (junction tables cascade). PR title: `Audit: <name> (REMOVE — not 3D printing)`. File: `..._remove_<supplier_id>.sql`. **Bias heavily toward keeping**: a small service slice, platform/aggregator role, or any "we'll print this for you" signal disqualifies the disqualification — skip instead. Only remove if the site has zero 3D printing service offering on any page. |
 | Website unreadable / no explicit tech named | NO migration. Skip to Step 6 with the "skipped" Telegram template. |
 
 File goes to: `supabase/migrations/$(date -u +%Y%m%d%H%M%S)_<correct\|remove>_<supplier_id_with_underscores>.sql`
@@ -164,4 +164,4 @@ Specific fallbacks:
 - **Don't call `AskUserQuestion`.** Use Auto-mode defaults from SKILL.md.
 - **Don't open more than one PR per run.** One supplier per day, period.
 - **Don't write to `supplier_technologies` / `supplier_materials` junction tables for "verified clean" runs** — only the main `suppliers` row update.
-- **Don't propose removal on borderline cases.** SKILL.md §2.5 disqualification requires an unambiguous signal. If the website is partially 3D-printing-related, a reseller that *might* offer service, or temporarily unreadable — fall through to "skipped" instead. Removal is destructive even with PR review; bias toward skipping.
+- **Don't propose removal on borderline cases.** SKILL.md §2.5 has a strict bar: removal requires that the site has **zero** 3D printing service offering on any page. A small service slice, a platform/aggregator role (Hubs, Craftcloud-style), or any "order this printed" path keeps the supplier. If the website is partially 3D-printing-related, a reseller that *might* offer service, or temporarily unreadable — fall through to "skipped" instead. The acid test: could a user plausibly contact this company and get their part 3D printed? Maybe = keep. Clearly no = remove. In doubt = skip.
