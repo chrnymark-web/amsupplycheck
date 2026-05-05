@@ -1069,7 +1069,7 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
       } else if (eventName === 'supplier_pageview') {
         sourceData[source].supplierViews += count;
         totalSupplierViews += count;
-      } else if (eventName === 'affiliate_click') {
+      } else if (eventName === 'outbound_click' || eventName === 'affiliate_click') {
         sourceData[source].conversions += count;
         totalConversions += count;
       }
@@ -1179,7 +1179,7 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
       totalFilesUploaded += count;
     } else if (eventName === 'supplier_pageview') {
       totalSupplierViews += count;
-    } else if (eventName === 'affiliate_click') {
+    } else if (eventName === 'outbound_click' || eventName === 'affiliate_click') {
       totalConversions += count;
     }
   });

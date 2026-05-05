@@ -3,12 +3,16 @@ import { format } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import type { DateRange } from '@/components/admin/date-range-picker';
 
+export type GA4UnavailableReason = 'credentials_missing' | 'edge_function_error' | 'no_funnel_data';
+
 export type GA4Funnel = {
   visits: number;
   filesUploaded: number;
   supplierViews: number;
   conversions: number;
   available: boolean;
+  reason?: GA4UnavailableReason;
+  errorMessage?: string;
 };
 
 async function fetchGA4Funnel(range: DateRange): Promise<GA4Funnel> {
@@ -19,9 +23,25 @@ async function fetchGA4Funnel(range: DateRange): Promise<GA4Funnel> {
     body: { dateRange: { startDate, endDate } },
   });
 
+  const empty = { visits: 0, filesUploaded: 0, supplierViews: 0, conversions: 0 };
+
+  if (error) {
+    return { ...empty, available: false, reason: 'edge_function_error', errorMessage: error.message };
+  }
+
+  if (data?.error) {
+    const isCreds = typeof data.error === 'string' && /credentials/i.test(data.error);
+    return {
+      ...empty,
+      available: false,
+      reason: isCreds ? 'credentials_missing' : 'edge_function_error',
+      errorMessage: data.error,
+    };
+  }
+
   const funnel = data?.funnelData;
-  if (error || !funnel) {
-    return { visits: 0, filesUploaded: 0, supplierViews: 0, conversions: 0, available: false };
+  if (!funnel) {
+    return { ...empty, available: false, reason: 'no_funnel_data' };
   }
 
   return {

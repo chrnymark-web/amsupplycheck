@@ -72,3 +72,6 @@ verify_jwt = false
 
 [functions.trigger-stl-match]
 verify_jwt = false
+
+[functions.ga4-analytics]
+verify_jwt = true

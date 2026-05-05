@@ -514,8 +514,26 @@ export default function Admin() {
             )}
 
             {ga4 && !ga4.available && !ga4Loading && !ga4Error && (
+              <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
+                {ga4.reason === 'credentials_missing' ? (
+                  <>
+                    <div className="font-semibold">GA4 credentials not configured in Supabase.</div>
+                    <div>Set <code className="font-mono text-xs">GA4_PROPERTY_ID</code> and <code className="font-mono text-xs">GA4_SERVICE_ACCOUNT_JSON</code> under Settings → Edge Functions → Secrets, then redeploy the <code className="font-mono text-xs">ga4-analytics</code> function.</div>
+                  </>
+                ) : ga4.reason === 'edge_function_error' ? (
+                  <>
+                    <div className="font-semibold">GA4 edge function returned an error.</div>
+                    <div>{ga4.errorMessage ?? 'Unknown error from ga4-analytics function.'}</div>
+                  </>
+                ) : (
+                  <div>GA4 returned no funnel data for this period. The function ran but produced no rows — either GA4 has no matching events, or the date range is empty.</div>
+                )}
+              </div>
+            )}
+
+            {ga4 && ga4.available && !ga4Loading && ga4.visits === 0 && ga4.supplierViews === 0 && ga4.conversions === 0 && ga4.filesUploaded === 0 && (
               <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-400">
-                GA4 returned no funnel data for this period. The edge function may be misconfigured or GA4 has no events yet.
+                GA4 has no events for this period. This usually means adblock/consent blocked all measurement, or GA4's 24–48h reporting delay hasn't caught up.
               </div>
             )}
 

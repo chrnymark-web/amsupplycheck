@@ -19,6 +19,14 @@ const HIGH_SIGNAL_EVENTS = new Set<string>([
   'newsletter_signup_submit',
   'quote_request_submit',
   'select_item',
+  'view_item',
+  'view_item_list',
+  'add_to_cart',
+  'purchase',
+  'filter_applied',
+  'file_uploaded',
+  'supplier_application_submit',
+  'supplier_website_click_submit',
 ]);
 
 const SESSION_ID_KEY = 'sc_analytics_session_id';
