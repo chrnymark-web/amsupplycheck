@@ -131,6 +131,7 @@ export function useRecentAudits() {
 async function fetchOpenPRs(): Promise<AuditPR[]> {
   const { data, error } = await supabase.functions.invoke('list-audit-prs');
   if (error) throw error;
+  if (data?.error) throw new Error(data.error);
   if (!data || !Array.isArray(data.prs)) return [];
   return data.prs as AuditPR[];
 }
