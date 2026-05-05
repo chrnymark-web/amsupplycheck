@@ -23,6 +23,7 @@ interface Supplier {
   verified: boolean;
   premium: boolean;
   isPartner?: boolean;
+  instantQuoteUrl?: string;
   rating: number;
   reviewCount: number;
   description: string;
@@ -299,7 +300,28 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
       <CardContent className="pt-2 px-3 pb-3">
         {/* Actions */}
         <div className="flex gap-2">
-          {supplier.website ? (
+          {supplier.isPartner && supplier.instantQuoteUrl ? (
+            <a
+              href={supplier.instantQuoteUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => {
+                e.stopPropagation();
+                trackOutboundLink(supplier.instantQuoteUrl!, supplier.name, supplier.id);
+                trackSupplierInteraction('contact', supplier.id, supplier.name, 'card', {
+                  verified: supplier.verified,
+                  premium: supplier.premium,
+                  partner: true,
+                  destination: 'instant_quote',
+                });
+              }}
+              className="flex-[2] inline-flex items-center justify-center gap-1 bg-supplier-partner text-black font-medium hover:scale-105 hover:shadow-hover transition-transform duration-300 h-7 text-xs rounded-md px-3"
+            >
+              <Star className="h-3 w-3 fill-current" />
+              Get instant quote
+              <ExternalLink className="h-2.5 w-2.5" />
+            </a>
+          ) : supplier.website ? (
             <a
               href={supplier.website}
               target="_blank"
@@ -315,7 +337,7 @@ const SupplierCard: React.FC<SupplierCardProps> = ({
               Contact
             </span>
           )}
-          <Button 
+          <Button
             variant="outline"
             className="flex-[1] hover:bg-accent hover:scale-105 transition-all duration-300 h-7 text-xs"
             onClick={(e) => {

@@ -91,11 +91,19 @@ function STLMatchCard({ match, rank }: { match: MatchResult; rank: number }) {
           <Button variant="outline" size="sm" className="flex-1" asChild>
             <a href={`/suppliers/${supplier.supplier_id}`}>View profile</a>
           </Button>
-          {supplier.website && (
+          {supplier.is_partner && supplier.instant_quote_url ? (
+            <Button size="sm" className="flex-1 bg-supplier-partner text-black hover:bg-supplier-partner/90" asChild>
+              <a href={supplier.instant_quote_url} target="_blank" rel="noopener noreferrer">
+                <Star className="h-3 w-3 mr-1 fill-current" />
+                Get instant quote
+                <ExternalLink className="h-3 w-3 ml-1" />
+              </a>
+            </Button>
+          ) : supplier.website ? (
             <Button size="sm" className="flex-1" asChild>
               <a href={supplier.website} target="_blank" rel="noopener noreferrer">Visit <ExternalLink className="h-3 w-3 ml-1" /></a>
             </Button>
-          )}
+          ) : null}
         </div>
       </CardContent>
     </Card>

@@ -108,6 +108,7 @@ interface MatchResult {
     verified: boolean;
     premium: boolean;
     is_partner: boolean;
+    instant_quote_url: string | null;
     logo_url: string | null;
   };
   score: number;
@@ -190,7 +191,7 @@ serve(async (req) => {
     // Get all suppliers from database
     const { data: suppliers, error: suppliersError } = await supabase
       .from('suppliers')
-      .select('supplier_id, name, website, description, technologies, materials, region, location_city, location_country, verified, premium, is_partner, logo_url');
+      .select('supplier_id, name, website, description, technologies, materials, region, location_city, location_country, verified, premium, is_partner, logo_url, metadata');
 
     if (suppliersError) {
       console.error('Error fetching suppliers:', suppliersError);
@@ -506,6 +507,7 @@ Extract the requirements. Prioritize the recommended technologies if they match 
             verified: supplier.verified || false,
             premium: supplier.premium || false,
             is_partner: supplier.is_partner || false,
+            instant_quote_url: (supplier.metadata as Record<string, unknown> | null)?.instant_quote_url as string ?? null,
             logo_url: supplier.logo_url,
           },
           score: Math.round(totalScore * 100),

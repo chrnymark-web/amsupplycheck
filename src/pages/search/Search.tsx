@@ -133,6 +133,7 @@ const Search = () => {
           verified: supplier.verified || false,
           premium: supplier.premium || false,
           isPartner: supplier.is_partner || false,
+          instantQuoteUrl: (supplier.metadata as Record<string, unknown> | null)?.instant_quote_url as string ?? undefined,
           rating: Number(supplier.rating) || 0,
           reviewCount: supplier.review_count || 0,
           description: supplier.description || '',
@@ -940,7 +941,9 @@ const Search = () => {
                   const normId = normalizeVendorId(supplier.id);
                   const normName = supplier.name.toLowerCase().replace(/[^a-z0-9]/g, '');
                   const matchedQuote = quoteMap.get(normId) || quoteMap.get(normName);
-                  const liveQuoteProp = matchedQuote ? {
+                  // Paying partners route to their own quote portal — never
+                  // show a Craftcloud-mediated price on a partner card.
+                  const liveQuoteProp = (matchedQuote && !supplier.isPartner) ? {
                     unitPrice: matchedQuote.unitPrice,
                     currency: matchedQuote.currency,
                     estimatedLeadTimeDays: matchedQuote.estimatedLeadTimeDays,

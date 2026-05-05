@@ -89,6 +89,7 @@ export interface ParsedSupplier {
   verified: boolean;
   premium: boolean;
   isPartner?: boolean;
+  instantQuoteUrl?: string;
   rating: number;
   reviewCount: number;
   description: string;

@@ -8,7 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import SupplierLogo from '@/components/ui/supplier-logo';
-import { MapPin, ExternalLink, Verified, Crown, ArrowLeft, Mail, Globe, Building2, Factory, HelpCircle, Clock, Zap, Calculator, ThumbsUp, ThumbsDown, DollarSign, Users, ArrowRight, Compass, BookOpen, Award, Tag } from 'lucide-react';
+import { MapPin, ExternalLink, Verified, Crown, ArrowLeft, Mail, Globe, Building2, Factory, HelpCircle, Clock, Zap, Calculator, ThumbsUp, ThumbsDown, DollarSign, Users, ArrowRight, Compass, BookOpen, Award, Tag, Star } from 'lucide-react';
 import { getDisplayNameFromMaterialKey, getDisplayNameFromTechnologyKey } from '@/lib/supplierData';
 import { TECHNOLOGY_GLOSSARY } from '@/lib/technologyGlossary';
 import { getSupplierPriceTier } from '@/lib/supplierPricing';
@@ -56,6 +56,8 @@ interface Supplier {
   certifications: string[] | null;
   verified: boolean | null;
   premium: boolean | null;
+  is_partner: boolean | null;
+  instant_quote_url: string | null;
   rating: number | null;
   review_count: number | null;
   logo_url: string | null;
@@ -135,6 +137,7 @@ const SupplierDetail = () => {
         } else {
           setSupplier({
             ...data,
+            instant_quote_url: (data.metadata as Record<string, unknown> | null)?.instant_quote_url as string ?? null,
             description_extended: data.description_extended as DescriptionExtended | null
           });
           
@@ -544,7 +547,19 @@ const SupplierDetail = () => {
                 )}
 
                 <div className="flex flex-wrap gap-3">
-                  {supplier.website ? (
+                  {supplier.is_partner && supplier.instant_quote_url ? (
+                    <a
+                      href={supplier.instant_quote_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={handleContactClick}
+                      className="inline-flex items-center justify-center bg-supplier-partner text-black font-medium hover:scale-105 hover:shadow-hover transition-transform duration-300 h-10 px-4 rounded-md"
+                    >
+                      <Star className="h-4 w-4 mr-2 fill-current" />
+                      Get instant quote
+                      <ExternalLink className="h-4 w-4 ml-2" />
+                    </a>
+                  ) : supplier.website ? (
                     <a
                       href={supplier.website}
                       target="_blank"
@@ -562,7 +577,7 @@ const SupplierDetail = () => {
                       Contact Supplier
                     </span>
                   )}
-                  
+
                   {supplier.website && (
                     <a
                       href={supplier.website}

@@ -44,7 +44,7 @@ const SupplierCategory = () => {
       setLoading(true);
       let query = supabase
         .from('suppliers')
-        .select('id, supplier_id, name, description, website, location_city, location_country, technologies, materials, verified, premium, rating, review_count, logo_url, region, lead_time_indicator, has_rush_service, has_instant_quote')
+        .select('id, supplier_id, name, description, website, location_city, location_country, technologies, materials, verified, premium, is_partner, rating, review_count, logo_url, region, lead_time_indicator, has_rush_service, has_instant_quote, metadata')
         .eq('verified', true);
 
       // Apply technology filter using overlaps (ANY match)
@@ -192,6 +192,7 @@ const SupplierCategory = () => {
                   verified: s.verified || false,
                   premium: s.premium || false,
                   isPartner: s.is_partner || false,
+                  instantQuoteUrl: (s.metadata as Record<string, unknown> | null)?.instant_quote_url as string ?? undefined,
                   rating: s.rating || 0,
                   reviewCount: s.review_count || 0,
                   website: s.website || undefined,

@@ -29,6 +29,7 @@ export interface MatchedSupplier {
   verified: boolean;
   premium: boolean;
   is_partner: boolean;
+  instant_quote_url: string | null;
   logo_url: string | null;
 }
 
