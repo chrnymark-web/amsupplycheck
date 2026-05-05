@@ -130,12 +130,14 @@ export default function STLMatch() {
       file_extension: "stl",
       page: "stl_match",
     });
-    void supabase.from("upload_events").insert({
+    supabase.from("upload_events").insert({
       file_name: f.name,
       file_size_bytes: f.size,
       file_extension: "stl",
       source_page: "stl_match",
       user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
+    }).then(({ error }) => {
+      if (error) console.warn('[upload_events] insert failed:', error.message, error);
     });
     setFile(f);
   }, []);

@@ -215,13 +215,15 @@ export const trackEvent = (eventName: string, params?: EventParams): void => {
   };
 
   if (HIGH_SIGNAL_EVENTS.has(eventName) && typeof window !== 'undefined') {
-    void supabase.from('analytics_events').insert({
+    supabase.from('analytics_events').insert({
       event_name: eventName,
       props: enrichedParams as Record<string, unknown>,
       session_id: getSessionId(),
       page_path: window.location.pathname,
       referrer: document.referrer || null,
       user_agent: navigator.userAgent,
+    }).then(({ error }) => {
+      if (error) console.warn('[analytics_events] insert failed:', error.message, error);
     });
   }
 
