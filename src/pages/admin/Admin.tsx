@@ -11,6 +11,7 @@ import {
 import { useAdminStats, type TopItem } from '@/hooks/use-admin-stats';
 import { useFunnelData, type FunnelData } from '@/hooks/use-funnel-data';
 import { useGA4Funnel } from '@/hooks/use-ga4-funnel';
+import { useEventBreakdown } from '@/hooks/use-event-breakdown';
 import { DateRangePicker, rangeForDays, type DateRange } from '@/components/admin/date-range-picker';
 
 function StatCard({ icon: Icon, label, value, sub, color = 'text-primary', loading }: {
@@ -225,6 +226,7 @@ export default function Admin() {
   const { data: stats, isLoading: statsLoading, isError: statsError, error: statsErr } = useAdminStats(range);
   const { data: funnel, isLoading: funnelLoading, error: funnelError } = useFunnelData(range);
   const { data: ga4, isLoading: ga4Loading, error: ga4Error } = useGA4Funnel(range, tab === 'compare');
+  const { data: events, isLoading: eventsLoading, error: eventsError } = useEventBreakdown(range);
 
   const total = stats?.suppliers.total ?? 0;
   const verified = stats?.suppliers.verified ?? 0;
@@ -405,93 +407,177 @@ export default function Admin() {
         )}
 
         {tab === 'analytics' && (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+          <div className="space-y-8">
+            <div className="flex items-baseline justify-between">
+              <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+              <p className="text-xs text-muted-foreground">All counts from Supabase platform tracking</p>
+            </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Search Overview</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Searches in period</span>
-                      {statsLoading
-                        ? <Skeleton className="h-5 w-12" />
-                        : <span className="font-semibold text-foreground">{stats?.searches ?? 0}</span>}
-                    </div>
-                    <p className="text-xs text-muted-foreground/70">
-                      For deeper search timing & smart-search breakdown, see{' '}
-                      <button
-                        type="button"
-                        className="underline hover:text-foreground"
-                        onClick={() => navigate('/admin/ai-analytics')}
-                      >
-                        AI Analytics
-                      </button>.
+            <FunnelSection funnel={funnel} loading={funnelLoading} error={funnelError} />
+
+            <Card className="bg-card border-border overflow-hidden">
+              <CardContent className="p-0">
+                <div className="px-6 py-4 border-b border-border flex items-center justify-between">
+                  <div>
+                    <h3 className="text-lg font-semibold text-foreground">Event tracking detail</h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Every high-signal event recorded in <code className="font-mono">analytics_events</code> for the selected period.
                     </p>
                   </div>
-                </CardContent>
-              </Card>
+                  {events && !eventsLoading && (
+                    <div className="text-sm text-muted-foreground">
+                      Total: <span className="font-semibold text-foreground">{events.totalEvents.toLocaleString()}</span>
+                    </div>
+                  )}
+                </div>
 
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Project Matching</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Projects matched</span>
-                      {statsLoading
-                        ? <Skeleton className="h-5 w-12" />
-                        : <span className="font-semibold text-foreground">{stats?.aiMatches ?? 0}</span>}
-                    </div>
-                    <p className="text-xs text-muted-foreground/70">
-                      Match score and timing details:{' '}
-                      <button
-                        type="button"
-                        className="underline hover:text-foreground"
-                        onClick={() => navigate('/admin/ai-analytics')}
-                      >
-                        AI Analytics
-                      </button>.
-                    </p>
+                {eventsError ? (
+                  <div className="m-6 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                    Failed to load event breakdown: {eventsError instanceof Error ? eventsError.message : 'Unknown error'}
                   </div>
-                </CardContent>
-              </Card>
+                ) : (
+                  <div className="grid grid-cols-[1.5fr_1fr_1fr] gap-0 text-sm">
+                    <div className="bg-muted/40 px-6 py-3 font-semibold text-foreground border-b border-border">Event</div>
+                    <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border">event_name</div>
+                    <div className="bg-muted/40 px-6 py-3 font-semibold text-foreground text-right border-b border-border">Count</div>
 
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Newsletter</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Signups in period</span>
-                      {statsLoading
-                        ? <Skeleton className="h-5 w-12" />
-                        : <span className="font-semibold text-foreground">{stats?.newsletterSignups ?? 0}</span>}
-                    </div>
+                    {eventsLoading ? (
+                      Array.from({ length: 8 }).map((_, i) => (
+                        <React.Fragment key={i}>
+                          <div className="px-6 py-3 border-b border-border last:border-b-0"><Skeleton className="h-5 w-32" /></div>
+                          <div className="px-4 py-3 border-b border-border last:border-b-0"><Skeleton className="h-4 w-24" /></div>
+                          <div className="px-6 py-3 text-right border-b border-border last:border-b-0"><Skeleton className="h-5 w-16 ml-auto" /></div>
+                        </React.Fragment>
+                      ))
+                    ) : events && events.rows.length > 0 ? (
+                      <>
+                        {events.rows.map(row => (
+                          <React.Fragment key={row.eventName}>
+                            <div className="px-6 py-3 border-b border-border last:border-b-0">
+                              <div className="font-medium text-foreground">{row.label}</div>
+                            </div>
+                            <div className="px-4 py-3 border-b border-border last:border-b-0">
+                              <code className="font-mono text-xs text-muted-foreground">{row.eventName}</code>
+                            </div>
+                            <div className="px-6 py-3 text-right border-b border-border last:border-b-0">
+                              <span className={`font-semibold ${row.count === 0 ? 'text-muted-foreground/60' : 'text-foreground'}`}>
+                                {row.count.toLocaleString()}
+                              </span>
+                            </div>
+                          </React.Fragment>
+                        ))}
+                        <div className="px-6 py-3 bg-muted/20 border-t border-border">
+                          <div className="font-semibold text-foreground">File uploads</div>
+                        </div>
+                        <div className="px-4 py-3 bg-muted/20 border-t border-border">
+                          <code className="font-mono text-xs text-muted-foreground">upload_events table</code>
+                        </div>
+                        <div className="px-6 py-3 text-right bg-muted/20 border-t border-border">
+                          <span className={`font-semibold ${events.uploadEvents === 0 ? 'text-muted-foreground/60' : 'text-foreground'}`}>
+                            {events.uploadEvents.toLocaleString()}
+                          </span>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="col-span-3 px-6 py-8 text-center text-sm text-muted-foreground">
+                        No events recorded in this period.
+                      </div>
+                    )}
                   </div>
-                </CardContent>
-              </Card>
+                )}
+              </CardContent>
+            </Card>
 
-              <Card className="bg-card border-border">
-                <CardContent className="p-6">
-                  <h3 className="text-lg font-semibold text-foreground mb-4">Supplier Discovery</h3>
-                  <div className="space-y-3">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Runs total</span>
-                      {statsLoading
-                        ? <Skeleton className="h-5 w-12" />
-                        : <span className="font-semibold text-foreground">
-                            {stats?.discoveryRunsCompleted ?? 0} of {stats?.discoveryRuns ?? 0}
-                          </span>}
+            <div>
+              <h2 className="text-lg font-semibold text-foreground mb-4">Database aggregates</h2>
+              <p className="text-xs text-muted-foreground mb-4">
+                These come from dedicated tables (search_analytics, ai_match_analytics, newsletter_signups, discovery_runs) — not event tracking.
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Search Overview</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Searches in period</span>
+                        {statsLoading
+                          ? <Skeleton className="h-5 w-12" />
+                          : <span className="font-semibold text-foreground">{stats?.searches ?? 0}</span>}
+                      </div>
+                      <p className="text-xs text-muted-foreground/70">
+                        For deeper search timing & smart-search breakdown, see{' '}
+                        <button
+                          type="button"
+                          className="underline hover:text-foreground"
+                          onClick={() => navigate('/admin/ai-analytics')}
+                        >
+                          AI Analytics
+                        </button>.
+                      </p>
                     </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">New suppliers found</span>
-                      {statsLoading
-                        ? <Skeleton className="h-5 w-12" />
-                        : <span className="font-semibold text-green-500">{stats?.newFromDiscovery ?? 0}</span>}
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Project Matching</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Projects matched</span>
+                        {statsLoading
+                          ? <Skeleton className="h-5 w-12" />
+                          : <span className="font-semibold text-foreground">{stats?.aiMatches ?? 0}</span>}
+                      </div>
+                      <p className="text-xs text-muted-foreground/70">
+                        Match score and timing details:{' '}
+                        <button
+                          type="button"
+                          className="underline hover:text-foreground"
+                          onClick={() => navigate('/admin/ai-analytics')}
+                        >
+                          AI Analytics
+                        </button>.
+                      </p>
                     </div>
-                  </div>
-                </CardContent>
-              </Card>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Newsletter</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Signups in period</span>
+                        {statsLoading
+                          ? <Skeleton className="h-5 w-12" />
+                          : <span className="font-semibold text-foreground">{stats?.newsletterSignups ?? 0}</span>}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+
+                <Card className="bg-card border-border">
+                  <CardContent className="p-6">
+                    <h3 className="text-lg font-semibold text-foreground mb-4">Supplier Discovery</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Runs total</span>
+                        {statsLoading
+                          ? <Skeleton className="h-5 w-12" />
+                          : <span className="font-semibold text-foreground">
+                              {stats?.discoveryRunsCompleted ?? 0} of {stats?.discoveryRuns ?? 0}
+                            </span>}
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">New suppliers found</span>
+                        {statsLoading
+                          ? <Skeleton className="h-5 w-12" />
+                          : <span className="font-semibold text-green-500">{stats?.newFromDiscovery ?? 0}</span>}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
           </div>
         )}

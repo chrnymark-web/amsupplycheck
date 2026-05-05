@@ -10,7 +10,7 @@ export const GA_DEBUG_MODE = localStorage.getItem('ga_debug') === 'true';
 
 // Events that are also persisted to Supabase analytics_events.
 // Keep this list tight — only events that drive the admin funnel and product analytics.
-const HIGH_SIGNAL_EVENTS = new Set<string>([
+export const HIGH_SIGNAL_EVENTS = new Set<string>([
   'page_view',
   'supplier_pageview',
   'outbound_click',
@@ -28,6 +28,26 @@ const HIGH_SIGNAL_EVENTS = new Set<string>([
   'supplier_application_submit',
   'supplier_website_click_submit',
 ]);
+
+// Human-friendly labels for the admin event breakdown table.
+export const EVENT_LABELS: Record<string, string> = {
+  page_view: 'Page view',
+  supplier_pageview: 'Supplier page view',
+  outbound_click: 'Affiliate / outbound click',
+  search: 'Search',
+  cta_click: 'CTA click',
+  newsletter_signup_submit: 'Newsletter signup',
+  quote_request_submit: 'Quote request',
+  select_item: 'Select item',
+  view_item: 'View item',
+  view_item_list: 'View item list',
+  add_to_cart: 'Add to cart',
+  purchase: 'Purchase',
+  filter_applied: 'Filter applied',
+  file_uploaded: 'File uploaded',
+  supplier_application_submit: 'Supplier application submit',
+  supplier_website_click_submit: 'Supplier website click submit',
+};
 
 const SESSION_ID_KEY = 'sc_analytics_session_id';
 
