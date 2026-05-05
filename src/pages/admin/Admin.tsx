@@ -6,12 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   Globe, CheckCircle, Zap, Star, Search, ArrowRight, BarChart3, Eye,
-  Target, MousePointerClick, Mail, FileText,
+  Target, MousePointerClick, Mail, FileText, ShieldCheck, ExternalLink, GitPullRequest,
 } from 'lucide-react';
 import { useAdminStats, type TopItem } from '@/hooks/use-admin-stats';
 import { useFunnelData, type FunnelData } from '@/hooks/use-funnel-data';
 import { useGA4Funnel } from '@/hooks/use-ga4-funnel';
 import { useEventBreakdown } from '@/hooks/use-event-breakdown';
+import {
+  useAuditQueue, useConfidenceHistogram, useRecentAudits, useOpenAuditPRs,
+  type AuditSupplier, type ConfidenceBucket, type AuditPR,
+} from '@/hooks/use-audit-data';
 import { DateRangePicker, rangeForDays, type DateRange } from '@/components/admin/date-range-picker';
 
 function StatCard({ icon: Icon, label, value, sub, color = 'text-primary', loading }: {
@@ -216,7 +220,311 @@ function FunnelSection({ funnel, loading, error }: {
   );
 }
 
-type Tab = 'overview' | 'suppliers' | 'analytics' | 'compare' | 'applications';
+type Tab = 'overview' | 'suppliers' | 'analytics' | 'compare' | 'applications' | 'audit';
+
+function confidenceTone(c: number | null | undefined): { color: string; label: string } {
+  if (c === null || c === undefined) return { color: 'bg-muted text-muted-foreground', label: '—' };
+  if (c < 40) return { color: 'bg-red-500/15 text-red-600 border-red-500/30', label: c.toFixed(0) };
+  if (c < 70) return { color: 'bg-yellow-500/15 text-yellow-700 dark:text-yellow-500 border-yellow-500/30', label: c.toFixed(0) };
+  return { color: 'bg-green-500/15 text-green-600 border-green-500/30', label: c.toFixed(0) };
+}
+
+function formatRelative(iso: string | null | undefined): string {
+  if (!iso) return 'Never';
+  const ms = Date.now() - new Date(iso).getTime();
+  const days = Math.floor(ms / (24 * 60 * 60 * 1000));
+  if (days === 0) return 'Today';
+  if (days === 1) return '1 day ago';
+  if (days < 30) return `${days} days ago`;
+  const months = Math.floor(days / 30);
+  return months === 1 ? '1 month ago' : `${months} months ago`;
+}
+
+function AuditQueueSection() {
+  const { data, isLoading, error } = useAuditQueue();
+  return (
+    <Card className="bg-card border-border overflow-hidden">
+      <CardContent className="p-0">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5" />
+            Next in audit queue
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Top 20 suppliers by lowest confidence — same order the daily cron picks from.
+          </p>
+        </div>
+        {error ? (
+          <div className="m-6 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            Failed to load queue: {error instanceof Error ? error.message : 'Unknown error'}
+          </div>
+        ) : (
+          <div className="grid grid-cols-[40px_1fr_90px_110px_70px_40px] gap-0 text-sm">
+            <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border">#</div>
+            <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border">Supplier</div>
+            <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border text-right">Confidence</div>
+            <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border">Last validated</div>
+            <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border text-right">Fails</div>
+            <div className="bg-muted/40 px-4 py-3 border-b border-border" />
+            {isLoading ? (
+              Array.from({ length: 8 }).map((_, i) => (
+                <React.Fragment key={i}>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0"><Skeleton className="h-4 w-6" /></div>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0"><Skeleton className="h-4 w-40" /></div>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0 text-right"><Skeleton className="h-5 w-12 ml-auto" /></div>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0"><Skeleton className="h-4 w-20" /></div>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0 text-right"><Skeleton className="h-4 w-6 ml-auto" /></div>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0" />
+                </React.Fragment>
+              ))
+            ) : data && data.length > 0 ? (
+              data.map((s: AuditSupplier, idx: number) => {
+                const tone = confidenceTone(s.last_validation_confidence);
+                return (
+                  <React.Fragment key={s.id}>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0 text-muted-foreground">{idx + 1}</div>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0">
+                      <div className="font-medium text-foreground truncate">{s.name}</div>
+                      <code className="font-mono text-xs text-muted-foreground/70">{s.supplier_id}</code>
+                    </div>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0 text-right">
+                      <span className={`inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded border text-xs font-semibold ${tone.color}`}>
+                        {tone.label}
+                      </span>
+                    </div>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0 text-muted-foreground text-xs">
+                      {formatRelative(s.last_validated_at)}
+                    </div>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0 text-right">
+                      <span className={s.validation_failures && s.validation_failures > 0 ? 'text-red-500 font-semibold' : 'text-muted-foreground/60'}>
+                        {s.validation_failures ?? 0}
+                      </span>
+                    </div>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0">
+                      {s.website && (
+                        <a
+                          href={s.website}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-muted-foreground hover:text-foreground inline-flex"
+                          title={s.website}
+                        >
+                          <ExternalLink className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div>
+                  </React.Fragment>
+                );
+              })
+            ) : (
+              <div className="col-span-6 px-6 py-8 text-center text-sm text-muted-foreground">
+                No suppliers in queue.
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function ConfidenceHistogramSection() {
+  const { data, isLoading, error } = useConfidenceHistogram();
+  const max = data ? Math.max(...data.buckets.map((b: ConfidenceBucket) => b.count), 1) : 1;
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <BarChart3 className="h-5 w-5" />
+            Confidence distribution
+          </h3>
+          {data && !isLoading && (
+            <p className="text-xs text-muted-foreground">
+              {data.total.toLocaleString()} suppliers total
+            </p>
+          )}
+        </div>
+        {error ? (
+          <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            Failed to load histogram: {error instanceof Error ? error.message : 'Unknown error'}
+          </div>
+        ) : isLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-6 flex-1" />
+                <Skeleton className="h-4 w-10" />
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {data?.buckets.map((b: ConfidenceBucket) => {
+              const tone = b.range === null
+                ? 'bg-muted-foreground/40'
+                : b.range[0] < 40
+                  ? 'bg-red-500/70'
+                  : b.range[0] < 70
+                    ? 'bg-yellow-500/70'
+                    : 'bg-green-500/70';
+              return (
+                <div key={b.label} className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-28 text-right">{b.label}</span>
+                  <div className="flex-1 h-6 bg-muted/30 rounded overflow-hidden">
+                    <div
+                      className={`h-full ${tone} rounded`}
+                      style={{ width: `${(b.count / max) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-muted-foreground w-10 text-right">{b.count}</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function RecentAuditsSection() {
+  const { data, isLoading, error } = useRecentAudits();
+  return (
+    <Card className="bg-card border-border overflow-hidden">
+      <CardContent className="p-0">
+        <div className="px-6 py-4 border-b border-border">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <CheckCircle className="h-5 w-5" />
+            Audited in last 14 days
+          </h3>
+          <p className="text-xs text-muted-foreground mt-0.5">
+            Suppliers whose <code className="font-mono">last_validated_at</code> was bumped recently. Up to 30 rows.
+          </p>
+        </div>
+        {error ? (
+          <div className="m-6 rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+            Failed to load recent audits: {error instanceof Error ? error.message : 'Unknown error'}
+          </div>
+        ) : (
+          <div className="grid grid-cols-[120px_1fr_100px_80px] gap-0 text-sm">
+            <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border">When</div>
+            <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border">Supplier</div>
+            <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border text-right">Confidence</div>
+            <div className="bg-muted/40 px-4 py-3 font-semibold text-foreground border-b border-border text-right">Fails</div>
+            {isLoading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <React.Fragment key={i}>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0"><Skeleton className="h-4 w-20" /></div>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0"><Skeleton className="h-4 w-40" /></div>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0 text-right"><Skeleton className="h-5 w-12 ml-auto" /></div>
+                  <div className="px-4 py-3 border-b border-border last:border-b-0 text-right"><Skeleton className="h-4 w-6 ml-auto" /></div>
+                </React.Fragment>
+              ))
+            ) : data && data.length > 0 ? (
+              data.map((s: AuditSupplier) => {
+                const tone = confidenceTone(s.last_validation_confidence);
+                return (
+                  <React.Fragment key={s.id}>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0 text-muted-foreground text-xs">
+                      {formatRelative(s.last_validated_at)}
+                    </div>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0">
+                      <div className="font-medium text-foreground truncate">{s.name}</div>
+                    </div>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0 text-right">
+                      <span className={`inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded border text-xs font-semibold ${tone.color}`}>
+                        {tone.label}
+                      </span>
+                    </div>
+                    <div className="px-4 py-3 border-b border-border last:border-b-0 text-right">
+                      <span className={s.validation_failures && s.validation_failures > 0 ? 'text-red-500 font-semibold' : 'text-muted-foreground/60'}>
+                        {s.validation_failures ?? 0}
+                      </span>
+                    </div>
+                  </React.Fragment>
+                );
+              })
+            ) : (
+              <div className="col-span-4 px-6 py-8 text-center text-sm text-muted-foreground">
+                No audits in the last 14 days.
+              </div>
+            )}
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+function OpenAuditPRsSection() {
+  const { data, isLoading, error } = useOpenAuditPRs();
+  return (
+    <Card className="bg-card border-border">
+      <CardContent className="p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+            <GitPullRequest className="h-5 w-5" />
+            Open audit PRs
+          </h3>
+          {data && !isLoading && (
+            <p className="text-xs text-muted-foreground">{data.length} open</p>
+          )}
+        </div>
+        {error ? (
+          <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
+            <div className="font-semibold">Couldn't reach GitHub.</div>
+            <div className="text-xs">
+              Set <code className="font-mono">GITHUB_AUDIT_PAT</code> via <code className="font-mono">npx supabase secrets set</code> and deploy <code className="font-mono">list-audit-prs</code>.
+            </div>
+          </div>
+        ) : isLoading ? (
+          <div className="space-y-2">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
+          </div>
+        ) : data && data.length > 0 ? (
+          <div className="space-y-2">
+            {data.map((pr: AuditPR) => (
+              <a
+                key={pr.number}
+                href={pr.html_url}
+                target="_blank"
+                rel="noreferrer"
+                className="block rounded-md border border-border bg-card hover:border-primary/50 hover:bg-muted/30 px-4 py-3 transition-colors"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-medium text-foreground truncate">{pr.title}</span>
+                      {pr.draft && (
+                        <Badge variant="outline" className="text-[10px] px-1.5 py-0">draft</Badge>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                      <span>#{pr.number}</span>
+                      <span>·</span>
+                      <span>{formatRelative(pr.created_at)}</span>
+                      <span>·</span>
+                      <code className="font-mono">{pr.head_ref}</code>
+                    </div>
+                  </div>
+                  <ExternalLink className="h-4 w-4 text-muted-foreground shrink-0" />
+                </div>
+              </a>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-md border border-border bg-muted/20 px-4 py-8 text-center text-sm text-muted-foreground">
+            No open audit PRs. The cron will open one tomorrow if a supplier needs review.
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function Admin() {
   const [tab, setTab] = useState<Tab>('overview');
@@ -251,7 +559,7 @@ export default function Admin() {
             </div>
           </div>
           <nav className="flex gap-1">
-            {(['overview', 'suppliers', 'analytics', 'compare', 'applications'] as Tab[]).map(t => (
+            {(['overview', 'suppliers', 'analytics', 'compare', 'applications', 'audit'] as Tab[]).map(t => (
               <Button
                 key={t}
                 variant={tab === t ? 'default' : 'ghost'}
@@ -713,6 +1021,19 @@ export default function Admin() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {tab === 'audit' && (
+          <div className="space-y-6">
+            <div className="flex items-baseline justify-between">
+              <h1 className="text-2xl font-bold text-foreground">Supplier audit</h1>
+              <p className="text-xs text-muted-foreground">Daily cron picks the lowest-confidence supplier and opens a draft PR</p>
+            </div>
+            <AuditQueueSection />
+            <ConfidenceHistogramSection />
+            <RecentAuditsSection />
+            <OpenAuditPRsSection />
           </div>
         )}
       </main>

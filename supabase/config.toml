@@ -75,3 +75,6 @@ verify_jwt = false
 
 [functions.ga4-analytics]
 verify_jwt = true
+
+[functions.list-audit-prs]
+verify_jwt = true
