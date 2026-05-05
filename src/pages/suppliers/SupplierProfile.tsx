@@ -389,9 +389,14 @@ const SupplierProfile: React.FC = () => {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-4">
-                    <p className="text-muted-foreground leading-relaxed">
-                      {supplier.description_extended?.overview || supplier.description}
-                    </p>
+                    <div className="space-y-3 text-muted-foreground leading-relaxed">
+                      {(supplier.description_extended?.overview || supplier.description || '')
+                        .split(/\n\n+/)
+                        .filter((para) => para.trim().length > 0)
+                        .map((para, i) => (
+                          <p key={i}>{para}</p>
+                        ))}
+                    </div>
                     {supplier.description_extended?.unique_value && (
                       <div className="bg-accent/40 p-4 rounded-lg border-l-4 border-primary">
                         <h3 className="font-semibold mb-1 text-foreground flex items-center gap-2">
@@ -414,10 +419,52 @@ const SupplierProfile: React.FC = () => {
                         </div>
                       </div>
                     )}
-                    {supplier.description_extended?.capacity_notes && (
-                      <div className="bg-muted/40 p-4 rounded-lg">
-                        <h3 className="font-semibold mb-1 text-foreground">Production capacity</h3>
-                        <p className="text-muted-foreground">{supplier.description_extended.capacity_notes}</p>
+                    {(supplier.description_extended?.capacity_notes || supplier.description_extended?.build_envelopes) && (
+                      <div className="bg-muted/40 p-4 rounded-lg space-y-2">
+                        <h3 className="font-semibold mb-1 text-foreground flex items-center gap-2">
+                          <Package className="h-4 w-4 text-primary" /> Production capacity
+                        </h3>
+                        {supplier.description_extended?.capacity_notes && (
+                          <p className="text-muted-foreground">{supplier.description_extended.capacity_notes}</p>
+                        )}
+                        {supplier.description_extended?.build_envelopes && (
+                          <p className="text-sm text-muted-foreground/90">
+                            <span className="font-medium text-foreground/80">Build envelopes:</span>{' '}
+                            {supplier.description_extended.build_envelopes}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {supplier.description_extended?.equipment && supplier.description_extended.equipment.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold mb-2 text-foreground flex items-center gap-2">
+                          <Cpu className="h-4 w-4 text-primary" /> Equipment
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                          {supplier.description_extended.equipment.map((machine, i) => (
+                            <Badge key={i} variant="outline" className="text-sm px-3 py-1">
+                              {machine}
+                            </Badge>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {supplier.description_extended?.notable_projects && supplier.description_extended.notable_projects.length > 0 && (
+                      <div>
+                        <h3 className="font-semibold mb-3 text-foreground flex items-center gap-2">
+                          <Star className="h-4 w-4 text-primary" /> Notable projects
+                        </h3>
+                        <ul className="space-y-2">
+                          {supplier.description_extended.notable_projects.map((project, i) => (
+                            <li
+                              key={i}
+                              className="border-l-2 border-primary/40 pl-3 py-1"
+                            >
+                              <p className="font-medium text-foreground">{project.title}</p>
+                              <p className="text-sm text-muted-foreground leading-relaxed">{project.description}</p>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
                     )}
                   </CardContent>

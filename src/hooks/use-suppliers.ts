@@ -7,6 +7,11 @@ export interface GalleryImage {
   caption?: string;
 }
 
+export interface NotableProject {
+  title: string;
+  description: string;
+}
+
 export interface DescriptionExtended {
   overview?: string;
   unique_value?: string;
@@ -17,6 +22,9 @@ export interface DescriptionExtended {
   cons?: string[];
   price_range?: string;
   partnerships?: string[];
+  notable_projects?: NotableProject[];
+  equipment?: string[];
+  build_envelopes?: string;
 }
 
 export interface SupplierListItem {
