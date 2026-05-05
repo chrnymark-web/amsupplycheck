@@ -9,6 +9,7 @@ import {
   Target, MousePointerClick, Mail, FileText, ShieldCheck, ExternalLink, GitPullRequest,
 } from 'lucide-react';
 import { useAdminStats, type TopItem } from '@/hooks/use-admin-stats';
+import { useSupplierInventory } from '@/hooks/use-supplier-inventory';
 import { useFunnelData, type FunnelData } from '@/hooks/use-funnel-data';
 import { useGA4Funnel } from '@/hooks/use-ga4-funnel';
 import { useEventBreakdown } from '@/hooks/use-event-breakdown';
@@ -532,6 +533,7 @@ export default function Admin() {
   const navigate = useNavigate();
 
   const { data: stats, isLoading: statsLoading, isError: statsError, error: statsErr } = useAdminStats(range);
+  const { data: inventory, isLoading: inventoryLoading } = useSupplierInventory();
   const { data: funnel, isLoading: funnelLoading, error: funnelError } = useFunnelData(range);
   const { data: ga4, isLoading: ga4Loading, error: ga4Error } = useGA4Funnel(range, tab === 'compare');
   const { data: events, isLoading: eventsLoading, error: eventsError } = useEventBreakdown(range);
@@ -542,6 +544,12 @@ export default function Admin() {
   const withDescPct = total > 0 ? Math.round(((stats?.suppliers.withDesc ?? 0) / total) * 100) : 0;
   const withLogoPct = total > 0 ? Math.round(((stats?.suppliers.withLogo ?? 0) / total) * 100) : 0;
   const missingLogos = total - (stats?.suppliers.withLogo ?? 0);
+
+  const invTotal = inventory?.total ?? 0;
+  const invVerified = inventory?.verified ?? 0;
+  const invWithLogoPct = invTotal > 0 ? Math.round(((inventory?.withLogo ?? 0) / invTotal) * 100) : 0;
+  const invWithDescPct = invTotal > 0 ? Math.round(((inventory?.withDesc ?? 0) / invTotal) * 100) : 0;
+  const invMissingLogos = invTotal - (inventory?.withLogo ?? 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -646,33 +654,33 @@ export default function Admin() {
           <div className="space-y-6">
             <div className="flex items-center justify-between">
               <h1 className="text-2xl font-bold text-foreground">
-                Suppliers added {statsLoading ? '' : `(${total})`}
+                Suppliers {inventoryLoading ? '' : `(${invTotal})`}
               </h1>
-              <Badge variant="outline">{verified} verified</Badge>
+              <Badge variant="outline">{invVerified} verified</Badge>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="bg-card border-border">
                 <CardContent className="p-6 text-center">
-                  {statsLoading
+                  {inventoryLoading
                     ? <Skeleton className="h-9 w-16 mx-auto" />
-                    : <p className="text-3xl font-bold text-green-500">{verified}</p>}
+                    : <p className="text-3xl font-bold text-green-500">{invVerified}</p>}
                   <p className="text-sm text-muted-foreground mt-1">Verified</p>
                 </CardContent>
               </Card>
               <Card className="bg-card border-border">
                 <CardContent className="p-6 text-center">
-                  {statsLoading
+                  {inventoryLoading
                     ? <Skeleton className="h-9 w-16 mx-auto" />
-                    : <p className="text-3xl font-bold text-yellow-500">{total - verified}</p>}
+                    : <p className="text-3xl font-bold text-yellow-500">{invTotal - invVerified}</p>}
                   <p className="text-sm text-muted-foreground mt-1">Unverified</p>
                 </CardContent>
               </Card>
               <Card className="bg-card border-border">
                 <CardContent className="p-6 text-center">
-                  {statsLoading
+                  {inventoryLoading
                     ? <Skeleton className="h-9 w-16 mx-auto" />
-                    : <p className="text-3xl font-bold text-muted-foreground">{withLogoPct}%</p>}
+                    : <p className="text-3xl font-bold text-muted-foreground">{invWithLogoPct}%</p>}
                   <p className="text-sm text-muted-foreground mt-1">Have Logos</p>
                 </CardContent>
               </Card>
@@ -680,32 +688,32 @@ export default function Admin() {
 
             <Card className="bg-card border-border">
               <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-foreground mb-2">Data Quality (new suppliers in period)</h3>
-                {statsLoading ? (
+                <h3 className="text-lg font-semibold text-foreground mb-2">Data Quality</h3>
+                {inventoryLoading ? (
                   <div className="space-y-2">
                     <Skeleton className="h-4 w-3/4" />
                     <Skeleton className="h-4 w-2/3" />
                     <Skeleton className="h-4 w-1/2" />
                   </div>
-                ) : total === 0 ? (
-                  <p className="text-sm text-muted-foreground">No new suppliers added in this period.</p>
+                ) : invTotal === 0 ? (
+                  <p className="text-sm text-muted-foreground">No suppliers yet.</p>
                 ) : (
                   <ul className="space-y-2 text-sm">
                     <li className="flex items-center gap-2 text-yellow-400">
                       <span className="w-2 h-2 rounded-full bg-yellow-400" />
-                      {missingLogos} missing logos ({Math.round((missingLogos / total) * 100)}%)
+                      {invMissingLogos} missing logos ({Math.round((invMissingLogos / invTotal) * 100)}%)
                     </li>
                     <li className="flex items-center gap-2 text-yellow-400">
                       <span className="w-2 h-2 rounded-full bg-yellow-400" />
-                      {stats?.suppliers.missingRegion ?? 0} have no region set
+                      {inventory?.missingRegion ?? 0} have no region set
                     </li>
                     <li className="flex items-center gap-2 text-yellow-400">
                       <span className="w-2 h-2 rounded-full bg-yellow-400" />
-                      {stats?.suppliers.missingCountry ?? 0} have no country
+                      {inventory?.missingCountry ?? 0} have no country
                     </li>
                     <li className="flex items-center gap-2 text-green-400">
                       <span className="w-2 h-2 rounded-full bg-green-400" />
-                      {withDescPct}% have descriptions
+                      {invWithDescPct}% have descriptions
                     </li>
                   </ul>
                 )}
