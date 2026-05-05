@@ -656,8 +656,12 @@ export default function Admin() {
               <h1 className="text-2xl font-bold text-foreground">
                 Suppliers {inventoryLoading ? '' : `(${invTotal})`}
               </h1>
-              <Badge variant="outline">{invVerified} verified</Badge>
+              <Badge variant="outline">{invVerified} approved</Badge>
             </div>
+
+            <p className="text-xs text-muted-foreground -mt-2">
+              "Approved" is the manual catalog flag (<code className="font-mono">suppliers.verified</code>). For automated data-quality checks, see the <button onClick={() => setTab('audit')} className="underline hover:text-foreground">Audit tab</button>.
+            </p>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="bg-card border-border">
@@ -665,7 +669,7 @@ export default function Admin() {
                   {inventoryLoading
                     ? <Skeleton className="h-9 w-16 mx-auto" />
                     : <p className="text-3xl font-bold text-green-500">{invVerified}</p>}
-                  <p className="text-sm text-muted-foreground mt-1">Verified</p>
+                  <p className="text-sm text-muted-foreground mt-1">Approved</p>
                 </CardContent>
               </Card>
               <Card className="bg-card border-border">
@@ -673,7 +677,7 @@ export default function Admin() {
                   {inventoryLoading
                     ? <Skeleton className="h-9 w-16 mx-auto" />
                     : <p className="text-3xl font-bold text-yellow-500">{invTotal - invVerified}</p>}
-                  <p className="text-sm text-muted-foreground mt-1">Unverified</p>
+                  <p className="text-sm text-muted-foreground mt-1">Not approved</p>
                 </CardContent>
               </Card>
               <Card className="bg-card border-border">
