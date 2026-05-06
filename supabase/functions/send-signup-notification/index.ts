@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { Resend } from "npm:resend@2.0.0";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
+const resendApiKey = Deno.env.get("RESEND_API_KEY");
+const resend = resendApiKey ? new Resend(resendApiKey) : null;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -186,14 +187,74 @@ const handler = async (req: Request): Promise<Response> => {
       `;
     }
 
-    const emailResponse = await resend.emails.send({
-      from: "AMSupplyCheck <onboarding@resend.dev>",
-      to: ["info@supplycheck.io", "chr.nymark@gmail.com"],
-      subject: emailSubject,
-      html: emailHtml,
-    });
+    if (resend) {
+      try {
+        const emailResponse = await resend.emails.send({
+          from: "AMSupplyCheck <onboarding@resend.dev>",
+          to: ["info@supplycheck.io", "chr.nymark@gmail.com"],
+          subject: emailSubject,
+          html: emailHtml,
+        });
+        console.log("Email sent successfully:", emailResponse);
+      } catch (emailErr) {
+        console.error("Email send failed (continuing to Telegram):", emailErr);
+      }
+    } else {
+      console.log("RESEND_API_KEY missing — skipping email");
+    }
 
-    console.log("Email sent successfully:", emailResponse);
+    // Telegram ping for auto-approvals (additive — email still goes out)
+    if (data.type === "auto_approval") {
+      const tgToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+      const tgChatId = Deno.env.get("TELEGRAM_CHAT_ID");
+
+      if (tgToken && tgChatId) {
+        const escapeHtml = (s: string) =>
+          s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        const tgName = escapeHtml(data.supplierName);
+        const tgWebsite = escapeHtml(data.website);
+        const tgLocation = escapeHtml(data.location || "Unknown");
+        const tgTech = escapeHtml((data.technologies || []).slice(0, 5).join(", ") || "—");
+        const tgMat = escapeHtml((data.materials || []).slice(0, 5).join(", ") || "—");
+
+        const tgText = [
+          `🚀 <b>Auto-godkendt: ${tgName}</b> (${data.confidence}%)`,
+          ``,
+          `📍 ${tgLocation}`,
+          `🔧 ${tgTech}`,
+          `🧪 ${tgMat}`,
+          `🌐 <a href="${tgWebsite}">${tgWebsite}</a>`,
+          ``,
+          `Total denne kørsel: <b>${data.totalAutoApproved}</b> · Threshold: ${data.autoApproveThreshold}%`,
+        ].join("\n");
+
+        try {
+          const tgResp = await fetch(
+            `https://api.telegram.org/bot${tgToken}/sendMessage`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: tgChatId,
+                parse_mode: "HTML",
+                disable_web_page_preview: true,
+                text: tgText,
+              }),
+            },
+          );
+          if (!tgResp.ok) {
+            console.error("Telegram send failed:", tgResp.status, await tgResp.text());
+          } else {
+            console.log("Telegram ping sent for auto-approval:", data.supplierName);
+          }
+        } catch (tgErr) {
+          console.error("Telegram send threw:", tgErr);
+        }
+      } else {
+        console.log("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing — skipping Telegram ping");
+      }
+    }
 
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
