@@ -32,7 +32,11 @@ temporary screenshots/
 screenshot.mjs
 screenshot-upload.mjs
 supabase/.temp/
-.claude/
+.claude/*
+!.claude/commands/
+!.claude/skills/
+!.claude/routines/
+.claude/.claude/
 .playwright-mcp/
 
 # Editor directories and files
