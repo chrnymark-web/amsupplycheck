@@ -30,6 +30,8 @@ interface AutoApprovalNotification {
   technologies: string[];
   materials: string[];
   location: string;
+  description?: string;
+  supplierRowId?: string;
   autoApproveThreshold: number;
   totalAutoApproved: number;
 }
@@ -215,16 +217,25 @@ const handler = async (req: Request): Promise<Response> => {
         const tgName = escapeHtml(data.supplierName);
         const tgWebsite = escapeHtml(data.website);
         const tgLocation = escapeHtml(data.location || "Unknown");
-        const tgTech = escapeHtml((data.technologies || []).slice(0, 5).join(", ") || "—");
-        const tgMat = escapeHtml((data.materials || []).slice(0, 5).join(", ") || "—");
+        const tgTech = escapeHtml((data.technologies || []).join(", ") || "—");
+        const tgMat = escapeHtml((data.materials || []).join(", ") || "—");
+        const tgDescription = data.description
+          ? escapeHtml(data.description.length > 600 ? `${data.description.slice(0, 600)}…` : data.description)
+          : "";
+        const adminLink = data.supplierRowId
+          ? `https://amsupplycheck.com/admin/supplier/${encodeURIComponent(data.supplierRowId)}/edit`
+          : "https://amsupplycheck.com/admin/suppliers";
 
         const tgText = [
           `🚀 <b>Auto-godkendt: ${tgName}</b> (${data.confidence}%)`,
+          ...(tgDescription ? [``, `📝 ${tgDescription}`] : []),
           ``,
           `📍 ${tgLocation}`,
           `🔧 ${tgTech}`,
           `🧪 ${tgMat}`,
           `🌐 <a href="${tgWebsite}">${tgWebsite}</a>`,
+          ``,
+          `🔗 <a href="${adminLink}">Åbn i admin →</a>`,
           ``,
           `Total denne kørsel: <b>${data.totalAutoApproved}</b> · Threshold: ${data.autoApproveThreshold}%`,
         ].join("\n");

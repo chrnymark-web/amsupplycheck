@@ -64,6 +64,32 @@ const SEARCH_QUERIES = [
   "3D printing service Brazil additive",
   "3D printing service Mexico industrial",
   "3D printing service UAE Dubai manufacturing",
+
+  // === TARGETED EXPANSION: India (city + industry depth) ===
+  "3D printing service Bangalore additive manufacturing",
+  "3D printing service Mumbai industrial manufacturing",
+  "3D printing service Pune prototyping",
+  "3D printing service Chennai automotive AM",
+  "3D printing service Hyderabad medical aerospace",
+  "3D printing service Delhi NCR rapid prototyping",
+
+  // === TARGETED EXPANSION: Brazil ===
+  "impressão 3D serviço São Paulo manufatura aditiva",
+  "impressão 3D serviço Rio de Janeiro prototipagem",
+  "3D printing service Brazil Minas Gerais industrial",
+
+  // === TARGETED EXPANSION: Mexico ===
+  "impresión 3D servicio Querétaro manufactura aditiva",
+  "impresión 3D servicio Monterrey industrial",
+  "impresión 3D servicio Ciudad de México prototipado",
+
+  // === TARGETED EXPANSION: Middle East ===
+  "3D printing service Saudi Arabia Riyadh manufacturing",
+  "3D printing service Turkey Istanbul additive",
+  "3D printing service Egypt Cairo industrial",
+  "3D printing service Qatar Doha manufacturing",
+  "3D printing service Jordan Amman prototyping",
+  "3D printing service Kuwait additive manufacturing",
 ];
 
 // Results per query (balanced for credit efficiency)
@@ -74,11 +100,24 @@ const MAX_NEW_SUPPLIERS = 100;
 
 // Helper to categorize queries for logging
 function getQueryCategory(query: string): string {
-  if (query.includes('Japan') || query.includes('Korea') || 
-      query.includes('Singapore') || query.includes('Israel') || 
+  if (query.includes('Japan') || query.includes('Korea') ||
+      query.includes('Singapore') || query.includes('Israel') ||
       query.includes('Australia') || query.includes('India') ||
       query.includes('Brazil') || query.includes('Mexico') ||
-      query.includes('UAE') || query.includes('Dubai')) return 'Geographic';
+      query.includes('UAE') || query.includes('Dubai') ||
+      query.includes('Bangalore') || query.includes('Mumbai') ||
+      query.includes('Pune') || query.includes('Chennai') ||
+      query.includes('Hyderabad') || query.includes('Delhi') ||
+      query.includes('São Paulo') || query.includes('Rio de Janeiro') ||
+      query.includes('Minas Gerais') || query.includes('Querétaro') ||
+      query.includes('Monterrey') || query.includes('Ciudad de México') ||
+      query.includes('Saudi Arabia') || query.includes('Riyadh') ||
+      query.includes('Turkey') || query.includes('Istanbul') ||
+      query.includes('Egypt') || query.includes('Cairo') ||
+      query.includes('Qatar') || query.includes('Doha') ||
+      query.includes('Jordan') || query.includes('Amman') ||
+      query.includes('Kuwait') || query.includes('impressão') ||
+      query.includes('impresión')) return 'Geographic';
   if (query.includes('bio') || query.includes('ceramic') || 
       query.includes('sand casting') || query.includes('WAAM') || 
       query.includes('micro') || query.includes('full color')) return 'Niche Tech';
@@ -398,7 +437,7 @@ serve(async (req) => {
           // AUTO-APPROVE: Insert directly into suppliers table
           const supplierId = `discovered-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`;
 
-          const { error: supplierInsertError } = await supabase
+          const { data: insertedSupplier, error: supplierInsertError } = await supabase
             .from('suppliers')
             .insert({
               supplier_id: supplierId,
@@ -411,7 +450,9 @@ serve(async (req) => {
               location_city: supplierData.location_city,
               verified: false,
               premium: false,
-            });
+            })
+            .select('id')
+            .single();
 
           if (supplierInsertError) {
             log(`Auto-approve insert error for ${supplierData.name}: ${supplierInsertError.message}`);
@@ -467,6 +508,8 @@ serve(async (req) => {
                 technologies: supplierData.technologies || [],
                 materials: supplierData.materials || [],
                 location: location,
+                description: supplierData.description,
+                supplierRowId: insertedSupplier?.id,
                 autoApproveThreshold: autoApproveThreshold,
                 totalAutoApproved: suppliersAutoApproved,
               }
