@@ -53,7 +53,9 @@ const whiteLogos = [
   'norra am',
   'norra additive',
   'norraadditive',
-  'norraam'
+  'norraam',
+  'am printservice',
+  'amprintservice'
 ];
 
 const shouldUseBlackBackground = (name: string): boolean => {
