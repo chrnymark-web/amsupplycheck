@@ -215,15 +215,28 @@ export const trackEvent = (eventName: string, params?: EventParams): void => {
   };
 
   if (HIGH_SIGNAL_EVENTS.has(eventName) && typeof window !== 'undefined') {
-    supabase.from('analytics_events').insert({
+    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+    const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+    const payload = {
       event_name: eventName,
       props: enrichedParams as Record<string, unknown>,
       session_id: getSessionId(),
       page_path: window.location.pathname,
       referrer: document.referrer || null,
       user_agent: navigator.userAgent,
-    }).then(({ error }) => {
-      if (error) console.warn('[analytics_events] insert failed:', error.message, error);
+    };
+    fetch(`${SUPABASE_URL}/rest/v1/analytics_events`, {
+      method: 'POST',
+      keepalive: true,
+      headers: {
+        'Content-Type': 'application/json',
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${SUPABASE_KEY}`,
+        Prefer: 'return=minimal',
+      },
+      body: JSON.stringify(payload),
+    }).catch((err) => {
+      console.warn('[analytics_events] insert failed:', err);
     });
   }
 
