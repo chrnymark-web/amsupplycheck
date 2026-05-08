@@ -704,9 +704,16 @@ export default function Admin() {
 
         {tab === 'analytics' && (
           <div className="space-y-8">
-            <div className="flex items-baseline justify-between">
-              <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-              <p className="text-xs text-muted-foreground">All counts from Supabase platform tracking</p>
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+                <span className="inline-flex items-center rounded-full bg-blue-500/10 border border-blue-500/30 px-2.5 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+                  Source: Platform (Supabase)
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground text-right">
+                Not GA4 — see Compare tab for GA4 numbers.
+              </p>
             </div>
 
             <FunnelSection funnel={funnel} loading={funnelLoading} error={funnelError} />
@@ -883,7 +890,15 @@ export default function Admin() {
             <div className="flex items-end justify-between gap-4">
               <div>
                 <h1 className="text-2xl font-bold text-foreground">Platform vs GA4</h1>
-                <p className="text-sm text-muted-foreground mt-1">
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="inline-flex items-center rounded-full bg-blue-500/10 border border-blue-500/30 px-2.5 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
+                    Platform = Supabase
+                  </span>
+                  <span className="inline-flex items-center rounded-full bg-amber-500/10 border border-amber-500/30 px-2.5 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+                    GA4 = Google Analytics
+                  </span>
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
                   Side-by-side check of internal Supabase events against Google Analytics. Gaps usually mean adblock, consent banner, or GA4's 24–48h reporting delay.
                 </p>
               </div>

@@ -1054,7 +1054,7 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
         sourceData[source] = { landingViews: 0, selectItems: 0, searches: 0, filesUploaded: 0, supplierViews: 0, conversions: 0 };
       }
 
-      if (eventName === 'page_view' || eventName === 'session_start') {
+      if (eventName === 'page_view') {
         sourceData[source].landingViews += count;
         totalLandingViews += count;
       } else if (eventName === 'select_item') {
@@ -1169,7 +1169,7 @@ async function fetchFunnelData(propertyId: string, accessToken: string, startDat
 
     console.log(`Event: ${eventName} = ${count}`);
 
-    if (eventName === 'page_view' || eventName === 'session_start') {
+    if (eventName === 'page_view') {
       totalLandingViews += count;
     } else if (eventName === 'select_item') {
       totalSelectItems += count;
@@ -1246,7 +1246,7 @@ function processDailyTrends(dailyTrendData: any) {
 
     const entry = dateMap.get(date);
 
-    if (eventName === 'page_view' || eventName === 'session_start') {
+    if (eventName === 'page_view') {
       entry.landingViews += count;
     } else if (eventName === 'select_item') {
       entry.selectItems += count;
