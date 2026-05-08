@@ -9,6 +9,44 @@ Source-of-truth procedure for the `daily-supplier-audit` Anthropic-cloud routine
 - Branch naming: `auto-audit/<supplier_id>-<YYYYMMDD>`
 - Migration path: `supabase/migrations/<UTCtimestamp>_correct_<supplier_id>.sql` (snake_case `supplier_id`, dashes → underscores)
 
+## Step 0 — Define `tg_send` and send a heartbeat (do this FIRST)
+
+The Telegram wrapper is needed by Step 0 itself, the trap in "Failure handling", and Step 5. Define it ONCE up front so it's in scope for the whole run.
+
+```bash
+# === Telegram wrapper — paste this verbatim, do NOT improvise ===
+# Avoids three known failure modes: parse_mode=Markdown 400-fails on agent
+# content, bash command-substitution on backticks, silent HTTP failures.
+tg_send() {
+  local text http
+  text=$(printf '%s\n' "$@")
+  http=$(curl -sS -o /tmp/tg_resp.json -w '%{http_code}' \
+    -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+    --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+    --data-urlencode "disable_web_page_preview=false" \
+    --data-urlencode "text=${text}")
+  echo "TG_HTTP=${http}" >&2
+  if [ "$http" != "200" ]; then
+    cat /tmp/tg_resp.json >&2 || true
+    local text_safe
+    text_safe=$(printf '%s' "$text" | tr -d '\r')
+    http=$(curl -sS -o /tmp/tg_resp.json -w '%{http_code}' \
+      -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
+      --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
+      --data-urlencode "text=${text_safe}")
+    echo "TG_RETRY_HTTP=${http}" >&2
+  fi
+  return 0
+}
+
+# === Heartbeat — fires before any research ===
+tg_send "🛠️ Audit kører — $(date -u '+%Y-%m-%d %H:%M UTC')"
+# If TG_HTTP wasn't 200, the bot/chat creds are broken — exit. No point doing
+# 5 min of Firecrawl work that nobody will hear about.
+```
+
+This costs one Telegram per run but guarantees the user sees evidence the routine actually fired today, even if a later step crashes silently. **It also proves to you, the agent, that the wrapper works** — if the heartbeat reaches `TG_HTTP=200`, then any later `tg_send` failure is about message content, not auth.
+
 ## Step 1 — Pick today's supplier
 
 Query the lowest-confidence supplier that doesn't already have an open auto-audit PR.
@@ -129,23 +167,66 @@ Reason: ${SKIP_REASON}
 🌴 Audit-kø er ren. Ingen suppliers under confidence 100 uden åben PR.
 ```
 
-**Send via curl:**
+**Send via the `tg_send` wrapper defined in Step 0.** Pass each body line as a separate argument — `printf '%s\n'` joins them, so no shell interpolation of agent-supplied content (backticks in `${SHORT_SUMMARY}` won't be command-substituted, etc.).
+
 ```bash
-curl -s -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-  -d "chat_id=${TELEGRAM_CHAT_ID}" \
-  -d "parse_mode=Markdown" \
-  --data-urlencode "text=${MESSAGE}"
+# Real diff (PR opened):
+tg_send \
+  "🔧 Audit klar — ${SUPPLIER_NAME}" \
+  "${PR_URL}" \
+  "" \
+  "Changes:" \
+  "${SHORT_SUMMARY}" \
+  "" \
+  "Human review needed:" \
+  "${REVIEW_FLAGS}" \
+  "" \
+  "Approve: merge PR + run npx supabase db push next session."
+
+# Verified clean:
+tg_send \
+  "✅ ${SUPPLIER_NAME} — DB matcher hjemmesiden" \
+  "${PR_URL}" \
+  "Bare merge — kan auto-merge'es."
+
+# Removal proposed:
+tg_send \
+  "🗑️ Audit foreslår fjernelse — ${SUPPLIER_NAME}" \
+  "${PR_URL}" \
+  "" \
+  "Grund: ${DISQUALIFYING_SIGNAL}" \
+  "" \
+  "Evidence:" \
+  "${SHORT_EVIDENCE}" \
+  "" \
+  "⚠️ Destructive — review carefully before merge." \
+  "After merge: npx supabase db push (junction tables cascade)."
+
+# Skipped:
+tg_send \
+  "⚠️ ${SUPPLIER_NAME} — sprunget over" \
+  "Reason: ${SKIP_REASON}" \
+  "(re-tries om 14 dage)"
+
+# Empty queue:
+tg_send "🌴 Audit-kø er ren. Ingen suppliers under confidence 100 uden åben PR."
 ```
+
+**No `parse_mode` is set** in the wrapper — plain text. Telegram clients still auto-link URLs. This eliminates the most common silent-failure mode (HTTP 400 "Bad Request: can't parse entities" on `_`, unbalanced `*`, brackets, etc. in agent output).
+
+**Every send echoes `TG_HTTP=<status>` to stderr.** Grep the run log for that line — if it isn't there, the agent never reached the send step. If it shows non-200, the message text broke Telegram's parser AND the auto-retry-with-stripped-text also failed.
 
 ## Failure handling
 
-Wrap the whole routine in a try-block. On any uncaught error, send:
+**Telegram is mandatory.** Every run MUST end with at least one `tg_send` call (success, skipped, empty queue, or error template). If you reach `exit` without having called `tg_send`, the run is failed by definition — go back and send the failure template before exiting.
 
-```
-❌ Daily audit fejlede
-Stage: ${STAGE}     # "queue-fetch" / "firecrawl" / "git-push" / "pr-create" / "telegram"
-Error: ${ERROR_FIRST_LINE}
-Supplier: ${SUPPLIER_NAME or "unknown"}
+Track outcomes in shell variables and emit Telegram in a single trap on EXIT:
+
+```bash
+STAGE="init"
+trap 'tg_send "❌ Daily audit fejlede" "Stage: $STAGE" "Error: $(tail -n1 /tmp/last_err 2>/dev/null || echo unknown)" "Supplier: ${SUPPLIER_NAME:-unknown}"' ERR
+# Update STAGE before each section: STAGE="queue-fetch", "firecrawl", "git-push", "pr-create", etc.
+# 2>/tmp/last_err on individual commands you want to capture stderr from.
 ```
 
 Specific fallbacks:
@@ -155,10 +236,11 @@ Specific fallbacks:
 | Firecrawl rate-limited / out of credits | Send Skipped Telegram (`SKIP_REASON: firecrawl-quota`). No PR. Don't bump `last_validated_at`. |
 | Website 404 / DNS fails | Send Skipped (`SKIP_REASON: site-unreachable`). |
 | `gh pr create` fails | Branch is already pushed — don't roll it back. Send error Telegram with the branch name so user can open the PR manually. |
-| Telegram POST fails | Log to stderr; don't fail the run (PR already opened, that's the recovery state). |
+| `tg_send` returns non-200 (after its own retry) | Log `TG_HTTP=<status>` to stderr. The wrapper has already retried. Continue exiting — there is no third attempt. |
 
 ## Don'ts
 
+- **Don't exit without sending Telegram.** The user has no other visibility into whether the routine ran. If you cannot decide what to send, send the failure template with `Stage=unknown`. One Telegram per run, always — see "Failure handling" above.
 - **Don't push to `main` directly.** Always a feature branch + draft PR.
 - **Don't run `npx supabase db push`.** Migration deploy is the human's responsibility on review.
 - **Don't call `AskUserQuestion`.** Use Auto-mode defaults from SKILL.md.

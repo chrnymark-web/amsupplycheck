@@ -206,6 +206,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Telegram ping for auto-approvals (additive — email still goes out)
+    let telegramStatus = "skipped: not auto_approval";
     if (data.type === "auto_approval") {
       const tgToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
       const tgChatId = Deno.env.get("TELEGRAM_CHAT_ID");
@@ -255,19 +256,24 @@ const handler = async (req: Request): Promise<Response> => {
             },
           );
           if (!tgResp.ok) {
-            console.error("Telegram send failed:", tgResp.status, await tgResp.text());
+            const tgBody = (await tgResp.text()).slice(0, 200);
+            console.error("Telegram send failed:", tgResp.status, tgBody);
+            telegramStatus = `http_${tgResp.status}: ${tgBody}`;
           } else {
             console.log("Telegram ping sent for auto-approval:", data.supplierName);
+            telegramStatus = "ok";
           }
-        } catch (tgErr) {
+        } catch (tgErr: any) {
           console.error("Telegram send threw:", tgErr);
+          telegramStatus = `threw: ${tgErr?.message ?? String(tgErr)}`;
         }
       } else {
         console.log("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing — skipping Telegram ping");
+        telegramStatus = "skipped: missing env";
       }
     }
 
-    return new Response(JSON.stringify({ success: true }), {
+    return new Response(JSON.stringify({ success: true, telegram_status: telegramStatus }), {
       status: 200,
       headers: {
         "Content-Type": "application/json",
