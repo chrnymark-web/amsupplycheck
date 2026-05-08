@@ -11,7 +11,7 @@ import {
 import { useAdminStats, type TopItem } from '@/hooks/use-admin-stats';
 import { useSupplierInventory } from '@/hooks/use-supplier-inventory';
 import { useFunnelData, type FunnelData } from '@/hooks/use-funnel-data';
-import { useGA4Funnel } from '@/hooks/use-ga4-funnel';
+import { useGA4Funnel, type GA4Funnel } from '@/hooks/use-ga4-funnel';
 import { useEventBreakdown } from '@/hooks/use-event-breakdown';
 import {
   useAuditQueue, useConfidenceHistogram, useRecentAudits, useOpenAuditPRs,
@@ -503,15 +503,38 @@ function OpenAuditPRsSection() {
   );
 }
 
+function ga4ToFunnelData(ga4: GA4Funnel | undefined): FunnelData | undefined {
+  if (!ga4 || !ga4.available) return undefined;
+  const { visits, filesUploaded, supplierViews, conversions: affiliateClicks } = ga4;
+  const pct = (n: number, d: number) => (d ? Number(((n / d) * 100).toFixed(1)) : 0);
+  return {
+    visits, filesUploaded, supplierViews, affiliateClicks,
+    rates: {
+      visitToUpload: pct(filesUploaded, visits),
+      uploadToView: pct(supplierViews, filesUploaded),
+      viewToClick: pct(affiliateClicks, supplierViews),
+      overall: pct(affiliateClicks, visits),
+    },
+    dropOff: {
+      visitToUpload: visits - filesUploaded,
+      uploadToView: filesUploaded - supplierViews,
+      viewToClick: supplierViews - affiliateClicks,
+    },
+    hasTrafficData: visits > 0 || filesUploaded > 0 || supplierViews > 0 || affiliateClicks > 0,
+  };
+}
+
 export default function Admin() {
   const [tab, setTab] = useState<Tab>('overview');
   const [range, setRange] = useState<DateRange>(() => rangeForDays(30));
+  const [analyticsSource, setAnalyticsSource] = useState<'platform' | 'ga4'>('platform');
   const navigate = useNavigate();
 
   const { data: stats, isLoading: statsLoading, isError: statsError, error: statsErr } = useAdminStats(range);
   const { data: inventory, isLoading: inventoryLoading } = useSupplierInventory();
   const { data: funnel, isLoading: funnelLoading, error: funnelError } = useFunnelData(range);
-  const { data: ga4, isLoading: ga4Loading, error: ga4Error } = useGA4Funnel(range, tab === 'compare');
+  const ga4Enabled = tab === 'compare' || (tab === 'analytics' && analyticsSource === 'ga4');
+  const { data: ga4, isLoading: ga4Loading, error: ga4Error } = useGA4Funnel(range, ga4Enabled);
   const { data: events, isLoading: eventsLoading, error: eventsError } = useEventBreakdown(range);
 
   const total = stats?.suppliers.total ?? 0;
@@ -704,20 +727,73 @@ export default function Admin() {
 
         {tab === 'analytics' && (
           <div className="space-y-8">
-            <div className="flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
-                <span className="inline-flex items-center rounded-full bg-blue-500/10 border border-blue-500/30 px-2.5 py-0.5 text-xs font-medium text-blue-600 dark:text-blue-400">
-                  Source: Platform (Supabase)
-                </span>
+            <div className="flex items-center justify-between gap-4 flex-wrap">
+              <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+              <div className="inline-flex items-center rounded-full border border-border bg-muted/30 p-0.5 text-xs font-medium">
+                <button
+                  type="button"
+                  onClick={() => setAnalyticsSource('platform')}
+                  className={`px-3 py-1 rounded-full transition-colors ${
+                    analyticsSource === 'platform'
+                      ? 'bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/30'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  Platform (Supabase)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAnalyticsSource('ga4')}
+                  className={`px-3 py-1 rounded-full transition-colors ${
+                    analyticsSource === 'ga4'
+                      ? 'bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  GA4 (Google Analytics)
+                </button>
               </div>
-              <p className="text-xs text-muted-foreground text-right">
-                Not GA4 — see Compare tab for GA4 numbers.
-              </p>
             </div>
 
-            <FunnelSection funnel={funnel} loading={funnelLoading} error={funnelError} />
+            {analyticsSource === 'platform' ? (
+              <FunnelSection funnel={funnel} loading={funnelLoading} error={funnelError} />
+            ) : (
+              <div className="space-y-4">
+                {ga4Error && (
+                  <div className="rounded-md border border-destructive/40 bg-destructive/10 p-3 text-sm text-destructive">
+                    Failed to load GA4 data: {ga4Error instanceof Error ? ga4Error.message : 'Unknown error'}
+                  </div>
+                )}
 
+                {ga4 && !ga4.available && !ga4Loading && !ga4Error && (
+                  <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-400 space-y-1">
+                    {ga4.reason === 'credentials_missing' ? (
+                      <>
+                        <div className="font-semibold">GA4 credentials not configured in Supabase.</div>
+                        <div>Set <code className="font-mono text-xs">GA4_PROPERTY_ID</code> and <code className="font-mono text-xs">GA4_SERVICE_ACCOUNT_JSON</code> under Settings → Edge Functions → Secrets, then redeploy the <code className="font-mono text-xs">ga4-analytics</code> function.</div>
+                      </>
+                    ) : ga4.reason === 'edge_function_error' ? (
+                      <>
+                        <div className="font-semibold">GA4 edge function returned an error.</div>
+                        <div>{ga4.errorMessage ?? 'Unknown error from ga4-analytics function.'}</div>
+                      </>
+                    ) : (
+                      <div>GA4 returned no funnel data for this period. The function ran but produced no rows — either GA4 has no matching events, or the date range is empty.</div>
+                    )}
+                  </div>
+                )}
+
+                {ga4 && ga4.available && !ga4Loading && ga4.visits === 0 && ga4.supplierViews === 0 && ga4.conversions === 0 && ga4.filesUploaded === 0 && (
+                  <div className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-3 text-sm text-yellow-700 dark:text-yellow-400">
+                    GA4 has no events for this period. This usually means adblock/consent blocked all measurement, or GA4's 24–48h reporting delay hasn't caught up.
+                  </div>
+                )}
+
+                <FunnelSection funnel={ga4ToFunnelData(ga4)} loading={ga4Loading} error={ga4Error} />
+              </div>
+            )}
+
+            {analyticsSource === 'platform' && (
             <Card className="bg-card border-border overflow-hidden">
               <CardContent className="p-0">
                 <div className="px-6 py-4 border-b border-border flex items-center justify-between">
@@ -790,6 +866,7 @@ export default function Admin() {
                 )}
               </CardContent>
             </Card>
+            )}
 
             <div>
               <h2 className="text-lg font-semibold text-foreground mb-4">Database aggregates</h2>
