@@ -9,14 +9,20 @@ Source-of-truth procedure for the `daily-supplier-audit` Anthropic-cloud routine
 - Branch naming: `auto-audit/<supplier_id>-<YYYYMMDD>`
 - Migration path: `supabase/migrations/<UTCtimestamp>_correct_<supplier_id>.sql` (snake_case `supplier_id`, dashes → underscores)
 
-## Step 0 — Define `tg_send` and send a heartbeat (do this FIRST)
+## Step 0 — Write `/tmp/tg.sh` and send a heartbeat (do this FIRST)
 
-The Telegram wrapper is needed by Step 0 itself, the trap in "Failure handling", and Step 5. Define it ONCE up front so it's in scope for the whole run.
+The Bash tool starts a fresh shell on every invocation, so `export` and shell-function definitions do NOT persist across calls. Solution: write the wrapper + env vars to `/tmp/tg.sh` once. Every later Telegram-send `source`s that file before calling `tg_send`.
+
+Run this whole block in **one** Bash call:
 
 ```bash
-# === Telegram wrapper — paste this verbatim, do NOT improvise ===
+cat > /tmp/tg.sh <<'TGEOF'
+#!/usr/bin/env bash
+# Sourced by every Telegram-send call. Self-contained: env vars + wrapper.
 # Avoids three known failure modes: parse_mode=Markdown 400-fails on agent
 # content, bash command-substitution on backticks, silent HTTP failures.
+export TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
+export TELEGRAM_CHAT_ID="${TELEGRAM_CHAT_ID:-}"
 tg_send() {
   local text http
   text=$(printf '%s\n' "$@")
@@ -28,8 +34,7 @@ tg_send() {
   echo "TG_HTTP=${http}" >&2
   if [ "$http" != "200" ]; then
     cat /tmp/tg_resp.json >&2 || true
-    local text_safe
-    text_safe=$(printf '%s' "$text" | tr -d '\r')
+    local text_safe; text_safe=$(printf '%s' "$text" | tr -d '\r')
     http=$(curl -sS -o /tmp/tg_resp.json -w '%{http_code}' \
       -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
       --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
@@ -38,14 +43,21 @@ tg_send() {
   fi
   return 0
 }
-
-# === Heartbeat — fires before any research ===
+TGEOF
+source /tmp/tg.sh
 tg_send "🛠️ Audit kører — $(date -u '+%Y-%m-%d %H:%M UTC')"
-# If TG_HTTP wasn't 200, the bot/chat creds are broken — exit. No point doing
-# 5 min of Firecrawl work that nobody will hear about.
 ```
 
-This costs one Telegram per run but guarantees the user sees evidence the routine actually fired today, even if a later step crashes silently. **It also proves to you, the agent, that the wrapper works** — if the heartbeat reaches `TG_HTTP=200`, then any later `tg_send` failure is about message content, not auth.
+The trigger prompt also writes `/tmp/tg.sh` and fires a heartbeat before this file is read — so this block is idempotent. If the heartbeat doesn't reach `TG_HTTP=200`, abort the run; later calls won't reach the user either.
+
+**Important:** every later Telegram-send must be a Bash call structured like:
+
+```bash
+source /tmp/tg.sh
+tg_send "..." "..." "..."
+```
+
+Without `source`, `tg_send` is undefined and `${TELEGRAM_BOT_TOKEN}` is empty, so curl POSTs to `https://api.telegram.org/bot/sendMessage` (no token) and Telegram returns 404 — silently from the run's perspective.
 
 ## Step 1 — Pick today's supplier
 
@@ -167,10 +179,11 @@ Reason: ${SKIP_REASON}
 🌴 Audit-kø er ren. Ingen suppliers under confidence 100 uden åben PR.
 ```
 
-**Send via the `tg_send` wrapper defined in Step 0.** Pass each body line as a separate argument — `printf '%s\n'` joins them, so no shell interpolation of agent-supplied content (backticks in `${SHORT_SUMMARY}` won't be command-substituted, etc.).
+**Send via the `tg_send` wrapper defined in Step 0.** Each call is a single Bash invocation that sources `/tmp/tg.sh` first (env + wrapper) then calls `tg_send` with body lines as separate arguments — `printf '%s\n'` joins them, so no shell interpolation of agent-supplied content (backticks in `${SHORT_SUMMARY}` won't be command-substituted, etc.).
 
 ```bash
 # Real diff (PR opened):
+source /tmp/tg.sh
 tg_send \
   "🔧 Audit klar — ${SUPPLIER_NAME}" \
   "${PR_URL}" \
@@ -184,12 +197,14 @@ tg_send \
   "Approve: merge PR + run npx supabase db push next session."
 
 # Verified clean:
+source /tmp/tg.sh
 tg_send \
   "✅ ${SUPPLIER_NAME} — DB matcher hjemmesiden" \
   "${PR_URL}" \
   "Bare merge — kan auto-merge'es."
 
 # Removal proposed:
+source /tmp/tg.sh
 tg_send \
   "🗑️ Audit foreslår fjernelse — ${SUPPLIER_NAME}" \
   "${PR_URL}" \
@@ -203,12 +218,14 @@ tg_send \
   "After merge: npx supabase db push (junction tables cascade)."
 
 # Skipped:
+source /tmp/tg.sh
 tg_send \
   "⚠️ ${SUPPLIER_NAME} — sprunget over" \
   "Reason: ${SKIP_REASON}" \
   "(re-tries om 14 dage)"
 
 # Empty queue:
+source /tmp/tg.sh
 tg_send "🌴 Audit-kø er ren. Ingen suppliers under confidence 100 uden åben PR."
 ```
 
