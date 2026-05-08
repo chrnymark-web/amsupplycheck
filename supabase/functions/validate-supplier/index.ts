@@ -212,10 +212,10 @@ interface SupplierValidationRequest {
 
 // ROBUST VALIDATION CONSTANTS - Optimized for reliability
 const FETCH_TIMEOUT_MS = 10000; // 10 seconds for basic fetch (increased from 8)
-const FIRECRAWL_TIMEOUT_MS = 20000; // 20 seconds for Firecrawl (increased from 15)
-const MAX_PAGES_TO_SCRAPE = 6; // Increased to 6 for better contact/imprint coverage
-const MAX_TOTAL_SCRAPE_TIME_MS = 90000; // 90 seconds total max (increased for retries)
-const MAX_RETRIES = 2; // Retry failed requests up to 2 times
+const FIRECRAWL_TIMEOUT_MS = 25000; // 25 seconds for Firecrawl (more time for JS-heavy sites)
+const MAX_PAGES_TO_SCRAPE = 20; // Up to 20 pages per supplier for deep validation
+const MAX_TOTAL_SCRAPE_TIME_MS = 180000; // 3 minutes total budget (one supplier per cron tick)
+const MAX_RETRIES = 3; // Retry failed requests up to 3 times
 const RETRY_DELAY_MS = 1000; // Wait 1 second between retries
 
 // Enhanced fetch with anti-bot techniques - rotating user agents
@@ -891,7 +891,61 @@ serve(async (req) => {
       }
       
       console.log(`🔗 Found ${foundLinks.length} internal links on homepage`);
-      
+
+      // Augment with Firecrawl /v1/map - discovers URLs not linked from homepage
+      // (e.g. /services/sla under a /services hub). Failure is non-fatal.
+      if (!firecrawlCreditsExhausted) {
+        const mapApiKey = Deno.env.get('FIRECRAWL_API_KEY');
+        if (mapApiKey) {
+          try {
+            console.log(`🗺️ Firecrawl map for ${baseUrl.origin}...`);
+            const mapController = new AbortController();
+            const mapTimeoutId = setTimeout(() => mapController.abort(), FIRECRAWL_TIMEOUT_MS);
+            const mapResponse = await fetch('https://api.firecrawl.dev/v1/map', {
+              method: 'POST',
+              headers: {
+                'Authorization': `Bearer ${mapApiKey}`,
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ url: baseUrl.origin }),
+              signal: mapController.signal
+            });
+            clearTimeout(mapTimeoutId);
+
+            if (mapResponse.ok) {
+              const mapData = await mapResponse.json();
+              const mapLinks: string[] = Array.isArray(mapData?.links) ? mapData.links : [];
+              const existingUrls = new Set(foundLinks.map(l => l.url));
+              let added = 0;
+              for (const mapUrl of mapLinks) {
+                try {
+                  const linkUrl = new URL(mapUrl);
+                  if (linkUrl.origin !== baseUrl.origin) continue;
+                  const lower = mapUrl.toLowerCase();
+                  if (lower.includes('login') || lower.includes('cart') || lower.includes('checkout')) continue;
+                  if (lower.includes('privacy') || lower.includes('terms') || lower.includes('cookie')) continue;
+                  if (existingUrls.has(mapUrl)) continue;
+                  foundLinks.push({ url: mapUrl, text: '' });
+                  existingUrls.add(mapUrl);
+                  added++;
+                } catch {
+                  // Invalid URL, skip
+                }
+              }
+              console.log(`🗺️ Firecrawl map added ${added} additional URLs (total: ${foundLinks.length})`);
+            } else if (mapResponse.status === 402 || mapResponse.status === 429) {
+              firecrawlCreditsExhausted = true;
+              console.warn(`⚠️ Firecrawl map: credits exhausted (${mapResponse.status}), continuing with homepage links only`);
+            } else {
+              console.warn(`⚠️ Firecrawl map failed: ${mapResponse.status}, continuing with homepage links only`);
+            }
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : String(err);
+            console.warn(`⚠️ Firecrawl map error: ${msg}, continuing with homepage links only`);
+          }
+        }
+      }
+
       // Match links to relevant categories
       const seenUrls = new Set<string>([supplierWebsite]);
       
@@ -913,7 +967,6 @@ serve(async (req) => {
               priority: category.priority
             });
             seenUrls.add(link.url);
-            break; // Only one link per category
           }
         }
       }

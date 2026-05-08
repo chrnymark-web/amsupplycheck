@@ -28,7 +28,7 @@ export const ValidationConfig = () => {
     auto_approve_technology_updates: false,
     auto_approve_material_updates: false,
     auto_approve_location_updates: false,
-    validation_schedule_cron: '0 2 * * 0',
+    validation_schedule_cron: '0 6,14,22 * * *',
     validation_paused: false,
     validations_this_month: 0,
     monthly_validation_limit: 76
