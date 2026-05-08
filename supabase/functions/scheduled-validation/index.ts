@@ -1,5 +1,6 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { syncSupplierJunctions } from '../_shared/sync-supplier-junctions.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -553,6 +554,28 @@ Deno.serve(async (req) => {
             } else {
               updated++;
               console.log(`💾 Auto-updated ${supplier.name} with fields:`, Object.keys(updates).join(', '));
+
+              // Sync junction tables when arrays were touched. SupplierProfile
+              // reads from the junctions, not the denormalized arrays — without
+              // this sync, audit findings never reach the page.
+              const techForSync = 'technologies' in updates
+                ? (updates.technologies as string[] | null)
+                : undefined;
+              const matForSync = 'materials' in updates
+                ? (updates.materials as string[] | null)
+                : undefined;
+              if (techForSync !== undefined || matForSync !== undefined) {
+                try {
+                  await syncSupplierJunctions(
+                    supabase,
+                    supplier.id,
+                    techForSync,
+                    matForSync,
+                  );
+                } catch (junctionError) {
+                  console.error(`❌ Junction sync error for ${supplier.name}:`, junctionError);
+                }
+              }
             }
           }
         }

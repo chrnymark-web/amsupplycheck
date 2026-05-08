@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import { z } from 'https://deno.land/x/zod@v3.22.4/mod.ts';
+import { syncSupplierJunctions } from '../_shared/sync-supplier-junctions.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -1744,13 +1745,31 @@ ${htmlContent.substring(0, 50000)}`
       console.log(`✅ Supplier verified`);
     }
 
-    const { error: updateError } = await supabase
+    const { data: updatedSupplier, error: updateError } = await supabase
       .from('suppliers')
       .update(supplierUpdate)
-      .eq('supplier_id', supplierId);
+      .eq('supplier_id', supplierId)
+      .select('id, technologies, materials')
+      .maybeSingle();
 
     if (updateError) {
       console.error('❌ Failed to update supplier:', updateError);
+    }
+
+    // Sync junction tables when arrays were touched. SupplierProfile reads
+    // from the junctions, not the denormalized arrays — without this sync,
+    // audit findings never reach the page.
+    if (updatedSupplier?.id && (shouldUpdateTechnologies || shouldUpdateMaterials)) {
+      try {
+        await syncSupplierJunctions(
+          supabase,
+          updatedSupplier.id,
+          shouldUpdateTechnologies ? (supplierUpdate.technologies as string[]) : undefined,
+          shouldUpdateMaterials ? (supplierUpdate.materials as string[]) : undefined,
+        );
+      } catch (junctionError) {
+        console.error('❌ Junction sync error:', junctionError);
+      }
     }
 
     // Return success response
