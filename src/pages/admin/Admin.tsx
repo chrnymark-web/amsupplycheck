@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -7,6 +9,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Globe, CheckCircle, Zap, Star, Search, ArrowRight, BarChart3, Eye,
   Target, Mail, ShieldCheck, ExternalLink, GitPullRequest,
+  Play, RefreshCw, Sparkles,
 } from 'lucide-react';
 import { useAdminStats, type TopItem } from '@/hooks/use-admin-stats';
 import { useSupplierInventory } from '@/hooks/use-supplier-inventory';
@@ -524,11 +527,40 @@ function ga4ToFunnelData(ga4: GA4Funnel | undefined): FunnelData | undefined {
   };
 }
 
+type DiscoveryResult = {
+  suppliersNew: number;
+  suppliersAutoApproved: number;
+  suppliersDuplicate: number;
+  suppliersFound: number;
+};
+
 export default function Admin() {
   const [tab, setTab] = useState<Tab>('overview');
   const [range, setRange] = useState<DateRange>(() => rangeForDays(30));
   const [analyticsSource, setAnalyticsSource] = useState<'platform' | 'ga4'>('platform');
+  const [runningDiscovery, setRunningDiscovery] = useState(false);
+  const [lastDiscoveryResult, setLastDiscoveryResult] = useState<DiscoveryResult | null>(null);
   const navigate = useNavigate();
+
+  async function runDiscoveryNow() {
+    setRunningDiscovery(true);
+    setLastDiscoveryResult(null);
+    toast.info('Starting supplier discovery — this can take a couple of minutes…');
+    try {
+      const response = await supabase.functions.invoke('discover-suppliers');
+      if (response.error) throw new Error(response.error.message);
+      const result = response.data as DiscoveryResult;
+      setLastDiscoveryResult(result);
+      toast.success(
+        `Discovery complete: ${result.suppliersNew} new (${result.suppliersAutoApproved} auto-approved)`,
+      );
+    } catch (error) {
+      console.error('Discovery error:', error);
+      toast.error('Discovery failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setRunningDiscovery(false);
+    }
+  }
 
   const { data: stats, isLoading: statsLoading, isError: statsError, error: statsErr } = useAdminStats(range);
   const { data: inventory, isLoading: inventoryLoading } = useSupplierInventory();
@@ -661,6 +693,56 @@ export default function Admin() {
             <p className="text-xs text-muted-foreground -mt-2">
               "Approved" is the manual catalog flag (<code className="font-mono">suppliers.verified</code>). For automated data-quality checks, see the <button onClick={() => setTab('audit')} className="underline hover:text-foreground">Audit tab</button>.
             </p>
+
+            <Card className="bg-card border-border">
+              <CardContent className="p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                  <div className="flex-1">
+                    <h2 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-primary" />
+                      Find new suppliers
+                    </h2>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Runs ~60 search queries through Firecrawl + Gemini. Hits the auto-approve threshold (configurable, default 85%) land directly in the catalog; lower-confidence finds queue up for manual review.
+                    </p>
+                    {lastDiscoveryResult && (
+                      <div className="mt-3 flex flex-wrap gap-2 text-xs">
+                        <span className="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 font-medium text-green-600 dark:text-green-400">
+                          {lastDiscoveryResult.suppliersNew} new
+                        </span>
+                        <span className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-0.5 font-medium text-blue-600 dark:text-blue-400">
+                          {lastDiscoveryResult.suppliersAutoApproved} auto-approved
+                        </span>
+                        <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2.5 py-0.5 font-medium text-muted-foreground">
+                          {lastDiscoveryResult.suppliersDuplicate} duplicates skipped
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => navigate('/admin/discovered-suppliers')}
+                    >
+                      Review & configure
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                    <Button
+                      onClick={runDiscoveryNow}
+                      disabled={runningDiscovery}
+                    >
+                      {runningDiscovery ? (
+                        <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                      ) : (
+                        <Play className="h-4 w-4 mr-2" />
+                      )}
+                      {runningDiscovery ? 'Running…' : 'Run discovery now'}
+                    </Button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <Card className="bg-card border-border">
