@@ -6,20 +6,28 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { toast } from 'sonner';
-import { 
-  CheckCircle, 
-  XCircle, 
-  RefreshCw, 
-  Clock, 
+import {
+  CheckCircle,
+  XCircle,
+  RefreshCw,
+  Clock,
   AlertCircle,
   ArrowLeft,
   Play,
   History,
   BarChart3,
   Settings,
-  Users
+  Users,
+  ChevronDown
 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { DiscoveryStats } from '@/components/discovery/DiscoveryStats';
 import { DiscoveryConfig } from '@/components/discovery/DiscoveryConfig';
 import { SupplierReviewList } from '@/components/discovery/SupplierReviewList';
@@ -37,6 +45,7 @@ interface DiscoveredSupplier {
   search_query: string | null;
   discovery_confidence: number | null;
   status: string;
+  source: string | null;
   created_at: string;
   reviewed_at: string | null;
   rejection_reason: string | null;
@@ -52,6 +61,7 @@ interface DiscoveryRun {
   suppliers_new: number | null;
   suppliers_duplicate: number | null;
   error_message: string | null;
+  source: string | null;
 }
 
 export default function DiscoveredSuppliers() {
@@ -115,23 +125,24 @@ export default function DiscoveredSuppliers() {
     setLoading(false);
   }
 
-  async function runDiscoveryNow() {
+  async function runDiscovery(functionName: string, label: string) {
     setRunningDiscovery(true);
-    toast.info('Starting supplier discovery...');
+    toast.info(`Starting ${label}...`);
 
     try {
-      const response = await supabase.functions.invoke('discover-suppliers');
-      
+      const response = await supabase.functions.invoke(functionName);
+
       if (response.error) {
         throw new Error(response.error.message);
       }
 
       const result = response.data;
-      toast.success(`Discovery complete: ${result.suppliersNew} new suppliers found`);
+      const newCount = result?.suppliersNew ?? result?.suppliers_new ?? 0;
+      toast.success(`${label} complete: ${newCount} new suppliers found`);
       await loadData();
     } catch (error) {
-      console.error('Discovery error:', error);
-      toast.error('Discovery failed: ' + (error instanceof Error ? error.message : 'Unknown error'));
+      console.error(`${label} error:`, error);
+      toast.error(`${label} failed: ` + (error instanceof Error ? error.message : 'Unknown error'));
     } finally {
       setRunningDiscovery(false);
     }
@@ -162,17 +173,31 @@ export default function DiscoveredSuppliers() {
               </p>
             </div>
           </div>
-          <Button 
-            onClick={runDiscoveryNow} 
-            disabled={runningDiscovery}
-          >
-            {runningDiscovery ? (
-              <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-            ) : (
-              <Play className="h-4 w-4 mr-2" />
-            )}
-            Run Discovery Now
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button disabled={runningDiscovery}>
+                {runningDiscovery ? (
+                  <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                ) : (
+                  <Play className="h-4 w-4 mr-2" />
+                )}
+                Run Discovery
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => runDiscovery('discover-suppliers', 'Search-based discovery')}>
+                Search-based discovery
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => runDiscovery('crawl-treatstock', 'Treatstock crawler')}>
+                Treatstock crawler
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => runDiscovery('crawl-all3dp', 'All3DP crawler')}>
+                All3DP crawler
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
 
         {/* Quick Stats */}

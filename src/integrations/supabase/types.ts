@@ -469,6 +469,7 @@ export type Database = {
           reviewed_at: string | null
           reviewed_by: string | null
           search_query: string | null
+          source: string
           source_url: string | null
           status: string
           technologies: string[] | null
@@ -489,6 +490,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           search_query?: string | null
+          source?: string
           source_url?: string | null
           status?: string
           technologies?: string[] | null
@@ -509,6 +511,7 @@ export type Database = {
           reviewed_at?: string | null
           reviewed_by?: string | null
           search_query?: string | null
+          source?: string
           source_url?: string | null
           status?: string
           technologies?: string[] | null
@@ -566,6 +569,7 @@ export type Database = {
           id: string
           logs: Json | null
           search_queries: string[] | null
+          source: string
           started_at: string
           status: string
           suppliers_duplicate: number | null
@@ -578,6 +582,7 @@ export type Database = {
           id?: string
           logs?: Json | null
           search_queries?: string[] | null
+          source?: string
           started_at?: string
           status?: string
           suppliers_duplicate?: number | null
@@ -590,6 +595,7 @@ export type Database = {
           id?: string
           logs?: Json | null
           search_queries?: string[] | null
+          source?: string
           started_at?: string
           status?: string
           suppliers_duplicate?: number | null

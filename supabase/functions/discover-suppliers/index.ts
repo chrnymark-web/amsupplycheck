@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.76.0";
+import { extractDomain, normalizeUrl, buildDedupSet } from "../_shared/discovery.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -245,7 +246,8 @@ serve(async (req) => {
     .from('discovery_runs')
     .insert({
       search_queries: SEARCH_QUERIES,
-      status: 'running'
+      status: 'running',
+      source: 'search',
     })
     .select()
     .single();
@@ -274,26 +276,7 @@ serve(async (req) => {
 
   try {
     // Get ALL existing supplier domains to avoid scraping
-    const { data: existingSuppliers } = await supabase
-      .from('suppliers')
-      .select('website');
-    
-    const { data: existingDiscovered } = await supabase
-      .from('discovered_suppliers')
-      .select('website');
-
-    // Create a set of normalized domains we already know
-    const existingDomains = new Set<string>();
-    
-    for (const s of existingSuppliers || []) {
-      const domain = extractDomain(s.website);
-      if (domain) existingDomains.add(domain);
-    }
-    
-    for (const s of existingDiscovered || []) {
-      const domain = extractDomain(s.website);
-      if (domain) existingDomains.add(domain);
-    }
+    const existingDomains = await buildDedupSet(supabase);
 
     log(`Starting optimized discovery with ${existingDomains.size} known domains`);
     log(`Using ${SEARCH_QUERIES.length} search queries (optimized from 10)`);
@@ -472,6 +455,7 @@ serve(async (req) => {
                 search_query: query,
                 discovery_confidence: supplierData.confidence,
                 status: 'auto_approved',
+                source: 'search',
                 reviewed_at: new Date().toISOString(),
                 raw_data: {
                   title: result.title,
@@ -530,6 +514,7 @@ serve(async (req) => {
               source_url: url,
               search_query: query,
               discovery_confidence: supplierData.confidence,
+              source: 'search',
               raw_data: {
                 title: result.title,
                 markdown: result.markdown?.substring(0, 5000),
@@ -632,30 +617,6 @@ serve(async (req) => {
     );
   }
 });
-
-// Extract just the domain from a URL for comparison
-function extractDomain(url: string | null): string | null {
-  if (!url) return null;
-  try {
-    const parsed = new URL(url);
-    // Remove www. prefix for consistent matching
-    return parsed.hostname.replace(/^www\./, '').toLowerCase();
-  } catch {
-    return null;
-  }
-}
-
-function normalizeUrl(url: string | null): string | null {
-  if (!url) return null;
-  try {
-    const parsed = new URL(url);
-    // Remove www. prefix and trailing slashes
-    let domain = parsed.hostname.replace(/^www\./, '');
-    return `https://${domain}`;
-  } catch {
-    return null;
-  }
-}
 
 interface SearchResult {
   url?: string;

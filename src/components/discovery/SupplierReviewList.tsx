@@ -28,6 +28,13 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface DiscoveredSupplier {
   id: string;
@@ -42,6 +49,7 @@ interface DiscoveredSupplier {
   search_query: string | null;
   discovery_confidence: number | null;
   status: string;
+  source: string | null;
   created_at: string;
   reviewed_at: string | null;
   rejection_reason: string | null;
@@ -55,6 +63,7 @@ interface SupplierReviewListProps {
 
 export function SupplierReviewList({ suppliers, loading, onRefresh }: SupplierReviewListProps) {
   const [selectedTab, setSelectedTab] = useState('pending');
+  const [sourceFilter, setSourceFilter] = useState<string>('all');
   
   // Edit dialog state
   const [editSupplier, setEditSupplier] = useState<DiscoveredSupplier | null>(null);
@@ -280,12 +289,30 @@ export function SupplierReviewList({ suppliers, loading, onRefresh }: SupplierRe
     }
   }
 
-  const filteredSuppliers = suppliers.filter(s => s.status === selectedTab);
+  const filteredSuppliers = suppliers.filter(s =>
+    s.status === selectedTab && (sourceFilter === 'all' || (s.source ?? 'search') === sourceFilter)
+  );
   const pendingCount = suppliers.filter(s => s.status === 'pending').length;
   const autoApprovedCount = suppliers.filter(s => s.status === 'auto_approved').length;
+  const availableSources = Array.from(
+    new Set(suppliers.map(s => s.source ?? 'search'))
+  ).sort();
 
   return (
     <>
+      <div className="flex items-center justify-end mb-3">
+        <Select value={sourceFilter} onValueChange={setSourceFilter}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="All sources" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All sources</SelectItem>
+            {availableSources.map(src => (
+              <SelectItem key={src} value={src}>{src}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList className="flex-wrap h-auto gap-1">
           <TabsTrigger value="pending">
@@ -323,13 +350,16 @@ export function SupplierReviewList({ suppliers, loading, onRefresh }: SupplierRe
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-2">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <h3 className="font-semibold text-lg truncate">{supplier.name}</h3>
                           {supplier.discovery_confidence && (
                             <Badge variant={supplier.discovery_confidence >= 70 ? 'default' : 'secondary'}>
                               {supplier.discovery_confidence}%
                             </Badge>
                           )}
+                          <Badge variant="outline" className="text-xs">
+                            {supplier.source ?? 'search'}
+                          </Badge>
                         </div>
 
                         {supplier.description && (
