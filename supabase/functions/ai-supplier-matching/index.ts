@@ -174,11 +174,11 @@ serve(async (req) => {
       certifications: project.certificationsNeeded,
     });
 
-    const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+    const GEMINI_API_KEY = Deno.env.get('GEMINI_API_KEY');
     const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     
-    if (!LOVABLE_API_KEY) {
+    if (!GEMINI_API_KEY) {
       return new Response(
         JSON.stringify({ error: 'Matching service not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -264,14 +264,14 @@ AVAILABLE REGIONS: Scandinavia, Western Europe, Central Europe, UK & Ireland, No
 
 Extract the requirements. Prioritize the recommended technologies if they match the project needs.`;
 
-    const analysisResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const analysisResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+        'Authorization': `Bearer ${GEMINI_API_KEY}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [
           { role: 'system', content: 'You are an expert 3D printing consultant. Analyze project requirements and extract structured data. Use the structured user inputs to inform your technology and material recommendations.' },
           { role: 'user', content: analysisPrompt }
@@ -550,14 +550,14 @@ Generate brief, friendly explanations (1-2 sentences each in English) for why ea
 ${topMatches.map((m, i) => `${i + 1}. ${m.supplier.name} - Score: ${m.score}%, Matched: ${m.matchDetails.matchedTechnologies.join(', ')}, ${m.matchDetails.matchedMaterials.join(', ')}${m.matchDetails.matchedCertifications.length ? `, Certs: ${m.matchDetails.matchedCertifications.join(', ')}` : ''}`).join('\n')}`;
 
       try {
-        const explanationResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+        const explanationResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
           method: 'POST',
           headers: {
-            'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+            'Authorization': `Bearer ${GEMINI_API_KEY}`,
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'google/gemini-2.5-flash',
+            model: 'gemini-2.5-flash',
             messages: [
               { role: 'system', content: 'You are a helpful assistant. Write in English. Be concise and friendly.' },
               { role: 'user', content: explanationPrompt }
@@ -646,14 +646,14 @@ RECOMMENDED MATERIALS: ${requirements.requiredMaterials?.join(', ') || 'Not spec
 
 Write in Danish. Be educational and friendly. Explain for someone who may not know about 3D printing.`;
 
-      const rationaleResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+      const rationaleResponse = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${LOVABLE_API_KEY}`,
+          'Authorization': `Bearer ${GEMINI_API_KEY}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          model: 'google/gemini-2.5-flash',
+          model: 'gemini-2.5-flash',
           messages: [
             { role: 'system', content: 'You are an expert 3D printing consultant who explains complex technology choices in simple terms. Write in Danish.' },
             { role: 'user', content: rationalePrompt }

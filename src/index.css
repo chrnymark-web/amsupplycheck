@@ -138,11 +138,6 @@
     width: 100%;
   }
 
-  /* Hide Lovable badge */
-  #lovable-badge {
-    display: none !important;
-  }
-
   body {
     @apply bg-background text-foreground;
   }

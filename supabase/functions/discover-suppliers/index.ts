@@ -155,7 +155,7 @@ serve(async (req) => {
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
   const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY')!;
   const firecrawlApiKey = Deno.env.get('FIRECRAWL_API_KEY');
-  const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
+  const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
 
   // Authentication check - only allow admin users, service role, or pg_net cron
   const authHeader = req.headers.get('Authorization');
@@ -221,10 +221,10 @@ serve(async (req) => {
     );
   }
 
-  if (!lovableApiKey) {
-    console.error('LOVABLE_API_KEY not configured');
+  if (!geminiApiKey) {
+    console.error('GEMINI_API_KEY not configured');
     return new Response(
-      JSON.stringify({ success: false, error: 'Lovable AI not configured' }),
+      JSON.stringify({ success: false, error: 'Gemini API not configured' }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }
@@ -401,7 +401,7 @@ serve(async (req) => {
       // Batch AI extraction — one call for all results in this query
       const batchSupplierData = await extractSupplierDataBatch(
         validResults.map(v => v.result),
-        lovableApiKey
+        geminiApiKey
       );
 
       // Process extraction results sequentially (DB writes need ordering)
@@ -662,14 +662,14 @@ Respond ONLY with a JSON array of ${results.length} object(s), one per entry, in
 Set is_supplier to false and confidence to 0 for non-suppliers.`;
 
   try {
-    const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+    const response = await fetch('https://generativelanguage.googleapis.com/v1beta/openai/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
+        model: 'gemini-2.5-flash',
         messages: [
           { role: 'system', content: 'You are an expert at identifying 3D printing and additive manufacturing service providers. Respond only with a valid JSON array.' },
           { role: 'user', content: prompt }
@@ -678,7 +678,7 @@ Set is_supplier to false and confidence to 0 for non-suppliers.`;
     });
 
     if (!response.ok) {
-      console.error('Lovable AI batch error:', await response.text());
+      console.error('Gemini batch error:', await response.text());
       return results.map(() => null);
     }
 

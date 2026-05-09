@@ -49,7 +49,7 @@ const Browse: React.FC = () => {
       <Helmet>
         <title>Browse Manufacturing Capabilities | Supplycheck</title>
         <meta name="description" content="Browse manufacturing technologies, materials, and supplier locations. Find the right additive manufacturing capabilities for your project." />
-        <link rel="canonical" href="https://supplycheck.lovable.app/browse" />
+        <link rel="canonical" href="https://amsupplycheck.com/browse" />
       </Helmet>
 
       <Navbar />

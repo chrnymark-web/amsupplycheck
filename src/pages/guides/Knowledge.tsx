@@ -103,7 +103,7 @@ const Knowledge: React.FC = () => {
       <Helmet>
         <title>Manufacturing Knowledge Base — Technologies & Materials | Supplycheck</title>
         <meta name="description" content="Explore all manufacturing technologies and materials available on Supplycheck. Find detailed information and discover suppliers for each capability." />
-        <link rel="canonical" href="https://supplycheck.lovable.app/knowledge" />
+        <link rel="canonical" href="https://amsupplycheck.com/knowledge" />
       </Helmet>
 
       <Navbar />

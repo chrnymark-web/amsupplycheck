@@ -37,7 +37,6 @@ export const ValidationConfig = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [isRunningValidation, setIsRunningValidation] = useState(false);
-  const [isTestingAI, setIsTestingAI] = useState(false);
 
   useEffect(() => {
     loadConfig();
@@ -187,29 +186,6 @@ export const ValidationConfig = () => {
     } catch (error) {
       console.error('Error resetting counter:', error);
       toast.error('Failed to reset counter');
-    }
-  };
-
-  const testLovableAI = async () => {
-    setIsTestingAI(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('test-lovable-ai', {
-        body: {}
-      });
-
-      if (error) throw error;
-
-      if (data.success) {
-        toast.success(`✅ Validation service connection working! Response: "${data.ai_response}" (${data.duration_ms}ms)`);
-      } else {
-        toast.error(`❌ Validation service test failed: ${data.error} (Status: ${data.status})`);
-        console.error('Test failed:', data);
-      }
-    } catch (error) {
-      console.error('Error testing Lovable AI:', error);
-      toast.error('Failed to test validation service connection');
-    } finally {
-      setIsTestingAI(false);
     }
   };
 
@@ -459,26 +435,7 @@ export const ValidationConfig = () => {
             )}
           </Button>
 
-          <Button 
-            onClick={testLovableAI} 
-            disabled={isTestingAI}
-            variant="secondary"
-            className="w-full"
-          >
-            {isTestingAI ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Testing Connection...
-              </>
-            ) : (
-              <>
-                <Settings className="mr-2 h-4 w-4" />
-                Test Validation Service
-              </>
-            )}
-          </Button>
-
-          <p className="text-xs text-muted-foreground">
+<p className="text-xs text-muted-foreground">
             Manual validation processes 1 supplier at a time. Uses 100% Firecrawl (~10 credits) for analysis.
           </p>
           

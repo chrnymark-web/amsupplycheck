@@ -133,7 +133,7 @@ const KnowledgeDetail: React.FC = () => {
       <Helmet>
         <title>{pageTitle}</title>
         <meta name="description" content={pageDesc} />
-        <link rel="canonical" href={`https://supplycheck.lovable.app/knowledge/${type}/${slug}`} />
+        <link rel="canonical" href={`https://amsupplycheck.com/knowledge/${type}/${slug}`} />
       </Helmet>
 
       <Navbar />
