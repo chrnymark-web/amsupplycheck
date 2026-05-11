@@ -16,8 +16,12 @@ const PRESETS: Preset[] = [
 ];
 
 function presetRange(days: number): DateRange {
+  // `to` covers all of *today* (not just the moment of selection) so rows
+  // created during the current day stay inside the range as it ages.
   const to = new Date();
+  to.setHours(23, 59, 59, 999);
   const from = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+  from.setHours(0, 0, 0, 0);
   return { from, to };
 }
 

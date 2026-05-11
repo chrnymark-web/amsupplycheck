@@ -423,9 +423,18 @@ serve(async (req) => {
             existingDomains.add(domain);
             log(`AUTO-APPROVED: ${supplierData.name} (${confidencePercent}% >= ${autoApproveThreshold}%) [${suppliersNew}/${MAX_NEW_SUPPLIERS}]`);
 
-            // Queue validation + notification (fire-and-forget)
+            // Queue validation + notification (fire-and-forget). Pass the
+            // service-role bearer explicitly — supabase-js v2's auto-attached
+            // Authorization header has been unreliable for function-to-function
+            // calls; without this, validate-supplier rejects with 401 and the
+            // new suppliers never get validated. Errors are surfaced into
+            // discovery_runs.logs (not just the function console) so a future
+            // silent failure is visible from the admin UI.
             const location = [supplierData.location_city, supplierData.location_country].filter(Boolean).join(', ');
+            const internalAuthHeader = `Bearer ${supabaseServiceKey}`;
+
             supabase.functions.invoke('validate-supplier', {
+              headers: { Authorization: internalAuthHeader },
               body: {
                 supplierId,
                 supplierName: supplierData.name,
@@ -434,9 +443,12 @@ serve(async (req) => {
                 currentMaterials: supplierData.materials || [],
                 currentLocation: location,
               }
-            }).catch(err => console.error(`Validation trigger failed for ${supplierData.name}:`, err));
+            }).then(({ error }) => {
+              if (error) log(`Validation trigger failed for ${supplierData.name}: ${error.message ?? JSON.stringify(error)}`);
+            }).catch(err => log(`Validation trigger threw for ${supplierData.name}: ${err?.message ?? err}`));
 
             supabase.functions.invoke('send-signup-notification', {
+              headers: { Authorization: internalAuthHeader },
               body: {
                 type: 'auto_approval',
                 supplierName: supplierData.name,
@@ -450,7 +462,9 @@ serve(async (req) => {
                 autoApproveThreshold: autoApproveThreshold,
                 totalAutoApproved: suppliersAutoApproved,
               }
-            }).catch(err => console.error(`Auto-approval notification failed for ${supplierData.name}:`, err));
+            }).then(({ error }) => {
+              if (error) log(`Auto-approval notification failed for ${supplierData.name}: ${error.message ?? JSON.stringify(error)}`);
+            }).catch(err => log(`Auto-approval notification threw for ${supplierData.name}: ${err?.message ?? err}`));
           }
         } else {
           // Insert into discovered_suppliers for manual review

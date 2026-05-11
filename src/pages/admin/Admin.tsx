@@ -703,16 +703,24 @@ export default function Admin() {
                       Find new suppliers
                     </h2>
                     <p className="text-sm text-muted-foreground mt-1">
-                      Runs ~60 search queries through Firecrawl + Gemini. Hits the auto-approve threshold (configurable, default 85%) land directly in the catalog; lower-confidence finds queue up for manual review.
+                      Runs ~20 high-yield search queries through Firecrawl + Gemini. Hits the auto-approve threshold (configurable, default 85%) land directly in the catalog; lower-confidence finds queue up for manual review.
                     </p>
                     {lastDiscoveryResult && (
                       <div className="mt-3 flex flex-wrap gap-2 text-xs">
-                        <span className="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 font-medium text-green-600 dark:text-green-400">
+                        <button
+                          type="button"
+                          onClick={() => navigate('/admin/discovered-suppliers?tab=review')}
+                          className="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 font-medium text-green-600 dark:text-green-400 hover:bg-green-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40 cursor-pointer transition-colors"
+                        >
                           {lastDiscoveryResult.suppliersNew} new
-                        </span>
-                        <span className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-0.5 font-medium text-blue-600 dark:text-blue-400">
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => navigate('/admin/discovered-suppliers?tab=review')}
+                          className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-0.5 font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 cursor-pointer transition-colors"
+                        >
                           {lastDiscoveryResult.suppliersAutoApproved} auto-approved
-                        </span>
+                        </button>
                         <span className="inline-flex items-center rounded-full border border-border bg-muted/40 px-2.5 py-0.5 font-medium text-muted-foreground">
                           {lastDiscoveryResult.suppliersDuplicate} duplicates skipped
                         </span>

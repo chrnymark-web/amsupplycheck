@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -64,14 +64,22 @@ interface DiscoveryRun {
   source: string | null;
 }
 
+const VALID_TABS = ['overview', 'review', 'config', 'runs'];
+
 export default function DiscoveredSuppliers() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const initialTab = (() => {
+    const t = searchParams.get('tab');
+    return t && VALID_TABS.includes(t) ? t : 'overview';
+  })();
+
   const [suppliers, setSuppliers] = useState<DiscoveredSupplier[]>([]);
   const [runs, setRuns] = useState<DiscoveryRun[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [runningDiscovery, setRunningDiscovery] = useState(false);
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState<string>(initialTab);
 
   useEffect(() => {
     checkAdminAndLoad();
