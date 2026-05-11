@@ -209,6 +209,8 @@ function confidenceTone(c: number | null | undefined): { color: string; label: s
   return { color: 'bg-green-500/15 text-green-600 border-green-500/30', label: c.toFixed(0) };
 }
 
+const ERRORED_PILL = 'bg-red-500/20 text-red-500 border-red-500/40';
+
 function formatRelative(iso: string | null | undefined): string {
   if (!iso) return 'Never';
   const ms = Date.now() - new Date(iso).getTime();
@@ -260,6 +262,7 @@ function AuditQueueSection() {
             ) : data && data.length > 0 ? (
               data.map((s: AuditSupplier, idx: number) => {
                 const tone = confidenceTone(s.last_validation_confidence);
+                const errored = !!s.last_validation_error;
                 return (
                   <React.Fragment key={s.id}>
                     <div className="px-4 py-3 border-b border-border last:border-b-0 text-muted-foreground">{idx + 1}</div>
@@ -268,8 +271,11 @@ function AuditQueueSection() {
                       <code className="font-mono text-xs text-muted-foreground/70">{s.supplier_id}</code>
                     </div>
                     <div className="px-4 py-3 border-b border-border last:border-b-0 text-right">
-                      <span className={`inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded border text-xs font-semibold ${tone.color}`}>
-                        {tone.label}
+                      <span
+                        className={`inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded border text-xs font-semibold ${errored ? ERRORED_PILL : tone.color}`}
+                        title={errored ? s.last_validation_error ?? '' : undefined}
+                      >
+                        {errored ? 'Err' : tone.label}
                       </span>
                     </div>
                     <div className="px-4 py-3 border-b border-border last:border-b-0 text-muted-foreground text-xs">
@@ -405,6 +411,7 @@ function RecentAuditsSection() {
             ) : data && data.length > 0 ? (
               data.map((s: AuditSupplier) => {
                 const tone = confidenceTone(s.last_validation_confidence);
+                const errored = !!s.last_validation_error;
                 return (
                   <React.Fragment key={s.id}>
                     <div className="px-4 py-3 border-b border-border last:border-b-0 text-muted-foreground text-xs">
@@ -412,10 +419,18 @@ function RecentAuditsSection() {
                     </div>
                     <div className="px-4 py-3 border-b border-border last:border-b-0">
                       <div className="font-medium text-foreground truncate">{s.name}</div>
+                      {errored && (
+                        <div className="text-[10px] text-red-500/80 truncate" title={s.last_validation_error ?? ''}>
+                          {s.last_validation_error}
+                        </div>
+                      )}
                     </div>
                     <div className="px-4 py-3 border-b border-border last:border-b-0 text-right">
-                      <span className={`inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded border text-xs font-semibold ${tone.color}`}>
-                        {tone.label}
+                      <span
+                        className={`inline-flex items-center justify-center min-w-[2.5rem] px-2 py-0.5 rounded border text-xs font-semibold ${errored ? ERRORED_PILL : tone.color}`}
+                        title={errored ? s.last_validation_error ?? '' : undefined}
+                      >
+                        {errored ? 'Err' : tone.label}
                       </span>
                     </div>
                     <div className="px-4 py-3 border-b border-border last:border-b-0 text-right">

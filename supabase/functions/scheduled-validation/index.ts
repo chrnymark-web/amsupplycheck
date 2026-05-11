@@ -310,7 +310,18 @@ Deno.serve(async (req) => {
 
     let validated = 0;
     let updated = 0;
-    
+    let verifiedCount = 0;
+    let disqualifiedCount = 0;
+    let erroredCount = 0;
+    const changes: Array<{
+      name: string;
+      supplierRowId: string | null;
+      confidence: number;
+      fieldsUpdated: string[];
+      is3dProvider: boolean | null;
+      error?: string;
+    }> = [];
+
     console.log('📋 Suppliers to validate:', suppliers.map(s => s.name).join(', '));
 
     for (const supplier of suppliers || []) {
@@ -347,7 +358,17 @@ Deno.serve(async (req) => {
             ? errorContext 
             : JSON.stringify(errorContext);
           console.error(`❌ Validation error for ${supplier.name}:`, errorMsg);
-          
+
+          erroredCount++;
+          changes.push({
+            name: supplier.name,
+            supplierRowId: supplier.id ?? null,
+            confidence: 0,
+            fieldsUpdated: [],
+            is3dProvider: null,
+            error: errorMsg,
+          });
+
           // Increment failure counter for this supplier
           const currentFailures = supplier.validation_failures || 0;
           const newFailureCount = currentFailures + 1;
@@ -355,10 +376,11 @@ Deno.serve(async (req) => {
           
           await supabase
             .from('suppliers')
-            .update({ 
+            .update({
               validation_failures: newFailureCount,
               last_validated_at: new Date().toISOString(),
-              last_validation_confidence: 0 // Explicitly set to 0 so they sort after successful suppliers
+              last_validation_confidence: 0, // Explicitly set to 0 so they sort after successful suppliers
+              last_validation_error: errorMsg.slice(0, 1000)
             })
             .eq('supplier_id', supplier.supplier_id);
           
@@ -420,12 +442,12 @@ Deno.serve(async (req) => {
           continue;
         }
         
-        // SUCCESS: Reset failure counter
-        if (supplier.validation_failures && supplier.validation_failures > 0) {
-          console.log(`✅ Resetting failure counter for ${supplier.name} (was ${supplier.validation_failures})`);
+        // SUCCESS: Reset failure counter and clear any prior error
+        if ((supplier.validation_failures && supplier.validation_failures > 0) || supplier.last_validation_error) {
+          console.log(`✅ Resetting failure state for ${supplier.name} (was ${supplier.validation_failures} fails)`);
           await supabase
             .from('suppliers')
-            .update({ validation_failures: 0 })
+            .update({ validation_failures: 0, last_validation_error: null })
             .eq('supplier_id', supplier.supplier_id);
         }
 

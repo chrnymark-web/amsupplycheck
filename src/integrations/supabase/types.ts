@@ -1049,6 +1049,7 @@ export type Database = {
           is_3d_printing_provider: boolean | null
           last_validated_at: string | null
           last_validation_confidence: number | null
+          last_validation_error: string | null
           lead_time_indicator: string | null
           listing_type: string | null
           location_address: string | null
@@ -1084,6 +1085,7 @@ export type Database = {
           is_3d_printing_provider?: boolean | null
           last_validated_at?: string | null
           last_validation_confidence?: number | null
+          last_validation_error?: string | null
           lead_time_indicator?: string | null
           listing_type?: string | null
           location_address?: string | null
@@ -1119,6 +1121,7 @@ export type Database = {
           is_3d_printing_provider?: boolean | null
           last_validated_at?: string | null
           last_validation_confidence?: number | null
+          last_validation_error?: string | null
           lead_time_indicator?: string | null
           listing_type?: string | null
           location_address?: string | null

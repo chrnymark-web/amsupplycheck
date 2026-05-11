@@ -1306,7 +1306,7 @@ CRITICAL INSTRUCTIONS:
 
     const requestBody = {
       model: 'claude-haiku-4-5-20251001',
-      max_tokens: 3000,
+      max_tokens: 8000,
       temperature: 0.3,
       system: systemPrompt,
       messages: [
@@ -1345,8 +1345,14 @@ ${htmlContent.substring(0, 50000)}`
 
     const aiData = await aiResponse.json();
     const aiContent = aiData.content?.[0]?.text || '';
-    
-    console.log(`✅ AI response received (${aiContent.length} chars)`);
+    const aiStopReason = aiData.stop_reason;
+
+    console.log(`✅ AI response received (${aiContent.length} chars, stop_reason=${aiStopReason})`);
+
+    if (aiStopReason === 'max_tokens') {
+      console.error(`❌ AI response truncated at max_tokens (${requestBody.max_tokens}). Raw end: ${aiContent.slice(-500)}`);
+      throw new Error(`AI response truncated at max_tokens (${requestBody.max_tokens}) — JSON output incomplete`);
+    }
 
     // Parse AI response
     let extractedData: {
@@ -1391,15 +1397,9 @@ ${htmlContent.substring(0, 50000)}`
       
     } catch (parseError) {
       console.error('❌ Parse error:', parseError.message);
-      extractedData = {
-        technologies: [],
-        materials: [],
-        location: '',
-        description: '',
-        logo_url: '',
-        lead_time: { typical: undefined, rush_service: false, instant_quote: false },
-        confidence: { technologies: 0, materials: 0, location: 0, description: 0, logo: 0, lead_time: 0 }
-      };
+      console.error(`Raw AI content (first 2000 chars): ${aiContent.slice(0, 2000)}`);
+      console.error(`Raw AI content (last 500 chars): ${aiContent.slice(-500)}`);
+      throw new Error(`AI response could not be parsed as JSON: ${parseError.message}`);
     }
 
     const scrapedTechnologies = extractedData.technologies || [];

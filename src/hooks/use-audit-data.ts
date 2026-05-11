@@ -9,6 +9,7 @@ export type AuditSupplier = {
   last_validation_confidence: number | null;
   last_validated_at: string | null;
   validation_failures: number | null;
+  last_validation_error: string | null;
 };
 
 export type ConfidenceBucket = {
@@ -28,7 +29,7 @@ export type AuditPR = {
 };
 
 const SELECT_COLUMNS =
-  'id, supplier_id, name, website, last_validation_confidence, last_validated_at, validation_failures';
+  'id, supplier_id, name, website, last_validation_confidence, last_validated_at, validation_failures, last_validation_error';
 
 function pgErr(e: unknown): Error {
   if (e instanceof Error) return e;
