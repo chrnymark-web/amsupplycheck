@@ -452,6 +452,7 @@ Deno.serve(async (req) => {
         }
 
         validated++;
+        let supplierFieldsUpdated: string[] = [];
         console.log(`✅ Validation API call completed for ${supplier.name}`);
         console.log('📦 Raw validation response:', JSON.stringify(validateResponse.data, null, 2));
 
@@ -575,6 +576,9 @@ Deno.serve(async (req) => {
               console.error(`❌ Update error for ${supplier.name}:`, updateError);
             } else {
               updated++;
+              supplierFieldsUpdated = Object.keys(updates).filter(
+                (k) => !['last_validated_at', 'verified', 'last_validation_confidence'].includes(k),
+              );
               console.log(`💾 Auto-updated ${supplier.name} with fields:`, Object.keys(updates).join(', '));
 
               // Sync junction tables when arrays were touched. SupplierProfile
@@ -627,7 +631,17 @@ Deno.serve(async (req) => {
           .from('suppliers')
           .update(validationOnlyUpdate)
           .eq('supplier_id', supplier.supplier_id);
-        
+
+        if (validationSucceeded) verifiedCount++;
+        if (is3dProvider === false) disqualifiedCount++;
+        changes.push({
+          name: supplier.name,
+          supplierRowId: supplier.id ?? null,
+          confidence: overallConfidence,
+          fieldsUpdated: supplierFieldsUpdated,
+          is3dProvider: typeof is3dProvider === 'boolean' ? is3dProvider : null,
+        });
+
         if (!validationSucceeded) {
           console.log(`⚠️ ${supplier.name} validation had 0 confidence or no data - NOT marking as verified`);
           // Increment failure count for failed validations
@@ -641,11 +655,20 @@ Deno.serve(async (req) => {
         // Delay between validations to avoid rate limiting
         await new Promise(resolve => setTimeout(resolve, 2000));
 
-      } catch (error) {
+      } catch (error: any) {
         console.error(`❌ Error processing ${supplier.name}:`, error);
+        erroredCount++;
+        changes.push({
+          name: supplier.name,
+          supplierRowId: supplier.id ?? null,
+          confidence: 0,
+          fieldsUpdated: [],
+          is3dProvider: null,
+          error: error?.message ?? String(error),
+        });
       }
     }
-    
+
     console.log('\n📈 Validation summary:', {
       validated,
       updated,
@@ -672,12 +695,26 @@ Deno.serve(async (req) => {
 
     console.log('🏁 ===== SCHEDULED VALIDATION COMPLETED =====\n');
 
+    supabase.functions.invoke('send-signup-notification', {
+      body: {
+        type: 'validation_run',
+        checked: suppliers.length,
+        verified: verifiedCount,
+        improved: updated,
+        disqualified: disqualifiedCount,
+        errored: erroredCount,
+        monthlyCount: (config.validations_this_month || 0) + validated,
+        monthlyLimit,
+        changes,
+      },
+    }).catch((err) => console.error('Validation-run Telegram notify failed:', err));
+
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        validated, 
+      JSON.stringify({
+        success: true,
+        validated,
         updated,
-        message: `Validated ${validated} suppliers, auto-updated ${updated}` 
+        message: `Validated ${validated} suppliers, auto-updated ${updated}`
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

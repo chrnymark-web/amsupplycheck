@@ -36,7 +36,32 @@ interface AutoApprovalNotification {
   totalAutoApproved: number;
 }
 
-type NotificationRequest = SupplierApplicationNotification | NewsletterSignupNotification | AutoApprovalNotification;
+interface ValidationRunChange {
+  name: string;
+  supplierRowId: string | null;
+  confidence: number;
+  fieldsUpdated: string[];
+  is3dProvider: boolean | null;
+  error?: string;
+}
+
+interface ValidationRunNotification {
+  type: "validation_run";
+  checked: number;
+  verified: number;
+  improved: number;
+  disqualified: number;
+  errored: number;
+  monthlyCount: number;
+  monthlyLimit: number;
+  changes: ValidationRunChange[];
+}
+
+type NotificationRequest =
+  | SupplierApplicationNotification
+  | NewsletterSignupNotification
+  | AutoApprovalNotification
+  | ValidationRunNotification;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -51,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
     const data: NotificationRequest = await req.json();
     
     // Input validation
-    if (!data.type || !["supplier_application", "newsletter_signup", "auto_approval"].includes(data.type)) {
+    if (!data.type || !["supplier_application", "newsletter_signup", "auto_approval", "validation_run"].includes(data.type)) {
       return new Response(
         JSON.stringify({ error: "Invalid notification type", code: "INVALID_TYPE" }),
         {
@@ -92,8 +117,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
     console.log("Sending notification email for:", data.type);
 
-    let emailSubject: string;
-    let emailHtml: string;
+    let emailSubject: string | undefined;
+    let emailHtml: string | undefined;
 
     if (data.type === "supplier_application") {
       // Sanitize user input to prevent HTML injection
@@ -189,7 +214,7 @@ const handler = async (req: Request): Promise<Response> => {
       `;
     }
 
-    if (resend) {
+    if (resend && emailSubject && emailHtml) {
       try {
         const emailResponse = await resend.emails.send({
           from: "AMSupplyCheck <onboarding@resend.dev>",
@@ -201,7 +226,7 @@ const handler = async (req: Request): Promise<Response> => {
       } catch (emailErr) {
         console.error("Email send failed (continuing to Telegram):", emailErr);
       }
-    } else {
+    } else if (!resend) {
       console.log("RESEND_API_KEY missing — skipping email");
     }
 
@@ -261,6 +286,83 @@ const handler = async (req: Request): Promise<Response> => {
             telegramStatus = `http_${tgResp.status}: ${tgBody}`;
           } else {
             console.log("Telegram ping sent for auto-approval:", data.supplierName);
+            telegramStatus = "ok";
+          }
+        } catch (tgErr: any) {
+          console.error("Telegram send threw:", tgErr);
+          telegramStatus = `threw: ${tgErr?.message ?? String(tgErr)}`;
+        }
+      } else {
+        console.log("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing — skipping Telegram ping");
+        telegramStatus = "skipped: missing env";
+      }
+    } else if (data.type === "validation_run") {
+      const tgToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+      const tgChatId = Deno.env.get("TELEGRAM_CHAT_ID");
+
+      if (tgToken && tgChatId) {
+        const escapeHtml = (s: string) =>
+          s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        const headerLines = [
+          `🔍 <b>Validering kørt</b> · ${data.checked} tjekket`,
+          `✅ Verificeret: ${data.verified}  ·  ✨ Opdateret: ${data.improved}`,
+          `⚠️ Ikke 3D-print: ${data.disqualified}  ·  ❌ Fejl: ${data.errored}`,
+          `📊 Måned: ${data.monthlyCount}/${data.monthlyLimit}`,
+        ];
+
+        const changes = Array.isArray(data.changes) ? data.changes.slice(0, 10) : [];
+        const changeLines: string[] = [];
+        if (changes.length > 0) {
+          changeLines.push("", "<b>Ændringer:</b>");
+          for (const c of changes) {
+            const tgName = escapeHtml(c.name || "Ukendt");
+            const link = c.supplierRowId
+              ? `https://amsupplycheck.com/admin/supplier/${encodeURIComponent(c.supplierRowId)}/edit`
+              : null;
+            const nameMarkup = link ? `<a href="${link}">${tgName}</a>` : tgName;
+            const confidence = typeof c.confidence === "number" ? `${c.confidence}%` : "—";
+            let detail: string;
+            if (c.error) {
+              detail = `❌ ${escapeHtml(c.error.slice(0, 80))}`;
+            } else if (c.is3dProvider === false) {
+              detail = "⚠️ ikke 3D-print";
+            } else if (c.fieldsUpdated && c.fieldsUpdated.length > 0) {
+              detail = escapeHtml(c.fieldsUpdated.join(", "));
+            } else {
+              detail = "verificeret";
+            }
+            changeLines.push(`• ${nameMarkup} (${confidence}) — ${detail}`);
+          }
+          const totalChanges =
+            Array.isArray(data.changes) ? data.changes.length : 0;
+          if (totalChanges > changes.length) {
+            changeLines.push(`<i>(+${totalChanges - changes.length} flere ikke vist)</i>`);
+          }
+        }
+
+        const tgText = [...headerLines, ...changeLines].join("\n");
+
+        try {
+          const tgResp = await fetch(
+            `https://api.telegram.org/bot${tgToken}/sendMessage`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: tgChatId,
+                parse_mode: "HTML",
+                disable_web_page_preview: true,
+                text: tgText,
+              }),
+            },
+          );
+          if (!tgResp.ok) {
+            const tgBody = (await tgResp.text()).slice(0, 200);
+            console.error("Telegram send failed:", tgResp.status, tgBody);
+            telegramStatus = `http_${tgResp.status}: ${tgBody}`;
+          } else {
+            console.log(`Telegram ping sent for validation_run: ${data.checked} checked`);
             telegramStatus = "ok";
           }
         } catch (tgErr: any) {
