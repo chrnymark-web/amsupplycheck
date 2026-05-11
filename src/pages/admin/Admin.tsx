@@ -724,14 +724,14 @@ export default function Admin() {
                       <div className="mt-3 flex flex-wrap gap-2 text-xs">
                         <button
                           type="button"
-                          onClick={() => navigate('/admin/discovered-suppliers?tab=review')}
+                          onClick={() => navigate('/admin/discovered?tab=review')}
                           className="inline-flex items-center rounded-full border border-green-500/30 bg-green-500/10 px-2.5 py-0.5 font-medium text-green-600 dark:text-green-400 hover:bg-green-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green-500/40 cursor-pointer transition-colors"
                         >
                           {lastDiscoveryResult.suppliersNew} new
                         </button>
                         <button
                           type="button"
-                          onClick={() => navigate('/admin/discovered-suppliers?tab=review')}
+                          onClick={() => navigate('/admin/discovered?tab=review')}
                           className="inline-flex items-center rounded-full border border-blue-500/30 bg-blue-500/10 px-2.5 py-0.5 font-medium text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/40 cursor-pointer transition-colors"
                         >
                           {lastDiscoveryResult.suppliersAutoApproved} auto-approved
@@ -746,7 +746,7 @@ export default function Admin() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => navigate('/admin/discovered-suppliers')}
+                      onClick={() => navigate('/admin/discovered')}
                     >
                       Review & configure
                       <ArrowRight className="h-4 w-4 ml-1" />
