@@ -20,6 +20,9 @@ verify_jwt = true
 [functions.scheduled-validation]
 verify_jwt = false
 
+[functions.daily-audit]
+verify_jwt = false
+
 [functions.import-addidex-suppliers]
 verify_jwt = true
 
