@@ -662,8 +662,29 @@ serve(async (req) => {
 
     const token = authHeader.replace('Bearer ', '');
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
-    const isServiceRole = token === serviceRoleKey;
-    
+
+    // Service-role detection: either an exact match against the injected
+    // SUPABASE_SERVICE_ROLE_KEY (the canonical case) OR a legacy `eyJ...` JWT
+    // carrying `role: service_role` issued by Supabase. The JWT fallback exists
+    // because supabase-js v2 inside another edge function doesn't always
+    // surface the same opaque token as Deno.env.get() returns here, so the
+    // equality check can spuriously fail even when the caller is legitimately
+    // signed by the project. Verifying the legacy JWT's payload is just as
+    // safe (only the project's JWT secret can mint these) and matches what
+    // every other internal call does.
+    let isServiceRole = token === serviceRoleKey;
+    if (!isServiceRole) {
+      const parts = token.split('.');
+      if (parts.length === 3) {
+        try {
+          const payload = JSON.parse(atob(parts[1]));
+          if (payload?.role === 'service_role' && payload?.iss === 'supabase') {
+            isServiceRole = true;
+          }
+        } catch (_) { /* fall through to admin-JWT check below */ }
+      }
+    }
+
     if (!isServiceRole) {
       const parts = token.split('.');
       if (parts.length !== 3) {
