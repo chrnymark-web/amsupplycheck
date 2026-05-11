@@ -7,97 +7,45 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Search queries for finding 3D printing suppliers
-// Organized by category for better tracking
+// Search queries for finding 3D printing suppliers.
+// Curated for high yield against the existing catalog: niche tech + specialty
+// applications + emerging-market geos. Generic North America / Western Europe
+// queries dropped — already heavily mined.
 const SEARCH_QUERIES = [
-  // === GENERAL (10 original queries) ===
-  "3D printing service bureau manufacturing",
-  "additive manufacturing service provider",
-  "metal 3D printing service company",
-  "SLS printing service industrial",
-  "SLA printing service professional",
-  "FDM printing service large format",
-  "MJF multi jet fusion service",
-  "DMLS metal printing service",
-  "rapid prototyping service bureau",
-  "on-demand manufacturing 3D printing",
-  
-  // === NICHE TECHNOLOGIES (6 new) ===
+  // Niche technologies (5)
   "bioprinting service tissue engineering",
   "ceramic 3D printing service industrial",
   "sand casting 3D printing foundry mold",
   "WAAM wire arc additive manufacturing service",
   "micro 3D printing precision manufacturing",
-  "full color 3D printing service sandstone",
-  
-  // === INDUSTRY-SPECIFIC (5 new) ===
-  "dental 3D printing laboratory service",
-  "medical device 3D printing manufacturer FDA",
-  "aerospace additive manufacturing AS9100 certified",
-  "automotive 3D printing production parts",
-  "architectural 3D printing large scale models",
-  
-  // === GEOGRAPHIC EXPANSION (5 new) ===
+
+  // Specialty applications (4)
+  "concrete 3D printing construction service",
+  "jewelry 3D printing casting service",
+  "eyewear 3D printing glasses frames",
+  "footwear 3D printing shoe manufacturing",
+
+  // Advanced materials (3)
+  "PEEK 3D printing service high performance",
+  "carbon fiber 3D printing continuous fiber",
+  "titanium 3D printing medical aerospace",
+
+  // Emerging-market geos (8)
   "3D printing service Japan additive manufacturing",
   "3D printing service Korea manufacturing",
   "3D printing service Singapore industrial",
-  "3D printing service Israel prototyping",
-  "3D printing service Australia manufacturing",
-  
-  // === ADVANCED MATERIALS (3) ===
-  "PEEK 3D printing service high performance",
-  "titanium 3D printing medical aerospace",
-  "carbon fiber 3D printing continuous fiber",
-  
-  // === SPECIALTY APPLICATIONS (9) ===
-  "concrete 3D printing construction service",
-  "food 3D printing culinary chocolate",
-  "jewelry 3D printing casting service",
-  "electronics 3D printing printed circuit",
-  "eyewear 3D printing glasses frames",
-  "footwear 3D printing shoe manufacturing",
-  "glass 3D printing fused silica optical",
-  "silicone 3D printing flexible elastomer",
-  "recycled materials 3D printing sustainable filament",
-  
-  // === ADDITIONAL GEOGRAPHIC (4 new) ===
-  "3D printing service India manufacturing",
-  "3D printing service Brazil additive",
-  "3D printing service Mexico industrial",
-  "3D printing service UAE Dubai manufacturing",
-
-  // === TARGETED EXPANSION: India (city + industry depth) ===
   "3D printing service Bangalore additive manufacturing",
   "3D printing service Mumbai industrial manufacturing",
-  "3D printing service Pune prototyping",
-  "3D printing service Chennai automotive AM",
-  "3D printing service Hyderabad medical aerospace",
-  "3D printing service Delhi NCR rapid prototyping",
-
-  // === TARGETED EXPANSION: Brazil ===
-  "impressão 3D serviço São Paulo manufatura aditiva",
-  "impressão 3D serviço Rio de Janeiro prototipagem",
-  "3D printing service Brazil Minas Gerais industrial",
-
-  // === TARGETED EXPANSION: Mexico ===
-  "impresión 3D servicio Querétaro manufactura aditiva",
-  "impresión 3D servicio Monterrey industrial",
-  "impresión 3D servicio Ciudad de México prototipado",
-
-  // === TARGETED EXPANSION: Middle East ===
-  "3D printing service Saudi Arabia Riyadh manufacturing",
-  "3D printing service Turkey Istanbul additive",
-  "3D printing service Egypt Cairo industrial",
-  "3D printing service Qatar Doha manufacturing",
-  "3D printing service Jordan Amman prototyping",
-  "3D printing service Kuwait additive manufacturing",
+  "3D printing service São Paulo Brazil manufatura aditiva",
+  "3D printing service Ciudad de México prototipado",
+  "3D printing service UAE Dubai manufacturing",
 ];
 
 // Results per query (balanced for credit efficiency)
 const RESULTS_PER_QUERY = 5;
 
-// Maximum new suppliers to discover per run (increased for expanded queries)
-const MAX_NEW_SUPPLIERS = 100;
+// Maximum new suppliers to discover per run
+const MAX_NEW_SUPPLIERS = 10;
 
 // Helper to categorize queries for logging
 function getQueryCategory(query: string): string {
@@ -353,13 +301,18 @@ serve(async (req) => {
         results = searchData.data || [];
         creditsUsed += 1;
 
-        // Cache the results for future runs
-        await supabase.from('scrape_cache').upsert({
-          key: cacheKey,
-          html: JSON.stringify(results),
-          visible_text: null,
-          created_at: new Date().toISOString(),
-        }, { onConflict: 'key' }).catch(() => {});
+        // Cache the results for future runs. Best-effort — never fail the
+        // query if the cache write blows up (e.g. column drift, RLS).
+        try {
+          await supabase.from('scrape_cache').upsert({
+            key: cacheKey,
+            html: JSON.stringify(results),
+            visible_text: null,
+            created_at: new Date().toISOString(),
+          }, { onConflict: 'key' });
+        } catch (_) {
+          // swallow
+        }
       }
 
       log(`Found ${results.length} results for "${query}"`);
@@ -536,8 +489,10 @@ serve(async (req) => {
       }
     }
 
-    // Process queries in parallel batches of 5
-    const BATCH_SIZE = 5;
+    // Process queries in small parallel batches. Firecrawl Hobby plan throttles
+    // concurrent requests and returns a misleading "Insufficient credits" error
+    // when saturated, so keep this low.
+    const BATCH_SIZE = 2;
     for (let i = 0; i < SEARCH_QUERIES.length; i += BATCH_SIZE) {
       if (suppliersNew >= MAX_NEW_SUPPLIERS) {
         log(`Reached max suppliers limit (${MAX_NEW_SUPPLIERS}). Stopping discovery.`);
