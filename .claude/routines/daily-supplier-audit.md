@@ -1,6 +1,6 @@
 # Daily supplier audit (cron prompt)
 
-Source-of-truth procedure for the `daily-supplier-audit` Anthropic-cloud routine. The routine config injects three secrets at runtime: `SUPABASE_ANON_KEY`, `TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`. Everything else is read from this file.
+Source-of-truth procedure for the `daily-supplier-audit` Anthropic-cloud routine. **The launcher prompt is what fires first** — it sends an inline `curl` heartbeat as the very first tool call before reading this file. The launcher then writes `/tmp/tg.sh` for the rest of the run. By the time the agent reads this doc, those two things have already happened.
 
 ## Constants
 
@@ -9,55 +9,16 @@ Source-of-truth procedure for the `daily-supplier-audit` Anthropic-cloud routine
 - Branch naming: `auto-audit/<supplier_id>-<YYYYMMDD>`
 - Migration path: `supabase/migrations/<UTCtimestamp>_correct_<supplier_id>.sql` (snake_case `supplier_id`, dashes → underscores)
 
-## Step 0 — Write `/tmp/tg.sh` and send a heartbeat (do this FIRST)
+## Telegram-send pattern (used in Step 5 onwards)
 
-The Bash tool starts a fresh shell on every invocation, so `export` and shell-function definitions do NOT persist across calls. Solution: write the wrapper + env vars to `/tmp/tg.sh` once. Every later Telegram-send `source`s that file before calling `tg_send`.
-
-Run this whole block in **one** Bash call:
-
-```bash
-cat > /tmp/tg.sh <<'TGEOF'
-#!/usr/bin/env bash
-# Sourced by every Telegram-send call. Self-contained: env vars + wrapper.
-# Avoids three known failure modes: parse_mode=Markdown 400-fails on agent
-# content, bash command-substitution on backticks, silent HTTP failures.
-export TELEGRAM_BOT_TOKEN="${TELEGRAM_BOT_TOKEN:-}"
-export TELEGRAM_CHAT_ID="${TELEGRAM_CHAT_ID:-}"
-tg_send() {
-  local text http
-  text=$(printf '%s\n' "$@")
-  http=$(curl -sS -o /tmp/tg_resp.json -w '%{http_code}' \
-    -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-    --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-    --data-urlencode "disable_web_page_preview=false" \
-    --data-urlencode "text=${text}")
-  echo "TG_HTTP=${http}" >&2
-  if [ "$http" != "200" ]; then
-    cat /tmp/tg_resp.json >&2 || true
-    local text_safe; text_safe=$(printf '%s' "$text" | tr -d '\r')
-    http=$(curl -sS -o /tmp/tg_resp.json -w '%{http_code}' \
-      -X POST "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage" \
-      --data-urlencode "chat_id=${TELEGRAM_CHAT_ID}" \
-      --data-urlencode "text=${text_safe}")
-    echo "TG_RETRY_HTTP=${http}" >&2
-  fi
-  return 0
-}
-TGEOF
-source /tmp/tg.sh
-tg_send "🛠️ Audit kører — $(date -u '+%Y-%m-%d %H:%M UTC')"
-```
-
-The trigger prompt also writes `/tmp/tg.sh` and fires a heartbeat before this file is read — so this block is idempotent. If the heartbeat doesn't reach `TG_HTTP=200`, abort the run; later calls won't reach the user either.
-
-**Important:** every later Telegram-send must be a Bash call structured like:
+`/tmp/tg.sh` was written by the launcher prompt. Every later Telegram-send must be ONE Bash call that sources it first:
 
 ```bash
 source /tmp/tg.sh
 tg_send "..." "..." "..."
 ```
 
-Without `source`, `tg_send` is undefined and `${TELEGRAM_BOT_TOKEN}` is empty, so curl POSTs to `https://api.telegram.org/bot/sendMessage` (no token) and Telegram returns 404 — silently from the run's perspective.
+Without `source`, `tg_send` is undefined and `${TELEGRAM_BOT_TOKEN}` is empty. Every send echoes `TG_HTTP=<status>` to stderr — grep the run log to confirm.
 
 ## Step 1 — Pick today's supplier
 
