@@ -1,4 +1,4 @@
-import { Suspense, lazy, ReactNode, useEffect, useState } from "react";
+import { Suspense, lazy, ReactNode, useEffect, useRef, useState } from "react";
 import { Helmet } from "react-helmet";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
@@ -76,6 +76,7 @@ type AdminAuthState = "checking" | "unauthed" | "non-admin" | "admin";
 const AdminPage = ({ children }: { children: ReactNode }) => {
   const location = useLocation();
   const [state, setState] = useState<AdminAuthState>("checking");
+  const lastUserIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -84,6 +85,7 @@ const AdminPage = ({ children }: { children: ReactNode }) => {
       const { data: { session } } = await supabase.auth.getSession();
       if (cancelled) return;
       if (!session) {
+        lastUserIdRef.current = null;
         setState("unauthed");
         return;
       }
@@ -93,6 +95,7 @@ const AdminPage = ({ children }: { children: ReactNode }) => {
         .eq("user_id", session.user.id)
         .maybeSingle();
       if (cancelled) return;
+      lastUserIdRef.current = session.user.id;
       setState(roleRow?.role === "admin" ? "admin" : "non-admin");
     };
 
@@ -100,11 +103,13 @@ const AdminPage = ({ children }: { children: ReactNode }) => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session) {
+        lastUserIdRef.current = null;
         setState("unauthed");
-      } else {
+      } else if (session.user.id !== lastUserIdRef.current) {
         setState("checking");
         check();
       }
+      // Same user as before — ignore (tab refocus, token refresh, etc.)
     });
 
     return () => {
