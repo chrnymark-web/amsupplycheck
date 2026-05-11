@@ -57,11 +57,25 @@ interface ValidationRunNotification {
   changes: ValidationRunChange[];
 }
 
+interface AuditRunNotification {
+  type: "audit_run";
+  status: "candidate" | "empty";
+  supplierName?: string;
+  supplierRowId?: string;
+  website?: string;
+  confidence?: number;
+  lastValidatedAt?: string | null;
+  verified?: boolean;
+  queueLength?: number;
+  skippedRecentAudits?: number;
+}
+
 type NotificationRequest =
   | SupplierApplicationNotification
   | NewsletterSignupNotification
   | AutoApprovalNotification
-  | ValidationRunNotification;
+  | ValidationRunNotification
+  | AuditRunNotification;
 
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === "OPTIONS") {
@@ -76,7 +90,7 @@ const handler = async (req: Request): Promise<Response> => {
     const data: NotificationRequest = await req.json();
     
     // Input validation
-    if (!data.type || !["supplier_application", "newsletter_signup", "auto_approval", "validation_run"].includes(data.type)) {
+    if (!data.type || !["supplier_application", "newsletter_signup", "auto_approval", "validation_run", "audit_run"].includes(data.type)) {
       return new Response(
         JSON.stringify({ error: "Invalid notification type", code: "INVALID_TYPE" }),
         {
@@ -363,6 +377,84 @@ const handler = async (req: Request): Promise<Response> => {
             telegramStatus = `http_${tgResp.status}: ${tgBody}`;
           } else {
             console.log(`Telegram ping sent for validation_run: ${data.checked} checked`);
+            telegramStatus = "ok";
+          }
+        } catch (tgErr: any) {
+          console.error("Telegram send threw:", tgErr);
+          telegramStatus = `threw: ${tgErr?.message ?? String(tgErr)}`;
+        }
+      } else {
+        console.log("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID missing — skipping Telegram ping");
+        telegramStatus = "skipped: missing env";
+      }
+    } else if (data.type === "audit_run") {
+      const tgToken = Deno.env.get("TELEGRAM_BOT_TOKEN");
+      const tgChatId = Deno.env.get("TELEGRAM_CHAT_ID");
+
+      if (tgToken && tgChatId) {
+        const escapeHtml = (s: string) =>
+          s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+        let tgText: string;
+        if (data.status === "empty") {
+          tgText = [
+            `🌴 <b>Audit-kø er ren</b>`,
+            ``,
+            `Ingen suppliers under confidence-grænsen uden en åben audit-PR fra de seneste 14 dage.`,
+            data.skippedRecentAudits != null
+              ? `Sprunget over: ${data.skippedRecentAudits} med nylig PR.`
+              : ``,
+          ].filter(Boolean).join("\n");
+        } else {
+          const name = escapeHtml(data.supplierName || "Ukendt");
+          const website = escapeHtml(data.website || "");
+          const confidence = typeof data.confidence === "number"
+            ? `${data.confidence}%`
+            : "—";
+          const lastValidated = data.lastValidatedAt
+            ? new Date(data.lastValidatedAt).toISOString().slice(0, 10)
+            : "aldrig";
+          const verifiedTag = data.verified ? "verificeret" : "uverificeret";
+          const adminLink = data.supplierRowId
+            ? `https://amsupplycheck.com/admin/supplier/${encodeURIComponent(data.supplierRowId)}/edit`
+            : "https://amsupplycheck.com/admin/suppliers";
+          const websiteLink = website
+            ? `<a href="${website}">${website}</a>`
+            : "(intet website)";
+
+          tgText = [
+            `🔍 <b>Dagens audit-kandidat</b>`,
+            ``,
+            `<b>${name}</b> · ${confidence} · ${verifiedTag}`,
+            `🌐 ${websiteLink}`,
+            `📅 Sidst valideret: ${lastValidated}`,
+            ``,
+            `🔗 <a href="${adminLink}">Åbn i admin →</a>`,
+            ``,
+            `<i>Audit-routine (CCR) er deaktiveret — egress blokerede Telegram + Supabase. Audit manuelt i Claude Code CLI når du har tid.</i>`,
+          ].join("\n");
+        }
+
+        try {
+          const tgResp = await fetch(
+            `https://api.telegram.org/bot${tgToken}/sendMessage`,
+            {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                chat_id: tgChatId,
+                parse_mode: "HTML",
+                disable_web_page_preview: true,
+                text: tgText,
+              }),
+            },
+          );
+          if (!tgResp.ok) {
+            const tgBody = (await tgResp.text()).slice(0, 200);
+            console.error("Telegram send failed:", tgResp.status, tgBody);
+            telegramStatus = `http_${tgResp.status}: ${tgBody}`;
+          } else {
+            console.log(`Telegram ping sent for audit_run: ${data.status}`);
             telegramStatus = "ok";
           }
         } catch (tgErr: any) {
