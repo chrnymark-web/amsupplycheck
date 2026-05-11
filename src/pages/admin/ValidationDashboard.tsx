@@ -39,8 +39,6 @@ const ValidationDashboard = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === "SIGNED_OUT") {
         navigate("/auth");
-      } else if (event === "SIGNED_IN") {
-        checkAuth();
       }
     });
 
@@ -52,6 +50,7 @@ const ValidationDashboard = () => {
     if (!isAdmin) return;
 
     const interval = setInterval(() => {
+      if (document.hidden) return;
       console.log('Auto-refreshing dashboard data...');
       fetchData();
     }, 30000); // 30 seconds
