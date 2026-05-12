@@ -13,9 +13,9 @@ const PageVideoBackground: React.FC = () => {
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
-    v.playbackRate = 0.7;
+    v.playbackRate = 0.5;
     const tryPlay = () => {
-      v.playbackRate = 0.7;
+      v.playbackRate = 0.5;
       v.play().catch(() => {});
     };
     v.addEventListener('canplay', tryPlay, { once: true });
@@ -38,7 +38,7 @@ const PageVideoBackground: React.FC = () => {
       <video
         ref={videoRef}
         className="absolute inset-0 w-full h-full object-cover"
-        src="/hero-printer.mp4"
+        src="/hero-metal-print.mp4"
         autoPlay
         loop
         muted
