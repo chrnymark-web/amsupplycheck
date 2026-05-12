@@ -1179,9 +1179,10 @@ const SupplierDetail = () => {
         </div>
       </div>
       {/* Sticky Quote CTA */}
-      <StickyQuoteCTA 
-        supplierName={supplier.name} 
-        technologyPreset={supplier.technologies?.[0]} 
+      <StickyQuoteCTA
+        supplierName={supplier.name}
+        supplierId={supplier.id}
+        technologyPreset={supplier.technologies?.[0]}
       />
     </TooltipProvider>
   );

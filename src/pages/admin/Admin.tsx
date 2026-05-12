@@ -9,18 +9,23 @@ import { Skeleton } from '@/components/ui/skeleton';
 import {
   Globe, CheckCircle, Zap, Star, Search, ArrowRight, BarChart3, Eye,
   Target, Mail, ShieldCheck, ExternalLink, GitPullRequest,
-  Play, RefreshCw, Sparkles,
+  Play, RefreshCw, Sparkles, Users, Upload, MousePointerClick, FileText,
+  TrendingUp, Receipt, Handshake, Crown,
 } from 'lucide-react';
 import { useAdminStats, type TopItem } from '@/hooks/use-admin-stats';
 import { useSupplierInventory } from '@/hooks/use-supplier-inventory';
 import { useFunnelData, type FunnelData } from '@/hooks/use-funnel-data';
 import { useGA4Funnel, type GA4Funnel } from '@/hooks/use-ga4-funnel';
 import { useEventBreakdown } from '@/hooks/use-event-breakdown';
+import { useWeeklyKPIs, usePartnerRevenue, LEAD_PRICE_USD, SUBSCRIPTION_MONTHLY_USD } from '@/hooks/use-weekly-kpis';
 import {
   useAuditQueue, useConfidenceHistogram, useRecentAudits, useOpenAuditPRs,
   type AuditSupplier, type ConfidenceBucket, type AuditPR,
 } from '@/hooks/use-audit-data';
 import { DateRangePicker, rangeForDays, type DateRange } from '@/components/admin/date-range-picker';
+import { WeeklyKpiCard } from '@/components/admin/weekly-kpi-card';
+import { GoalProgressBar } from '@/components/admin/goal-progress-bar';
+import { SubscriptionEntryForm } from '@/components/admin/subscription-entry-form';
 
 function StatCard({ icon: Icon, label, value, sub, color = 'text-primary', loading }: {
   icon: React.ElementType; label: string; value: React.ReactNode; sub?: string; color?: string; loading?: boolean;
@@ -583,6 +588,8 @@ export default function Admin() {
   const ga4Enabled = tab === 'compare' || (tab === 'analytics' && analyticsSource === 'ga4');
   const { data: ga4, isLoading: ga4Loading, error: ga4Error } = useGA4Funnel(range, ga4Enabled);
   const { data: events, isLoading: eventsLoading, error: eventsError } = useEventBreakdown(range);
+  const { data: kpis, isLoading: kpisLoading } = useWeeklyKPIs(range);
+  const { data: partnerRevenue, isLoading: partnerRevenueLoading } = usePartnerRevenue();
 
   const total = stats?.suppliers.total ?? 0;
   const verified = stats?.suppliers.verified ?? 0;
@@ -693,6 +700,178 @@ export default function Admin() {
                 <BarChart data={stats?.topCountries ?? []} loading={statsLoading} />
               </CardContent>
             </Card>
+
+            {/* === Weekly KPIs section === */}
+            <div className="pt-4 border-t border-border">
+              <div className="flex items-baseline justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">Weekly KPIs</h2>
+                  <p className="text-xs text-muted-foreground">Periode: {range.from.toLocaleDateString('da-DK')} – {range.to.toLocaleDateString('da-DK')}</p>
+                </div>
+              </div>
+
+              <GoalProgressBar
+                currentMrr={kpis?.current_mrr_equivalent_usd ?? 0}
+                gap={kpis?.goal_gap_usd ?? 0}
+                pctOfGoal={kpis?.goal_progress_pct ?? 0}
+                subscriptionRevenue={(kpis?.partner_count ?? 0) * SUBSCRIPTION_MONTHLY_USD}
+                leadRevenue={(kpis?.leads_30d ?? 0) * LEAD_PRICE_USD}
+                loading={kpisLoading}
+              />
+
+              <div className="mt-6">
+                <h3 className="text-sm font-semibold text-foreground mb-3">Buyer-funnel (periode)</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                  <WeeklyKpiCard
+                    icon={Users}
+                    label="Unikke besøgende"
+                    value={kpis?.visitors ?? 0}
+                    target={2500}
+                    loading={kpisLoading}
+                  />
+                  <WeeklyKpiCard
+                    icon={Upload}
+                    label="STL-uploads"
+                    value={kpis?.stl_uploads ?? 0}
+                    target={125}
+                    loading={kpisLoading}
+                  />
+                  <WeeklyKpiCard
+                    icon={Eye}
+                    label="Supplier-views"
+                    value={kpis?.supplier_views ?? 0}
+                    target={500}
+                    loading={kpisLoading}
+                  />
+                  <WeeklyKpiCard
+                    icon={MousePointerClick}
+                    label="Outbound clicks"
+                    value={kpis?.outbound_clicks ?? 0}
+                    target={75}
+                    loading={kpisLoading}
+                  />
+                  <WeeklyKpiCard
+                    icon={FileText}
+                    label="Quote-form-submits"
+                    value={kpis?.quote_submits ?? 0}
+                    target={12}
+                    sub={`= $${(kpis?.quote_submits ?? 0) * LEAD_PRICE_USD} potentiel revenue`}
+                    revenueCritical
+                    loading={kpisLoading}
+                  />
+                  <WeeklyKpiCard
+                    icon={TrendingUp}
+                    label="Quote conv-rate"
+                    value={`${(kpis?.conversion_rate_pct ?? 0).toFixed(2)}%`}
+                    target="0,50%"
+                    sub="i dag ~0,25%"
+                    revenueCritical
+                    loading={kpisLoading}
+                  />
+                </div>
+              </div>
+
+              <div className="mt-6">
+                <h3 className="text-sm font-semibold text-foreground mb-3">Supplier-funnel</h3>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <WeeklyKpiCard
+                    icon={Globe}
+                    label="Aktive suppliers"
+                    value={kpis?.active_suppliers ?? 0}
+                    sub="i directory"
+                    loading={kpisLoading}
+                  />
+                  <WeeklyKpiCard
+                    icon={Handshake}
+                    label="Leads leveret (periode)"
+                    value={kpis?.leads_in_range ?? 0}
+                    sub={`= $${(kpis?.leads_in_range ?? 0) * LEAD_PRICE_USD}`}
+                    revenueCritical
+                    loading={kpisLoading}
+                  />
+                  <WeeklyKpiCard
+                    icon={Crown}
+                    label="Betalende partnere"
+                    value={kpis?.partner_count ?? 0}
+                    sub={kpis?.new_partners_in_range ? `+${kpis.new_partners_in_range} i periode` : 'is_partner=true'}
+                    loading={kpisLoading}
+                  />
+                  <WeeklyKpiCard
+                    icon={Receipt}
+                    label="Revenue booked YTD"
+                    value={`$${(kpis?.revenue_booked_ytd_usd ?? 0).toLocaleString('en-US')}`}
+                    sub="subscription up-front"
+                    revenueCritical
+                    loading={kpisLoading}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* === Revenue tracker === */}
+            <div className="pt-4 border-t border-border">
+              <div className="flex items-baseline justify-between mb-4">
+                <div>
+                  <h2 className="text-xl font-bold text-foreground">Subscription-tracker</h2>
+                  <p className="text-xs text-muted-foreground">$600/år pr. partner + $50 pr. lead</p>
+                </div>
+                <SubscriptionEntryForm />
+              </div>
+
+              <Card className="bg-card border-border">
+                <CardContent className="p-0">
+                  {partnerRevenueLoading ? (
+                    <div className="p-6 space-y-2">
+                      {Array.from({ length: 3 }).map((_, i) => (
+                        <Skeleton key={i} className="h-6 w-full" />
+                      ))}
+                    </div>
+                  ) : !partnerRevenue || partnerRevenue.length === 0 ? (
+                    <div className="p-6 text-center text-sm text-muted-foreground">
+                      Ingen betalende partnere endnu. Klik "Registrér subscription" øverst for at tilføje den første.
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-muted/40 border-b border-border">
+                          <tr className="text-left text-xs text-muted-foreground">
+                            <th className="px-4 py-2 font-medium">Partner</th>
+                            <th className="px-4 py-2 font-medium text-right">Betalt</th>
+                            <th className="px-4 py-2 font-medium">Betalt dato</th>
+                            <th className="px-4 py-2 font-medium">Udløber</th>
+                            <th className="px-4 py-2 font-medium text-right">Leads 7d</th>
+                            <th className="px-4 py-2 font-medium text-right">Leads 30d</th>
+                            <th className="px-4 py-2 font-medium">Status</th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                          {partnerRevenue.map(p => {
+                            const paidStr = p.subscription_paid_at ? new Date(p.subscription_paid_at).toLocaleDateString('da-DK') : '—';
+                            const expiresStr = p.subscription_expires_at ? new Date(p.subscription_expires_at).toLocaleDateString('da-DK') : '—';
+                            const expiringSoon = p.subscription_expires_at && new Date(p.subscription_expires_at).getTime() - Date.now() < 30 * 24 * 60 * 60 * 1000;
+                            return (
+                              <tr key={p.supplier_id} className="hover:bg-muted/20">
+                                <td className="px-4 py-2 font-medium text-foreground">{p.name}</td>
+                                <td className="px-4 py-2 text-right">{p.subscription_paid_usd ? `$${Number(p.subscription_paid_usd).toLocaleString()}` : '—'}</td>
+                                <td className="px-4 py-2 text-muted-foreground">{paidStr}</td>
+                                <td className={`px-4 py-2 ${expiringSoon ? 'text-amber-600 dark:text-amber-400 font-medium' : 'text-muted-foreground'}`}>{expiresStr}</td>
+                                <td className="px-4 py-2 text-right">{p.leads_7d}</td>
+                                <td className="px-4 py-2 text-right">{p.leads_30d}</td>
+                                <td className="px-4 py-2">
+                                  <Badge variant={p.subscription_status === 'active' ? 'default' : 'outline'} className="text-xs">
+                                    {p.subscription_status ?? 'ingen'}
+                                  </Badge>
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            </div>
           </div>
         )}
 

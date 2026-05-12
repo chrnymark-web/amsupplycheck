@@ -28,6 +28,7 @@ type QuoteFormValues = z.infer<typeof quoteSchema>;
 
 interface QuoteRequestFormProps {
   supplierContext?: string;
+  supplierId?: string;
   technologyPreset?: string;
   materialPreset?: string;
   variant?: 'dialog' | 'inline';
@@ -38,8 +39,9 @@ interface QuoteRequestFormProps {
 const TECHNOLOGIES = ['FDM/FFF', 'SLA', 'SLS', 'MJF', 'DMLS', 'SLM', 'Binder Jetting', 'Material Jetting', 'DLP', 'EBM', 'CNC Machining'];
 const MATERIALS = ['PLA', 'ABS', 'Nylon (PA12)', 'PETG', 'Resin', 'Stainless Steel', 'Aluminum', 'Titanium', 'Inconel', 'Copper'];
 
-function QuoteForm({ supplierContext, technologyPreset, materialPreset, onSuccess }: {
+function QuoteForm({ supplierContext, supplierId, technologyPreset, materialPreset, onSuccess }: {
   supplierContext?: string;
+  supplierId?: string;
   technologyPreset?: string;
   materialPreset?: string;
   onSuccess: () => void;
@@ -60,7 +62,7 @@ function QuoteForm({ supplierContext, technologyPreset, materialPreset, onSucces
     if (values.honeypot) return;
     setSubmitting(true);
     try {
-      const { error } = await supabase.from('quote_requests' as any).insert({
+      const { error } = await supabase.from('quote_requests').insert({
         name: values.name,
         email: values.email,
         project_description: values.project_description || null,
@@ -68,8 +70,9 @@ function QuoteForm({ supplierContext, technologyPreset, materialPreset, onSucces
         material_preference: values.material_preference || null,
         volume: values.volume || null,
         supplier_context: supplierContext || null,
+        supplier_id: supplierId || null,
         source_page: window.location.pathname,
-      } as any);
+      });
 
       if (error) throw error;
 
@@ -148,6 +151,7 @@ function QuoteForm({ supplierContext, technologyPreset, materialPreset, onSucces
 
 export const QuoteRequestForm: React.FC<QuoteRequestFormProps> = ({
   supplierContext,
+  supplierId,
   technologyPreset,
   materialPreset,
   variant = 'inline',
@@ -176,7 +180,7 @@ export const QuoteRequestForm: React.FC<QuoteRequestFormProps> = ({
               <p className="text-sm text-muted-foreground mt-1">We'll connect you with matching suppliers soon.</p>
             </div>
           ) : (
-            <QuoteForm supplierContext={supplierContext} technologyPreset={technologyPreset} materialPreset={materialPreset} onSuccess={() => setSubmitted(true)} />
+            <QuoteForm supplierContext={supplierContext} supplierId={supplierId} technologyPreset={technologyPreset} materialPreset={materialPreset} onSuccess={() => setSubmitted(true)} />
           )}
         </DialogContent>
       </Dialog>
@@ -200,7 +204,7 @@ export const QuoteRequestForm: React.FC<QuoteRequestFormProps> = ({
             <p className="text-sm text-muted-foreground mt-1">We'll be in touch soon.</p>
           </div>
         ) : (
-          <QuoteForm supplierContext={supplierContext} technologyPreset={technologyPreset} materialPreset={materialPreset} onSuccess={() => setSubmitted(true)} />
+          <QuoteForm supplierContext={supplierContext} supplierId={supplierId} technologyPreset={technologyPreset} materialPreset={materialPreset} onSuccess={() => setSubmitted(true)} />
         )}
       </CardContent>
     </Card>

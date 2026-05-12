@@ -3,10 +3,11 @@ import { QuoteRequestForm } from '../forms/QuoteRequestForm';
 
 interface StickyQuoteCTAProps {
   supplierName: string;
+  supplierId?: string;
   technologyPreset?: string;
 }
 
-export const StickyQuoteCTA: React.FC<StickyQuoteCTAProps> = ({ supplierName, technologyPreset }) => {
+export const StickyQuoteCTA: React.FC<StickyQuoteCTAProps> = ({ supplierName, supplierId, technologyPreset }) => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -26,6 +27,7 @@ export const StickyQuoteCTA: React.FC<StickyQuoteCTAProps> = ({ supplierName, te
         <QuoteRequestForm
           variant="dialog"
           supplierContext={supplierName}
+          supplierId={supplierId}
           technologyPreset={technologyPreset}
           triggerLabel="Request Quote"
           triggerClassName="shrink-0"

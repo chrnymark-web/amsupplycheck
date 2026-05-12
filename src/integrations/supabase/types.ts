@@ -680,6 +680,7 @@ export type Database = {
           source_page: string | null
           status: string
           supplier_context: string | null
+          supplier_id: string | null
           technology_preference: string | null
           volume: string | null
         }
@@ -693,6 +694,7 @@ export type Database = {
           source_page?: string | null
           status?: string
           supplier_context?: string | null
+          supplier_id?: string | null
           technology_preference?: string | null
           volume?: string | null
         }
@@ -706,10 +708,19 @@ export type Database = {
           source_page?: string | null
           status?: string
           supplier_context?: string | null
+          supplier_id?: string | null
           technology_preference?: string | null
           volume?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "quote_requests_supplier_id_fkey"
+            columns: ["supplier_id"]
+            isOneToOne: false
+            referencedRelation: "suppliers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       saved_searches: {
         Row: {
@@ -1047,6 +1058,7 @@ export type Database = {
           has_rush_service: boolean | null
           id: string
           is_3d_printing_provider: boolean | null
+          is_partner: boolean | null
           last_validated_at: string | null
           last_validation_confidence: number | null
           last_validation_error: string | null
@@ -1065,6 +1077,10 @@ export type Database = {
           rating: number | null
           region: string | null
           review_count: number | null
+          subscription_expires_at: string | null
+          subscription_paid_at: string | null
+          subscription_paid_usd: number | null
+          subscription_status: string | null
           supplier_id: string
           technologies: string[] | null
           updated_at: string | null
@@ -1083,6 +1099,7 @@ export type Database = {
           has_rush_service?: boolean | null
           id?: string
           is_3d_printing_provider?: boolean | null
+          is_partner?: boolean | null
           last_validated_at?: string | null
           last_validation_confidence?: number | null
           last_validation_error?: string | null
@@ -1101,6 +1118,10 @@ export type Database = {
           rating?: number | null
           region?: string | null
           review_count?: number | null
+          subscription_expires_at?: string | null
+          subscription_paid_at?: string | null
+          subscription_paid_usd?: number | null
+          subscription_status?: string | null
           supplier_id: string
           technologies?: string[] | null
           updated_at?: string | null
@@ -1119,6 +1140,7 @@ export type Database = {
           has_rush_service?: boolean | null
           id?: string
           is_3d_printing_provider?: boolean | null
+          is_partner?: boolean | null
           last_validated_at?: string | null
           last_validation_confidence?: number | null
           last_validation_error?: string | null
@@ -1137,6 +1159,10 @@ export type Database = {
           rating?: number | null
           region?: string | null
           review_count?: number | null
+          subscription_expires_at?: string | null
+          subscription_paid_at?: string | null
+          subscription_paid_usd?: number | null
+          subscription_status?: string | null
           supplier_id?: string
           technologies?: string[] | null
           updated_at?: string | null
@@ -1510,6 +1536,21 @@ export type Database = {
           source_citation: string | null
           technology_id: string | null
           tier: string | null
+        }
+        Relationships: []
+      }
+      partner_revenue_summary: {
+        Row: {
+          supplier_id: string | null
+          name: string | null
+          is_partner: boolean | null
+          subscription_paid_usd: number | null
+          subscription_paid_at: string | null
+          subscription_expires_at: string | null
+          subscription_status: string | null
+          leads_mtd: number | null
+          leads_30d: number | null
+          leads_7d: number | null
         }
         Relationships: []
       }
