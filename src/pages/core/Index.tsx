@@ -938,9 +938,10 @@ const Index = () => {
               <PriceCalculator />
 
               {/* Search Interface with AI and Live Preview */}
-              <div className="max-w-4xl mx-auto mb-8 md:mb-10 overflow-visible relative z-[70]">
-                <div className="bg-background/80 backdrop-blur-sm rounded-2xl shadow-2xl p-3 sm:p-4 border border-border/20 overflow-visible">
+              <div className="max-w-2xl mx-auto mb-8 md:mb-10 overflow-visible relative z-[70]">
+                <div className="bg-background/60 backdrop-blur-sm rounded-xl shadow-lg shadow-black/20 p-2 sm:p-2.5 border border-border/20 overflow-visible">
                   <AISearchInput
+                    compact
                     onFiltersExtracted={(filters: AISearchFilters) => {
                       const searchParams = new URLSearchParams();
                       if (filters.technologies.length > 0) searchParams.set('technologies', filters.technologies.join(','));
@@ -974,7 +975,7 @@ const Index = () => {
                       region: s.region,
                     }))}
                     enableLivePreview={true}
-                    placeholder="Try: 'titanium aerospace parts urgent' or 'medical grade prototypes in Europe'"
+                    placeholder="Or search by capability..."
                   />
                 </div>
               </div>

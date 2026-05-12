@@ -132,11 +132,14 @@ export function PriceCalculator() {
       {!isExpanded && (
         <button
           onClick={() => setIsExpanded(true)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-primary/30 bg-primary/5 hover:bg-primary/10 transition-all text-sm text-primary/90 hover:text-primary"
+          className="group w-full flex items-center justify-center gap-3 py-4 px-6 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground shadow-xl shadow-primary/30 hover:shadow-primary/40 hover:-translate-y-0.5 transition-[transform,box-shadow,background-color] duration-200 ease-out"
         >
-          <Calculator className="h-4 w-4" />
-          <span>Compare prices for different suppliers</span>
-          <ChevronDown className="h-3.5 w-3.5" />
+          <Calculator className="h-5 w-5 shrink-0" />
+          <div className="flex flex-col items-start sm:items-center sm:flex-row sm:gap-2 text-left sm:text-center">
+            <span className="text-base font-semibold leading-tight">Compare prices for different suppliers</span>
+            <span className="text-xs text-primary-foreground/80 font-normal">Upload STL for instant prices</span>
+          </div>
+          <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-hover:translate-y-0.5" />
         </button>
       )}
 

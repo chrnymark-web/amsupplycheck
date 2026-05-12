@@ -36,6 +36,7 @@ interface AISearchInputProps {
   enableLivePreview?: boolean;
   onQueryChange?: (query: string) => void;
   externalQuery?: string;
+  compact?: boolean;
 }
 
 const AISearchInput: React.FC<AISearchInputProps> = ({
@@ -46,7 +47,8 @@ const AISearchInput: React.FC<AISearchInputProps> = ({
   placeholder = "Try: 'titanium aerospace parts urgent' or 'medical grade prototypes in Europe'",
   enableLivePreview = true,
   onQueryChange,
-  externalQuery
+  externalQuery,
+  compact = false
 }) => {
   const [query, setQuery] = useState(externalQuery || '');
   const [showAutocomplete, setShowAutocomplete] = useState(false);
@@ -407,9 +409,13 @@ const AISearchInput: React.FC<AISearchInputProps> = ({
     <div className={cn('space-y-3', className)}>
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center gap-1.5">
+          <div className={cn(
+            "absolute top-1/2 -translate-y-1/2 flex items-center gap-1.5",
+            compact ? "left-2.5" : "left-3"
+          )}>
             <Sparkles className={cn(
-              "h-4 w-4 transition-colors",
+              "transition-colors",
+              compact ? "h-3.5 w-3.5" : "h-4 w-4",
               isLoading ? "text-primary animate-pulse" : "text-primary"
             )} />
           </div>
@@ -424,7 +430,7 @@ const AISearchInput: React.FC<AISearchInputProps> = ({
               else if (query.length === 0 && history.length > 0) setShowHistory(true);
             }}
             placeholder={placeholder}
-            className="pl-10 pr-10 h-12 text-base"
+            className={cn("pr-10", compact ? "pl-9 h-10 text-sm" : "pl-10 h-12 text-base")}
             autoComplete="off"
           />
           {query && (
@@ -496,8 +502,11 @@ const AISearchInput: React.FC<AISearchInputProps> = ({
         </div>
         <Button
           type="button"
-          size="lg"
-          className="h-12 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-medium"
+          size={compact ? "default" : "lg"}
+          className={cn(
+            "bg-primary hover:bg-primary/90 text-primary-foreground font-medium",
+            compact ? "h-10 px-4" : "h-12 px-6"
+          )}
           onClick={handleSearch}
           disabled={isLoading || !query.trim()}
         >
@@ -505,7 +514,7 @@ const AISearchInput: React.FC<AISearchInputProps> = ({
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
-              <Search className="h-4 w-4 mr-2" />
+              <Search className={cn("mr-2", compact ? "h-3.5 w-3.5" : "h-4 w-4")} />
               Search
             </>
           )}
