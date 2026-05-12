@@ -328,14 +328,16 @@ def slide_north_star():
         box_w,
         box_h,
         [
-            ("Konvertering\n", 22, WHITE, True, FONT_HEAD),
-            ("\n", 8, WHITE, False, FONT_BODY),
-            ("Buyer-funnel + Supplier-funnel\n", 13, GRAY_LIGHT, False, FONT_BODY),
-            ("Måles ugentligt", 11, GREEN, True, FONT_BODY),
+            ("Revenue-formel\n", 18, WHITE, True, FONT_HEAD),
+            ("\n", 6, WHITE, False, FONT_BODY),
+            ("N × $50 + Leads × $50\n", 16, GREEN, True, FONT_BODY),
+            ("\n", 6, WHITE, False, FONT_BODY),
+            ("$600/år subscription\n", 11, GRAY_LIGHT, False, FONT_BODY),
+            ("+ $50 pr. quote-form-submit", 11, GRAY_LIGHT, False, FONT_BODY),
         ],
         align=PP_ALIGN.CENTER,
         anchor=MSO_ANCHOR.MIDDLE,
-        line_spacing=1.2,
+        line_spacing=1.15,
     )
 
     # Arrow 2
@@ -363,7 +365,7 @@ def slide_north_star():
         [
             ("30.000\n", 56, GREEN_DARK, True, FONT_HEAD),
             ("DKK/måned i løn\n", 14, GRAY_TEXT, False, FONT_BODY),
-            ("≈ €4.025 MRR fra partnere", 11, GRAY_TEXT, False, FONT_BODY),
+            ("≈ $4.400/md fra partnere", 11, GRAY_TEXT, False, FONT_BODY),
         ],
         align=PP_ALIGN.CENTER,
         anchor=MSO_ANCHOR.MIDDLE,
@@ -377,8 +379,8 @@ def slide_north_star():
         Inches(5.8),
         Inches(12.333),
         Inches(0.6),
-        "Det er IKKE 10k → 27 partnere direkte. 10k buyer-trafik skaber value · value skaber partnere.",
-        size=14,
+        "10k besøgende konverterer IKKE direkte til 40 partnere. Trafik driver leads ($50/stk) · outreach driver subscriptions ($600/år).",
+        size=13,
         color=GRAY_TEXT,
         font=FONT_BODY,
         align=PP_ALIGN.CENTER,
@@ -397,14 +399,29 @@ def slide_math():
     add_text(
         s,
         Inches(0.5),
-        Inches(1.7),
+        Inches(1.55),
         Inches(12.333),
-        Inches(0.6),
-        "30.000 DKK/md  ≈  €4.025 MRR  (kurs 7,45)",
-        size=24,
+        Inches(0.5),
+        "30.000 DKK/md  ≈  $4.400/md  (kurs 6,85 DKK/USD)",
+        size=22,
         color=DARK_TEXT,
         bold=True,
         font=FONT_HEAD,
+        align=PP_ALIGN.CENTER,
+    )
+
+    # Formula sub-headline
+    add_text(
+        s,
+        Inches(0.5),
+        Inches(2.1),
+        Inches(12.333),
+        Inches(0.4),
+        "Formel:  Månedlig omsætning  =  N partnere × $50  +  Leads × $50",
+        size=14,
+        color=GREEN_DARK,
+        bold=True,
+        font=FONT_BODY,
         align=PP_ALIGN.CENTER,
     )
 
@@ -414,31 +431,31 @@ def slide_math():
     gap = Inches(0.3)
     total_w = card_w * 3 + gap * 2
     start_x = (SLIDE_W - total_w) / 2
-    y = Inches(2.8)
+    y = Inches(2.9)
 
     scenarios = [
         {
-            "label": "ALL GROWTH",
-            "big": "27",
-            "small": "betalende partnere",
-            "calc": "27 × €149\n= €4.023 MRR",
-            "note": "Lavt billet, høj volumen",
+            "label": "A · PARTNER-HEAVY",
+            "big": "50",
+            "small": "partnere + 38 leads/md",
+            "calc": "50 × $50 + 38 × $50\n= $4.400/md",
+            "note": "Kræver lift af conversion til 1,5%",
             "featured": False,
         },
         {
-            "label": "REALISTISK MIX",
-            "big": "15 + 6",
-            "small": "Growth + Enterprise",
-            "calc": "15 × €149 + 6 × €349\n= €4.329 MRR",
-            "note": "≈ 32.250 DKK/md",
+            "label": "B · MIX",
+            "big": "40",
+            "small": "partnere + 50 leads/md",
+            "calc": "40 × $50 + 50 × $50\n= $4.500/md ≈ 30.800 DKK",
+            "note": "Kræver 0,5% quote-conversion @ 10k MAU",
             "featured": True,
         },
         {
-            "label": "ALL ENTERPRISE",
-            "big": "12",
-            "small": "betalende partnere",
-            "calc": "12 × €349\n= €4.188 MRR",
-            "note": "Højere billet, færre kunder",
+            "label": "C · LEAD-HEAVY",
+            "big": "20",
+            "small": "partnere + 70 leads/md",
+            "calc": "20 × $50 + 70 × $50\n= $4.500/md",
+            "note": "Få men aktive partnere, churn-risk",
             "featured": False,
         },
     ]
@@ -571,7 +588,7 @@ def slide_math():
         Inches(6.7),
         Inches(12.333),
         Inches(0.4),
-        "I dag: 1 betalende partner (AM Printservice). Gap til mål: 14-26 partnere afhængigt af mix.",
+        "I dag: 1 partner × $600 banked + 0 leads. Gap til 30k DKK/md: 19-49 partnere + lead-conversion-lift.",
         size=12,
         color=RED_MUTED,
         bold=True,
@@ -630,7 +647,7 @@ def slide_two_funnels():
         ("Besøgende på platformen", "GA4 + sessions"),
         ("STL upload / quote start", "upload_events"),
         ("Supplier-views", "supplier_pageview"),
-        ("Outbound click / quote sendt", "outbound_click = konvertering"),
+        ("Quote-form-submit  →  $50", "quote_request_submit = revenue"),
     ]
     step_y = y + Inches(1.4)
     for i, (label, src) in enumerate(buyer_steps):
@@ -692,9 +709,9 @@ def slide_two_funnels():
 
     supplier_steps = [
         ("Suppliers i directory", "suppliers count"),
-        ("Leads leveret pr. supplier", "outbound + quote (gap)"),
+        ("Leads leveret pr. supplier", "quote_submit + supplier_id (gap)"),
         ("Outreach + samtaler bookede", "manuelt (CRM)"),
-        ("Tier-upgrade til betalende", "is_partner=true · MRR"),
+        ("Underskriv $600/år-kontrakt", "is_partner=true · cash up front"),
     ]
     for i, (label, src) in enumerate(supplier_steps):
         sy = step_y + Inches(0.85) * i
@@ -737,9 +754,9 @@ def slide_buyer_kpis():
         ["1", "Unikke besøgende", "GA4 / data-overview", "~2.500"],
         ["2", "STL-uploads", "upload_events", "~125  (5%)"],
         ["3", "Supplier-views", "supplier_pageview", "~500"],
-        ["4", "Outbound clicks (konvertering)", "outbound_click", "~75"],
-        ["5", "Quote requests", "quote_request_submit", "~25"],
-        ["6", "Conv-rate visit → outbound", "beregnet", "3,0%"],
+        ["4", "Outbound clicks", "outbound_click", "~75"],
+        ["5", "Quote-form-submits  ⇒  $50/stk", "quote_request_submit", "~12  ($600/uge)"],
+        ["6", "Quote-form conversion-rate", "beregnet (submits/visits)", "0,5%  (i dag ~0,25%)"],
     ]
 
     table_x = Inches(0.5)
@@ -777,11 +794,11 @@ def slide_buyer_kpis():
             add_rect(s, rx, ry, w, row_h, bg_color)
             rx += w
 
-        # Highlight row 6 (conversion rate — the headline KPI)
+        # Highlight rows 5 and 6 (quote-submit + conv-rate — revenue-critical KPIs)
         cx = table_x
         for j, (w, val) in enumerate(zip(col_widths, row)):
             is_last = j == len(row) - 1
-            is_headline = i == 5
+            is_headline = i in (4, 5)
             text_color = GREEN_DARK if is_last else DARK_TEXT
             if is_headline:
                 text_color = GREEN_DARK
@@ -812,9 +829,10 @@ def slide_buyer_kpis():
         Inches(6.6),
         Inches(12.333),
         Inches(0.5),
-        "Konverteringen er outbound_click → supplier-website. Quote-form-submit er stærkere signal men sjældnere.",
+        "KPI #5 = revenue-event ($50 pr. submit). KPI #6 = højeste leverage: lift 0,25% → 0,5% = 2× lead-revenue uden ny trafik.",
         size=12,
-        color=GRAY_TEXT,
+        color=GREEN_DARK,
+        bold=True,
         font=FONT_BODY,
         align=PP_ALIGN.LEFT,
     )
@@ -832,11 +850,11 @@ def slide_supplier_kpis():
     col_widths = [Inches(0.6), Inches(5.5), Inches(4.0), Inches(2.2)]
     rows = [
         ["7", "Aktive suppliers i directory", "suppliers count", "TRACKES"],
-        ["8", "Leads leveret pr. partner (mdr.)", "outbound + quote", "GAP"],
-        ["9", "Booked partner-samtaler", "manuelt (CRM/regneark)", "GAP"],
-        ["10", "Nye betalende partnere/uge", "is_partner=true", "TRACKES"],
-        ["11", "MRR (DKK)", "mangler tabel", "GAP"],
-        ["12", "Churn (kr. tabt sidste 30 dage)", "mangler", "GAP"],
+        ["8", "Leads leveret pr. partner (uge)", "quote_submit + supplier_id", "GAP"],
+        ["9", "Booked partner-samtaler (uge)", "manuelt (CRM/regneark)", "GAP"],
+        ["10", "Nye partnere (uge) × $600", "is_partner=true", "TRACKES"],
+        ["11", "Annual revenue booked (kvt.)", "$600 × nye partnere", "GAP"],
+        ["12", "Renewal-rate (efter 12 mdr.)", "fra md. 13", "FREMTID"],
     ]
 
     table_x = Inches(0.5)
@@ -881,6 +899,9 @@ def slide_supplier_kpis():
                 if val == "GAP":
                     text_color = RED_MUTED
                     bold = True
+                elif val == "FREMTID":
+                    text_color = AMBER
+                    bold = True
                 else:
                     text_color = GREEN_DARK
                     bold = True
@@ -917,7 +938,7 @@ def slide_supplier_kpis():
         Inches(6.6),
         Inches(12.333),
         Inches(0.5),
-        "4 ud af 6 KPI'er har gaps. Instrumentation skal bygges — se slide 10.",
+        "3 GAPs + 1 fremtid. Lead-attribution (KPI #8) er revenue-kritisk — hver utracket submit = $50 tabt. Se slide 10.",
         size=12,
         color=RED_MUTED,
         bold=True,
@@ -948,13 +969,13 @@ def slide_baseline():
     # Two columns of metric cards
     metrics = [
         ("Unikke besøgende/uge", "____", "mål: 2.500", False),
-        ("STL-uploads/uge", "____", "mål: 125", False),
-        ("Supplier-views/uge", "____", "mål: 500", False),
+        ("Quote-form-submits/uge", "____", "mål: 12 ($600/uge)", False),
+        ("Conversion-rate", "____", "mål: 0,5%", False),
         ("Outbound clicks/uge", "____", "mål: 75", False),
         ("Aktive suppliers", "____", "directory", False),
         ("Betalende partnere", "1", "AM Printservice", True),
-        ("MRR (DKK)", "~3.500", "Growth-tier", True),
-        ("Gap til 30k/md", "26.500", "DKK at indhente", True),
+        ("Revenue booked YTD", "$600", "1 × $600/år", True),
+        ("Gap til 30k DKK/md", "$4.350", "≈ 29.800 DKK", True),
     ]
 
     card_w = Inches(3.0)
@@ -1140,9 +1161,9 @@ def slide_funnel_pyramid():
         Inches(6.85),
         Inches(12.333),
         Inches(0.5),
-        "Headline-metric: 3% af besøgende klikker ud til en supplier-side. Forbedring her er højeste leverage.",
+        "Headline-revenue: hver Quote-form-submit = $50. Lift 0,25% → 0,5% = $1.250/md ekstra uden ny trafik.",
         size=12,
-        color=DARK_TEXT,
+        color=GREEN_DARK,
         bold=True,
         font=FONT_BODY,
     )
@@ -1273,13 +1294,13 @@ def slide_gaps():
     gaps = [
         {
             "title": "partner_subscriptions tabel",
-            "drives": "Driver KPI #11 (MRR) og #12 (Churn)",
-            "details": "Kolonner: supplier_id, tier (growth/enterprise), mrr_dkk, started_at, cancelled_at. Manuel for nu, automatiser når Stripe er på.",
+            "drives": "Driver KPI #10/#11 (Revenue booked + Renewal)",
+            "details": "Simpel: supplier_id, paid_amount_usd (600), paid_at, expires_at (+12md), renewal_status. Ingen tiers. Manuel fakturering for nu, Stripe senere.",
         },
         {
-            "title": "Lead-attribution pr. supplier",
-            "drives": "Driver KPI #8 (Leads leveret)",
-            "details": "Link outbound_click + quote_request_submit til supplier_id. Memory: selectItems/searches/supplier_id mangler GTM-tagging — samme rod.",
+            "title": "Lead-attribution (revenue-kritisk)",
+            "drives": "Driver KPI #5 ($50/lead) + KPI #8",
+            "details": "Tilføj supplier_id til quote_request_submit-event + ny partner_leads tabel. Hver utracket submit = $50 tabt. Samtidig fix: selectItems/searches/supplier_id GTM-tagging.",
         },
         {
             "title": "MAU-query i admin",
@@ -1395,10 +1416,10 @@ def slide_90_day_plan():
     )
 
     weeks = [
-        ("Uge 1-3", "INSTRUMENTATION", "Byg MRR-tabel · Fix lead-attribution · MAU-query i admin", DARK, WHITE),
-        ("Uge 4-6", "BUYER TOP-OF-FUNNEL", "SEO-content · Compare-prices-side · landing-page tests for at hæve unikke besøgende", GREEN_DARK, WHITE),
-        ("Uge 7-9", "BUYER CONVERSION", "Optimér STL-upload-flow · supplier-card design · CTA-test for at hæve 3% → 5%", GREEN, WHITE),
-        ("Uge 10-12", "SUPPLIER OUTREACH", "Outreach til top-25 suppliers · pricing-samtaler · få 3 nye Growth-partnere underskrevet", AMBER, WHITE),
+        ("Uge 1-3", "LEAD-ATTRIBUTION", "Tilføj supplier_id til quote_submit · partner_leads tabel · partner_subscriptions tabel · MAU-query", DARK, WHITE),
+        ("Uge 4-6", "BUYER CONVERSION", "Quote-form-UX · CTA-tests · STL-flow · lift quote-submit fra 0,25% → 0,5% = 2× lead-revenue", GREEN_DARK, WHITE),
+        ("Uge 7-9", "BUYER TOP-OF-FUNNEL", "SEO-content · Compare-prices-side · landing pages · hæv MAU fra X → 10k for mere lead-volumen", GREEN, WHITE),
+        ("Uge 10-12", "SUPPLIER OUTREACH", "Outreach til top-25 suppliers · vis dem leads-rapport · få 3 nye $600/år-kontrakter underskrevet", AMBER, WHITE),
     ]
 
     block_w = Inches(2.95)
@@ -1481,7 +1502,7 @@ def slide_90_day_plan():
         Inches(6.85),
         Inches(11.3),
         Inches(0.5),
-        "EFTER 90 DAGE:  baseline = 4.000 besøgende/uge  ·  4% conversion  ·  4 nye Growth-partnere  ·  9.000 DKK MRR",
+        "EFTER 90 DAGE:  4 nye partnere × $600 = $2.400 booked  ·  0,5% quote-conversion  ·  ~$1.250/md lead-revenue",
         size=12,
         color=WHITE,
         bold=True,
@@ -1524,10 +1545,10 @@ def slide_sources():
             "Outreach-CRM: manuelt regneark (TBD)",
             "Dashboard: /admin (Suppliers-fane)",
         ]),
-        ("KPI #11-12 (Revenue) — BYG", [
-            "partner_subscriptions tabel: SKAL OPRETTES",
-            "Stripe-webhook: ikke koblet på endnu",
-            "MRR-query: SUM(mrr_dkk) WHERE cancelled_at IS NULL",
+        ("KPI #5/#10/#11 (Revenue) — BYG", [
+            "partner_subscriptions: supplier_id, paid_at, expires_at, $600",
+            "partner_leads: quote_event_id → supplier_id → $50",
+            "Manuel fakturering (Stripe senere)",
             "Vises på: /admin/data-overview (ny sektion)",
         ]),
     ]
