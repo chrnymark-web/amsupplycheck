@@ -885,6 +885,8 @@ export type Database = {
           email: string
           id: string
           name: string
+          status: Database["public"]["Enums"]["supplier_application_status"]
+          status_updated_at: string
         }
         Insert: {
           company: string
@@ -892,6 +894,8 @@ export type Database = {
           email: string
           id?: string
           name: string
+          status?: Database["public"]["Enums"]["supplier_application_status"]
+          status_updated_at?: string
         }
         Update: {
           company?: string
@@ -899,6 +903,8 @@ export type Database = {
           email?: string
           id?: string
           name?: string
+          status?: Database["public"]["Enums"]["supplier_application_status"]
+          status_updated_at?: string
         }
         Relationships: []
       }
@@ -1576,6 +1582,13 @@ export type Database = {
         | "completed"
         | "failed"
       search_type: "requirement" | "stl"
+      supplier_application_status:
+        | "pending"
+        | "contacted"
+        | "demo_booked"
+        | "approved"
+        | "onboarded"
+        | "rejected"
     }
     CompositeTypes: {
       [_ in never]: never

@@ -26,6 +26,7 @@ import { DateRangePicker, rangeForDays, type DateRange } from '@/components/admi
 import { WeeklyKpiCard } from '@/components/admin/weekly-kpi-card';
 import { GoalProgressBar } from '@/components/admin/goal-progress-bar';
 import { SubscriptionEntryForm } from '@/components/admin/subscription-entry-form';
+import { ApplicationsKanban } from '@/components/admin/applications-kanban/ApplicationsKanban';
 
 function StatCard({ icon: Icon, label, value, sub, color = 'text-primary', loading }: {
   icon: React.ElementType; label: string; value: React.ReactNode; sub?: string; color?: string; loading?: boolean;
@@ -1347,44 +1348,13 @@ export default function Admin() {
         )}
 
         {tab === 'applications' && (
-          <div className="space-y-6">
-            <h1 className="text-2xl font-bold text-foreground">Supplier Applications</h1>
-            <p className="text-muted-foreground">Companies that applied in the selected period</p>
-
-            {statsLoading ? (
-              <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Card key={i} className="bg-card border-border">
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div className="space-y-2">
-                        <Skeleton className="h-5 w-48" />
-                        <Skeleton className="h-4 w-32" />
-                      </div>
-                      <Skeleton className="h-4 w-20" />
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : stats && stats.recentApplications.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No applications in this period.</p>
-            ) : (
-              <div className="space-y-3">
-                {stats?.recentApplications.map((app, i) => (
-                  <Card key={`${app.company}-${i}`} className="bg-card border-border">
-                    <CardContent className="p-4 flex items-center justify-between">
-                      <div>
-                        <h4 className="font-semibold text-foreground">{app.company}</h4>
-                        <p className="text-sm text-muted-foreground">{app.name}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-muted-foreground">{app.date}</p>
-                        <Badge variant="outline" className="text-xs mt-1">Pending</Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
+          <div className="space-y-4">
+            <div className="flex items-baseline justify-between gap-4">
+              <h1 className="text-2xl font-bold text-foreground">Supplier Applications</h1>
+              <p className="text-xs text-muted-foreground">Date filter does not apply here — pipeline shows all applications</p>
+            </div>
+            <p className="text-muted-foreground">Drag cards between columns to update funnel stage.</p>
+            <ApplicationsKanban />
           </div>
         )}
 
