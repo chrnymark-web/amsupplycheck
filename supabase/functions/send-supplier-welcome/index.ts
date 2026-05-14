@@ -12,7 +12,7 @@ const corsHeaders = {
 };
 
 const FROM_ADDRESS = 'SupplyCheck <info@supplycheck.io>';
-const REPLY_TO = 'chr.nymark@gmail.com';
+const REPLY_TO = 'info@supplycheck.io';
 const BATCH_LIMIT = 50;
 const DELAY_MINUTES = 5;
 
