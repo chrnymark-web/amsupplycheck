@@ -37,18 +37,21 @@ export function useUpdateApplicationStatus() {
   const queryClient = useQueryClient();
 
   return useCallback(
-    async (id: string, nextStatus: ApplicationStatus): Promise<void> => {
+    async (ids: string[], nextStatus: ApplicationStatus): Promise<void> => {
+      if (ids.length === 0) return;
+
       const previous = queryClient.getQueryData<SupplierApplication[]>(
         SUPPLIER_APPLICATIONS_QUERY_KEY,
       );
       const nowIso = new Date().toISOString();
+      const idSet = new Set(ids);
 
       // Optimistic
       if (previous) {
         queryClient.setQueryData<SupplierApplication[]>(
           SUPPLIER_APPLICATIONS_QUERY_KEY,
           previous.map(app =>
-            app.id === id ? { ...app, status: nextStatus, status_updated_at: nowIso } : app,
+            idSet.has(app.id) ? { ...app, status: nextStatus, status_updated_at: nowIso } : app,
           ),
         );
       }
@@ -56,7 +59,7 @@ export function useUpdateApplicationStatus() {
       const { error } = await supabase
         .from('supplier_applications')
         .update({ status: nextStatus, status_updated_at: nowIso })
-        .eq('id', id);
+        .in('id', ids);
 
       if (error) {
         if (previous) {

@@ -15,20 +15,20 @@ import { useToast } from '@/hooks/use-toast';
 import {
   useSupplierApplications,
   useUpdateApplicationStatus,
-  type SupplierApplication,
 } from '@/hooks/use-supplier-applications';
 import { ApplicationCard } from './ApplicationCard';
 import { KanbanColumn } from './KanbanColumn';
 import { STAGES, STAGE_IDS, type ApplicationStatus } from './stages';
+import { groupByCompany, type CompanyGroup } from './group';
 
-function groupByStatus(applications: SupplierApplication[]): Record<ApplicationStatus, SupplierApplication[]> {
+function bucketByStatus(groups: CompanyGroup[]): Record<ApplicationStatus, CompanyGroup[]> {
   const buckets = Object.fromEntries(
-    STAGE_IDS.map(id => [id, [] as SupplierApplication[]]),
-  ) as Record<ApplicationStatus, SupplierApplication[]>;
+    STAGE_IDS.map(id => [id, [] as CompanyGroup[]]),
+  ) as Record<ApplicationStatus, CompanyGroup[]>;
 
-  for (const app of applications) {
-    if (buckets[app.status]) buckets[app.status].push(app);
-    else buckets.pending.push(app);
+  for (const g of groups) {
+    if (buckets[g.status]) buckets[g.status].push(g);
+    else buckets.pending.push(g);
   }
   return buckets;
 }
@@ -37,37 +37,39 @@ export function ApplicationsKanban() {
   const { data, isLoading, error } = useSupplierApplications();
   const updateStatus = useUpdateApplicationStatus();
   const { toast } = useToast();
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [activeKey, setActiveKey] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(TouchSensor, { activationConstraint: { delay: 150, tolerance: 6 } }),
   );
 
-  const grouped = useMemo(() => groupByStatus(data ?? []), [data]);
-  const activeApp = useMemo(
-    () => (activeId ? data?.find(a => a.id === activeId) ?? null : null),
-    [activeId, data],
+  const groups = useMemo(() => groupByCompany(data ?? []), [data]);
+  const bucketed = useMemo(() => bucketByStatus(groups), [groups]);
+  const activeGroup = useMemo(
+    () => (activeKey ? groups.find(g => g.key === activeKey) ?? null : null),
+    [activeKey, groups],
   );
 
   function handleDragStart(event: DragStartEvent) {
-    setActiveId(String(event.active.id));
+    setActiveKey(String(event.active.id));
   }
 
   async function handleDragEnd(event: DragEndEvent) {
-    setActiveId(null);
+    setActiveKey(null);
     const { active, over } = event;
     if (!over) return;
 
-    const id = String(active.id);
     const nextStatus = String(over.id) as ApplicationStatus;
     const currentStatus = active.data.current?.status as ApplicationStatus | undefined;
+    const ids = (active.data.current?.ids as string[] | undefined) ?? [];
 
     if (!STAGE_IDS.includes(nextStatus)) return;
     if (currentStatus === nextStatus) return;
+    if (ids.length === 0) return;
 
     try {
-      await updateStatus(id, nextStatus);
+      await updateStatus(ids, nextStatus);
     } catch (e) {
       toast({
         title: 'Could not update status',
@@ -109,13 +111,13 @@ export function ApplicationsKanban() {
     <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
       <div className="flex gap-3 overflow-x-auto pb-3 -mx-2 px-2">
         {STAGES.map(stage => (
-          <KanbanColumn key={stage.id} stage={stage} applications={grouped[stage.id]} />
+          <KanbanColumn key={stage.id} stage={stage} groups={bucketed[stage.id]} />
         ))}
       </div>
       <DragOverlay dropAnimation={null}>
-        {activeApp ? (
+        {activeGroup ? (
           <div className="w-72">
-            <ApplicationCard app={activeApp} isDragOverlay />
+            <ApplicationCard group={activeGroup} isDragOverlay />
           </div>
         ) : null}
       </DragOverlay>

@@ -2,14 +2,14 @@ import { useDroppable } from '@dnd-kit/core';
 import { cn } from '@/lib/utils';
 import { ApplicationCard } from './ApplicationCard';
 import type { StageConfig } from './stages';
-import type { SupplierApplication } from '@/hooks/use-supplier-applications';
+import type { CompanyGroup } from './group';
 
 type Props = {
   stage: StageConfig;
-  applications: SupplierApplication[];
+  groups: CompanyGroup[];
 };
 
-export function KanbanColumn({ stage, applications }: Props) {
+export function KanbanColumn({ stage, groups }: Props) {
   const { setNodeRef, isOver } = useDroppable({
     id: stage.id,
     data: { stage: stage.id },
@@ -27,7 +27,7 @@ export function KanbanColumn({ stage, applications }: Props) {
           <span className={cn('h-1.5 w-1.5 rounded-full', stage.dotClass)} />
           <span className="text-xs font-semibold tracking-wide uppercase">{stage.label}</span>
         </div>
-        <span className="text-xs font-medium opacity-70 tabular-nums">{applications.length}</span>
+        <span className="text-xs font-medium opacity-70 tabular-nums">{groups.length}</span>
       </div>
 
       <div
@@ -37,7 +37,7 @@ export function KanbanColumn({ stage, applications }: Props) {
           isOver && 'bg-foreground/[0.03]',
         )}
       >
-        {applications.length === 0 ? (
+        {groups.length === 0 ? (
           <div
             className={cn(
               'h-24 rounded-lg border border-dashed border-border/60 flex items-center justify-center transition-colors',
@@ -49,7 +49,7 @@ export function KanbanColumn({ stage, applications }: Props) {
             </span>
           </div>
         ) : (
-          applications.map(app => <ApplicationCard key={app.id} app={app} />)
+          groups.map(group => <ApplicationCard key={group.key} group={group} />)
         )}
       </div>
     </div>

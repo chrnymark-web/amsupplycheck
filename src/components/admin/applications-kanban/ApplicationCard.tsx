@@ -2,10 +2,10 @@ import { useDraggable } from '@dnd-kit/core';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { SupplierApplication } from '@/hooks/use-supplier-applications';
+import type { CompanyGroup } from './group';
 
 type Props = {
-  app: SupplierApplication;
+  group: CompanyGroup;
   isDragOverlay?: boolean;
 };
 
@@ -26,14 +26,14 @@ function formatApplied(days: number): string {
   return `applied ${days}d ago`;
 }
 
-export function ApplicationCard({ app, isDragOverlay = false }: Props) {
+export function ApplicationCard({ group, isDragOverlay = false }: Props) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: app.id,
-    data: { status: app.status },
+    id: group.key,
+    data: { status: group.status, ids: group.ids },
   });
 
-  const stageDays = daysBetween(app.status_updated_at);
-  const appliedDays = daysBetween(app.created_at);
+  const stageDays = daysBetween(group.lastStatusAt);
+  const appliedDays = daysBetween(group.firstAppliedAt);
   const stagnant = stageDays >= 7;
 
   const style = transform
@@ -61,8 +61,19 @@ export function ApplicationCard({ app, isDragOverlay = false }: Props) {
       >
         <CardContent className="p-3 space-y-2">
           <div className="space-y-0.5">
-            <h4 className="font-semibold text-foreground text-sm leading-tight">{app.company}</h4>
-            <p className="text-xs text-muted-foreground truncate">{app.name}</p>
+            <div className="flex items-start justify-between gap-2">
+              <h4 className="font-semibold text-foreground text-sm leading-tight">{group.company}</h4>
+              {group.count > 1 && (
+                <Badge
+                  variant="outline"
+                  className="text-[10px] px-1.5 py-0 h-5 font-normal shrink-0 border-foreground/20 text-foreground/80"
+                  title={`${group.count} applications from this company`}
+                >
+                  ×{group.count}
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground truncate">{group.contactName}</p>
           </div>
           <div className="flex items-center justify-between gap-2 pt-1">
             <span className="text-[10px] text-muted-foreground/80">{formatApplied(appliedDays)}</span>
