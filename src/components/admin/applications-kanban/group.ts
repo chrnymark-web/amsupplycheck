@@ -1,4 +1,4 @@
-import type { SupplierApplication } from '@/hooks/use-supplier-applications';
+import type { SupplierApplication, Temperature } from '@/hooks/use-supplier-applications';
 import type { ApplicationStatus } from './stages';
 
 export type CompanyGroup = {
@@ -7,7 +7,9 @@ export type CompanyGroup = {
   company: string;
   /** Most recent contact-person name (by created_at). */
   contactName: string;
-  /** All underlying application row ids — every status mutation hits all of them. */
+  /** Most recent contact email. */
+  contactEmail: string;
+  /** All underlying application row ids — every status/field mutation hits all of them. */
   ids: string[];
   /** Stage shown for the card = stage of the application whose status was updated most recently. */
   status: ApplicationStatus;
@@ -17,6 +19,10 @@ export type CompanyGroup = {
   lastStatusAt: string;
   /** Number of underlying application rows for this company. */
   count: number;
+  /** CRM-style enrichment — taken from the anchor row (most recent status_updated_at). */
+  notes: string | null;
+  estimatedValueUsd: number | null;
+  temperature: Temperature | null;
 };
 
 function canonicalKey(company: string): string {
@@ -35,11 +41,9 @@ export function groupByCompany(applications: SupplierApplication[]): CompanyGrou
 
   const groups: CompanyGroup[] = [];
   for (const [key, rows] of map) {
-    // status comes from the row with the most recent status_updated_at
-    const latestStatusRow = rows.reduce((acc, r) =>
+    const anchor = rows.reduce((acc, r) =>
       new Date(r.status_updated_at) > new Date(acc.status_updated_at) ? r : acc,
     );
-    // contact name from the most recently created application
     const latestCreatedRow = rows.reduce((acc, r) =>
       new Date(r.created_at) > new Date(acc.created_at) ? r : acc,
     );
@@ -51,15 +55,18 @@ export function groupByCompany(applications: SupplierApplication[]): CompanyGrou
       key,
       company: latestCreatedRow.company,
       contactName: latestCreatedRow.name,
+      contactEmail: latestCreatedRow.email,
       ids: rows.map(r => r.id),
-      status: latestStatusRow.status,
+      status: anchor.status,
       firstAppliedAt: firstApplied.created_at,
-      lastStatusAt: latestStatusRow.status_updated_at,
+      lastStatusAt: anchor.status_updated_at,
       count: rows.length,
+      notes: anchor.notes,
+      estimatedValueUsd: anchor.estimated_value_usd,
+      temperature: anchor.temperature,
     });
   }
 
-  // Newest activity first within each future column.
   groups.sort((a, b) => new Date(b.lastStatusAt).getTime() - new Date(a.lastStatusAt).getTime());
   return groups;
 }

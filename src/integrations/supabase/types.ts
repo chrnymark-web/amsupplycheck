@@ -883,28 +883,37 @@ export type Database = {
           company: string
           created_at: string
           email: string
+          estimated_value_usd: number | null
           id: string
           name: string
+          notes: string | null
           status: Database["public"]["Enums"]["supplier_application_status"]
           status_updated_at: string
+          temperature: Database["public"]["Enums"]["supplier_application_temperature"] | null
         }
         Insert: {
           company: string
           created_at?: string
           email: string
+          estimated_value_usd?: number | null
           id?: string
           name: string
+          notes?: string | null
           status?: Database["public"]["Enums"]["supplier_application_status"]
           status_updated_at?: string
+          temperature?: Database["public"]["Enums"]["supplier_application_temperature"] | null
         }
         Update: {
           company?: string
           created_at?: string
           email?: string
+          estimated_value_usd?: number | null
           id?: string
           name?: string
+          notes?: string | null
           status?: Database["public"]["Enums"]["supplier_application_status"]
           status_updated_at?: string
+          temperature?: Database["public"]["Enums"]["supplier_application_temperature"] | null
         }
         Relationships: []
       }
@@ -1589,6 +1598,7 @@ export type Database = {
         | "approved"
         | "onboarded"
         | "rejected"
+      supplier_application_temperature: "cold" | "warm" | "hot"
     }
     CompositeTypes: {
       [_ in never]: never

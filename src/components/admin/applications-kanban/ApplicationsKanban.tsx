@@ -18,6 +18,7 @@ import {
 } from '@/hooks/use-supplier-applications';
 import { ApplicationCard } from './ApplicationCard';
 import { KanbanColumn } from './KanbanColumn';
+import { ApplicationDetailSheet } from './ApplicationDetailSheet';
 import { STAGES, STAGE_IDS, type ApplicationStatus } from './stages';
 import { groupByCompany, type CompanyGroup } from './group';
 
@@ -38,6 +39,7 @@ export function ApplicationsKanban() {
   const updateStatus = useUpdateApplicationStatus();
   const { toast } = useToast();
   const [activeKey, setActiveKey] = useState<string | null>(null);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -49,6 +51,10 @@ export function ApplicationsKanban() {
   const activeGroup = useMemo(
     () => (activeKey ? groups.find(g => g.key === activeKey) ?? null : null),
     [activeKey, groups],
+  );
+  const selectedGroup = useMemo(
+    () => (selectedKey ? groups.find(g => g.key === selectedKey) ?? null : null),
+    [selectedKey, groups],
   );
 
   function handleDragStart(event: DragStartEvent) {
@@ -108,19 +114,33 @@ export function ApplicationsKanban() {
   }
 
   return (
-    <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-      <div className="flex gap-3 overflow-x-auto pb-3 -mx-2 px-2">
-        {STAGES.map(stage => (
-          <KanbanColumn key={stage.id} stage={stage} groups={bucketed[stage.id]} />
-        ))}
-      </div>
-      <DragOverlay dropAnimation={null}>
-        {activeGroup ? (
-          <div className="w-72">
-            <ApplicationCard group={activeGroup} isDragOverlay />
-          </div>
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+    <>
+      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
+        <div className="flex gap-3 overflow-x-auto pb-3 -mx-2 px-2">
+          {STAGES.map(stage => (
+            <KanbanColumn
+              key={stage.id}
+              stage={stage}
+              groups={bucketed[stage.id]}
+              onOpenCard={g => setSelectedKey(g.key)}
+            />
+          ))}
+        </div>
+        <DragOverlay dropAnimation={null}>
+          {activeGroup ? (
+            <div className="w-72">
+              <ApplicationCard group={activeGroup} isDragOverlay />
+            </div>
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+      <ApplicationDetailSheet
+        group={selectedGroup}
+        open={selectedGroup !== null}
+        onOpenChange={open => {
+          if (!open) setSelectedKey(null);
+        }}
+      />
+    </>
   );
 }

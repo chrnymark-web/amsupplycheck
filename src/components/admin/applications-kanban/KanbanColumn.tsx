@@ -7,13 +7,31 @@ import type { CompanyGroup } from './group';
 type Props = {
   stage: StageConfig;
   groups: CompanyGroup[];
+  onOpenCard?: (group: CompanyGroup) => void;
 };
 
-export function KanbanColumn({ stage, groups }: Props) {
+const USD_COMPACT = new Intl.NumberFormat('en-US', {
+  style: 'currency',
+  currency: 'USD',
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
+
+function totalValue(groups: CompanyGroup[]): number {
+  let sum = 0;
+  for (const g of groups) {
+    if (g.estimatedValueUsd && g.estimatedValueUsd > 0) sum += g.estimatedValueUsd;
+  }
+  return sum;
+}
+
+export function KanbanColumn({ stage, groups, onOpenCard }: Props) {
   const { setNodeRef, isOver } = useDroppable({
     id: stage.id,
     data: { stage: stage.id },
   });
+
+  const value = totalValue(groups);
 
   return (
     <div className="flex flex-col w-72 shrink-0 rounded-xl bg-card/40 border border-border">
@@ -27,7 +45,15 @@ export function KanbanColumn({ stage, groups }: Props) {
           <span className={cn('h-1.5 w-1.5 rounded-full', stage.dotClass)} />
           <span className="text-xs font-semibold tracking-wide uppercase">{stage.label}</span>
         </div>
-        <span className="text-xs font-medium opacity-70 tabular-nums">{groups.length}</span>
+        <div className="flex items-center gap-2 text-xs opacity-70 tabular-nums">
+          <span>{groups.length}</span>
+          {value > 0 && (
+            <>
+              <span className="opacity-50">·</span>
+              <span className="font-medium">{USD_COMPACT.format(value)}</span>
+            </>
+          )}
+        </div>
       </div>
 
       <div
@@ -49,7 +75,9 @@ export function KanbanColumn({ stage, groups }: Props) {
             </span>
           </div>
         ) : (
-          groups.map(group => <ApplicationCard key={group.key} group={group} />)
+          groups.map(group => (
+            <ApplicationCard key={group.key} group={group} onOpen={onOpenCard} />
+          ))
         )}
       </div>
     </div>
