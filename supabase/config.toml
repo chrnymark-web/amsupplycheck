@@ -41,6 +41,9 @@ verify_jwt = true
 [functions.send-signup-notification]
 verify_jwt = false
 
+[functions.send-supplier-welcome]
+verify_jwt = false
+
 [functions.generate-sitemap]
 verify_jwt = false
 
