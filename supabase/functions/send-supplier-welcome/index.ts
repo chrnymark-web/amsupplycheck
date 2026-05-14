@@ -11,7 +11,11 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-welcome-secret',
 };
 
-const FROM_ADDRESS = 'SupplyCheck <info@supplycheck.io>';
+// TODO: swap to 'SupplyCheck <info@supplycheck.io>' once supplycheck.io is
+// verified in Resend (resend.com/domains). onboarding@resend.dev is Resend's
+// test domain — works without domain verification but recipient sees the
+// generic Resend sender, which looks less legitimate.
+const FROM_ADDRESS = 'SupplyCheck <onboarding@resend.dev>';
 const REPLY_TO = 'chr.nymark@gmail.com';
 const BATCH_LIMIT = 50;
 const DELAY_MINUTES = 5;
