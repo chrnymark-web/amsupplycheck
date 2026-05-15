@@ -1,1 +1,1 @@
-export const BASE_URL = "https://amsupplycheck.com";
+export const BASE_URL = "https://www.amsupplycheck.com";

@@ -22,7 +22,7 @@ import { getVerifiedSuppliersList, type SupplierListItem } from "@/lib/suppliers
 
 export const dynamic = "force-dynamic";
 
-const BASE_URL = "https://amsupplycheck.com";
+const BASE_URL = "https://www.amsupplycheck.com";
 
 interface SearchParams {
   q?: string;
@@ -192,12 +192,12 @@ export const metadata: Metadata = {
   title: "Search 3D Printing Suppliers | AMSupplyCheck",
   description:
     "Search and compare 3D printing suppliers worldwide. Filter by materials, technologies, location, and certifications to find the perfect manufacturing partner.",
-  alternates: { canonical: "https://amsupplycheck.com/search" },
+  alternates: { canonical: "https://www.amsupplycheck.com/search" },
   openGraph: {
     title: "Search 3D Printing Suppliers | AMSupplyCheck",
     description:
       "Search and compare 3D printing suppliers worldwide. Filter by materials, technologies, location, and certifications.",
-    url: "https://amsupplycheck.com/search",
+    url: "https://www.amsupplycheck.com/search",
     type: "website",
   },
   twitter: {

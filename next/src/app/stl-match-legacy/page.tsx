@@ -5,7 +5,7 @@ import StlMatchLegacyClient from "./StlMatchLegacyClient";
 export const metadata: Metadata = {
   title: "STL Supplier Match | AMSupplyCheck",
   description: "Upload your STL file and find the best 3D printing suppliers for your part.",
-  alternates: { canonical: "https://amsupplycheck.com/stl-match-legacy" },
+  alternates: { canonical: "https://www.amsupplycheck.com/stl-match-legacy" },
   robots: { index: false, follow: false },
 };
 

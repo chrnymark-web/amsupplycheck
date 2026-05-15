@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getVerifiedSupplierSlugs } from "@/lib/suppliers";
 
-const BASE = "https://amsupplycheck.com";
+const BASE = "https://www.amsupplycheck.com";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const slugs = await getVerifiedSupplierSlugs();

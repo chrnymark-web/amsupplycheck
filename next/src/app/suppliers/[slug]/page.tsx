@@ -44,11 +44,11 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   return {
     title: `${supplier.name} - Manufacturing Supplier | Supplycheck`,
     description,
-    alternates: { canonical: `https://amsupplycheck.com/suppliers/${slug}` },
+    alternates: { canonical: `https://www.amsupplycheck.com/suppliers/${slug}` },
     openGraph: {
       title: `${supplier.name} - Manufacturing Supplier`,
       description,
-      url: `https://amsupplycheck.com/suppliers/${slug}`,
+      url: `https://www.amsupplycheck.com/suppliers/${slug}`,
       type: "website",
       images: supplier.logo_url ? [{ url: supplier.logo_url }] : undefined,
     },

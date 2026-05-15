@@ -4,11 +4,11 @@ current_branch: seo/02-nextjs
 current_pr: null
 current_pr_url: null
 phase_started_at: 2026-05-15T11:20:00Z
-last_action_at:   2026-05-15T19:30:00Z
+last_action_at:   2026-05-15T20:05:00Z
 
 phases:
   "1": { status: completed, pr: 7, merged_at: 2026-05-15T11:14:22Z }
-  "2": { status: in_progress, branch: seo/02-nextjs, chunk: "c2-seo shipped (/compatibility, /search, /keywordsearch); c2-tools (a) shipped (/match, polling-only — no Trigger.dev realtime upgrade); c2-tools (b) Part 1 shipped: /stl-match production route (STL parser + Web Worker + R3F v9 + drei v10 viewer; cards-only result view, map deferred to c4); c2-tools (b) Part 2 shipped: /compare-prices production route (Craftcloud-only live quotes via public v5 REST; LivePriceComparison ported faithfully; treatstock skipped — env-gated and dark in prod); c2-tools (b) Part 3 shipped: /stl-match-legacy + /compare-prices-legacy noindex variants (faithful Vite ports; shadcn Dialog + SearchProgress + getEstimatedPrice helpers added; bug-fix-on-port: added noindex to /compare-prices-legacy which Vite source was missing); c2-tools (b) COMPLETE — all 4 tool routes ported; chunk-d (d1) shipped: Vercel preview live at https://amsupplycheck-next.vercel.app (new project amsupplycheck-next linked from next/, zero blast-radius vs prod); c3 guides/knowledge, c4 heavy interactives [Map/AISearch/PriceCalc/Shapeways], c5 admin/auth/embed pending; chunk-d remaining: d2 ESLint + apex/www decision, d3 TS strictness (~71 errors), d4 directory swap + Phase 2 PR" }
+  "2": { status: in_progress, branch: seo/02-nextjs, chunk: "c2-seo shipped (/compatibility, /search, /keywordsearch); c2-tools (a) shipped (/match, polling-only — no Trigger.dev realtime upgrade); c2-tools (b) Part 1 shipped: /stl-match production route (STL parser + Web Worker + R3F v9 + drei v10 viewer; cards-only result view, map deferred to c4); c2-tools (b) Part 2 shipped: /compare-prices production route (Craftcloud-only live quotes via public v5 REST; LivePriceComparison ported faithfully; treatstock skipped — env-gated and dark in prod); c2-tools (b) Part 3 shipped: /stl-match-legacy + /compare-prices-legacy noindex variants (faithful Vite ports; shadcn Dialog + SearchProgress + getEstimatedPrice helpers added; bug-fix-on-port: added noindex to /compare-prices-legacy which Vite source was missing); c2-tools (b) COMPLETE — all 4 tool routes ported; chunk-d (d1) shipped: Vercel preview live at https://amsupplycheck-next.vercel.app (new project amsupplycheck-next linked from next/, zero blast-radius vs prod); chunk-d (d2) shipped: canonical=www.amsupplycheck.com everywhere in next/ (15 files, 41 hits rewritten apex→www), ESLint strict mode on (eslint.ignoreDuringBuilds: false), 2 errors fixed (StlViewer any → typed OrbitControls ref, tailwind require → ESM import) + 1 warning fixed (use-toast dead actionTypes) — 2 warnings remain (supplier-logo img, use-in-view exhaustive-deps) and don't block builds; c3 guides/knowledge, c4 heavy interactives [Map/AISearch/PriceCalc/Shapeways], c5 admin/auth/embed pending; chunk-d remaining: d3 TS strictness (~71 errors), d4 directory swap + Phase 2 PR" }
   "3": { status: pending }
   "4": { status: pending }
   "5": { status: pending }
@@ -35,13 +35,21 @@ baseline:
   soft_404s_in_sample: 2
 
 notes:
-  vercel_preview_url: https://amsupplycheck-next.vercel.app
+  vercel_preview_url: https://amsupplycheck-next.vercel.app    # alias may decay between deploys; per-deploy URLs always work
+  vercel_preview_latest_deploy: https://amsupplycheck-next-35do574xs-chrnymark-webs-projects.vercel.app   # d2 deploy
   vercel_preview_project: chrnymark-webs-projects/amsupplycheck-next
-  vercel_prod_project: chrnymark-webs-projects/amsupplycheck   # serves www.supplycheck.io per `vercel project list`; reconcile with production_domain_* below in d2
-  production_domain_canonical: amsupplycheck.com
+  vercel_prod_project: chrnymark-webs-projects/amsupplycheck   # prj_GVyTQxHxsultT5z5pvphQsq97Knp; serves both www.amsupplycheck.com (canonical) and www.supplycheck.io (legacy, to 301 — see vercel_dashboard_todo)
+  production_domain_canonical: www.amsupplycheck.com
   production_domain_serving: www.amsupplycheck.com
-  redirect_inconsistency: |
-    Sitemap declares URLs as https://amsupplycheck.com/<path> but apex 307s to www.amsupplycheck.com.
-    Either fix the redirect or rewrite the sitemap. Flagged for Phase 2/5.
+  redirect_status: |
+    d2 (code): All Next canonicals + sitemap + JSON-LD now point to https://www.amsupplycheck.com.
+    d2 (Vercel dashboard, parallel-todo, see vercel_dashboard_todo): apex amsupplycheck.com is currently 307→www; need 308 permanent. supplycheck.io (apex + www) still serves 200; need 308 → www.amsupplycheck.com.
+    Code changes don't affect prod until d4 directory swap (prod is still Vite). Vercel dashboard changes affect prod immediately.
+  vercel_dashboard_todo: |
+    On prod project amsupplycheck (prj_GVyTQxHxsultT5z5pvphQsq97Knp), set:
+      1. amsupplycheck.com (apex) → 308 to https://www.amsupplycheck.com (currently 307)
+      2. www.supplycheck.io → 308 to https://www.amsupplycheck.com (currently serves 200, identical content — duplicate-content SEO risk)
+      3. supplycheck.io (apex) → 308 to https://www.amsupplycheck.com (currently 307 to somewhere)
+    Also: preview project amsupplycheck-next has Deployment Protection (SSO) enabled — blocks automated curl/firecrawl smoke checks. Consider disabling for the preview project (no secrets risk; site is public).
   sitemap_url_count: 427
   supplier_page_count: 249

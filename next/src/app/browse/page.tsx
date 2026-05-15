@@ -12,12 +12,12 @@ export const metadata: Metadata = {
   title: "Browse Manufacturing Capabilities | AMSupplyCheck",
   description:
     "Browse manufacturing technologies, materials, and supplier locations. Find the right additive manufacturing capabilities for your project.",
-  alternates: { canonical: "https://amsupplycheck.com/browse" },
+  alternates: { canonical: "https://www.amsupplycheck.com/browse" },
   openGraph: {
     title: "Browse Manufacturing Capabilities | AMSupplyCheck",
     description:
       "Browse manufacturing technologies, materials, and supplier locations.",
-    url: "https://amsupplycheck.com/browse",
+    url: "https://www.amsupplycheck.com/browse",
     type: "website",
   },
   twitter: { card: "summary_large_image" },

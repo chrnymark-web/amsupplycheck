@@ -57,7 +57,7 @@ function StlMesh({ buffer, wireframe }: { buffer: ArrayBuffer; wireframe: boolea
 }
 
 function CameraController({ resetKey }: { resetKey: number }) {
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef<import("three-stdlib").OrbitControls | null>(null);
   const { camera } = useThree();
 
   useEffect(() => {

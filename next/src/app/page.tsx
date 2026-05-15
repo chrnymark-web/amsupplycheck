@@ -19,12 +19,12 @@ export const metadata: Metadata = {
   title: "AMSupplyCheck — Find 3D Printing Suppliers Worldwide",
   description:
     "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
-  alternates: { canonical: "https://amsupplycheck.com/" },
+  alternates: { canonical: "https://www.amsupplycheck.com/" },
   openGraph: {
     title: "AMSupplyCheck — Find 3D Printing Suppliers Worldwide",
     description:
       "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
-    url: "https://amsupplycheck.com/",
+    url: "https://www.amsupplycheck.com/",
     type: "website",
   },
   twitter: { card: "summary_large_image" },
@@ -46,22 +46,22 @@ export default async function HomePage() {
     "@graph": [
       {
         "@type": "Organization",
-        "@id": "https://amsupplycheck.com/#organization",
+        "@id": "https://www.amsupplycheck.com/#organization",
         name: "AMSupplyCheck",
-        url: "https://amsupplycheck.com/",
-        logo: "https://amsupplycheck.com/amsupplycheck-logo-white.png",
+        url: "https://www.amsupplycheck.com/",
+        logo: "https://www.amsupplycheck.com/amsupplycheck-logo-white.png",
         description:
           "Verified directory of additive manufacturing suppliers worldwide. Compare 3D printing services by technology, material, certification, and location.",
       },
       {
         "@type": "WebSite",
-        "@id": "https://amsupplycheck.com/#website",
-        url: "https://amsupplycheck.com/",
+        "@id": "https://www.amsupplycheck.com/#website",
+        url: "https://www.amsupplycheck.com/",
         name: "AMSupplyCheck",
-        publisher: { "@id": "https://amsupplycheck.com/#organization" },
+        publisher: { "@id": "https://www.amsupplycheck.com/#organization" },
         potentialAction: {
           "@type": "SearchAction",
-          target: "https://amsupplycheck.com/search?q={search_term_string}",
+          target: "https://www.amsupplycheck.com/search?q={search_term_string}",
           "query-input": "required name=search_term_string",
         },
       },

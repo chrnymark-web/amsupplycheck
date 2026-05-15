@@ -15,12 +15,12 @@ export const metadata: Metadata = {
   title: "Smart Search — Find 3D Printing Suppliers by Description | AMSupplyCheck",
   description:
     "Search for 3D printing and additive manufacturing suppliers using natural language. Describe your project — materials, technologies, region — and find verified suppliers that match.",
-  alternates: { canonical: "https://amsupplycheck.com/keywordsearch" },
+  alternates: { canonical: "https://www.amsupplycheck.com/keywordsearch" },
   openGraph: {
     title: "Smart Search — Find 3D Printing Suppliers by Description",
     description:
       "Search for 3D printing and additive manufacturing suppliers using natural language. Describe your project and find verified suppliers that match.",
-    url: "https://amsupplycheck.com/keywordsearch",
+    url: "https://www.amsupplycheck.com/keywordsearch",
     type: "website",
   },
   twitter: {
@@ -49,15 +49,15 @@ export default function KeywordSearchPage() {
     name: "Smart Search — 3D Printing Suppliers",
     description:
       "Search for 3D printing and additive manufacturing suppliers using natural language. Describe materials, technologies, and region to find verified matches.",
-    url: "https://amsupplycheck.com/keywordsearch",
+    url: "https://www.amsupplycheck.com/keywordsearch",
     isPartOf: {
       "@type": "WebSite",
       name: "AMSupplyCheck",
-      url: "https://amsupplycheck.com/",
+      url: "https://www.amsupplycheck.com/",
     },
     potentialAction: {
       "@type": "SearchAction",
-      target: "https://amsupplycheck.com/search?q={search_term_string}",
+      target: "https://www.amsupplycheck.com/search?q={search_term_string}",
       "query-input": "required name=search_term_string",
     },
   };

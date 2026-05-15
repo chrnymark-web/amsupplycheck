@@ -16,12 +16,12 @@ export const metadata: Metadata = {
   title: "3D Printing Suppliers Directory | AMSupplyCheck",
   description:
     "Browse verified 3D printing and additive manufacturing suppliers worldwide. Filter by technology, material, certification, and location.",
-  alternates: { canonical: "https://amsupplycheck.com/suppliers" },
+  alternates: { canonical: "https://www.amsupplycheck.com/suppliers" },
   openGraph: {
     title: "3D Printing Suppliers Directory | AMSupplyCheck",
     description:
       "Browse verified 3D printing and additive manufacturing suppliers worldwide. Filter by technology, material, certification, and location.",
-    url: "https://amsupplycheck.com/suppliers",
+    url: "https://www.amsupplycheck.com/suppliers",
     type: "website",
   },
   twitter: { card: "summary_large_image" },
@@ -62,7 +62,7 @@ export default async function SuppliersPage({
     itemListElement: suppliers.slice(0, 100).map((s, i) => ({
       "@type": "ListItem",
       position: i + 1,
-      url: `https://amsupplycheck.com/suppliers/${s.supplier_id}`,
+      url: `https://www.amsupplycheck.com/suppliers/${s.supplier_id}`,
       name: s.name,
     })),
   };

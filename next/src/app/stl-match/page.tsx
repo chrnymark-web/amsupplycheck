@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   title: "STL Supplier Match | AMSupplyCheck",
   description:
     "Upload your STL file and get matched with 3D printing suppliers that can produce your part — filtered by technology, material, and production volume.",
-  alternates: { canonical: "https://amsupplycheck.com/stl-match" },
+  alternates: { canonical: "https://www.amsupplycheck.com/stl-match" },
   robots: { index: false, follow: false },
 };
 

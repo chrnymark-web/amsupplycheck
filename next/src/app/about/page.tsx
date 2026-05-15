@@ -9,18 +9,18 @@ export const metadata: Metadata = {
   description:
     "Learn about AMSupplyCheck - the platform connecting businesses with verified 3D printing suppliers worldwide. Meet our team and discover our mission.",
   alternates: {
-    canonical: "https://amsupplycheck.com/about",
+    canonical: "https://www.amsupplycheck.com/about",
     languages: {
-      en: "https://amsupplycheck.com/about",
-      da: "https://amsupplycheck.com/about",
-      "x-default": "https://amsupplycheck.com/about",
+      en: "https://www.amsupplycheck.com/about",
+      da: "https://www.amsupplycheck.com/about",
+      "x-default": "https://www.amsupplycheck.com/about",
     },
   },
   openGraph: {
     title: "About AMSupplyCheck | 3D Printing Supplier Platform",
     description:
       "Connecting businesses with verified 3D printing suppliers worldwide. Meet our team and discover our mission.",
-    url: "https://amsupplycheck.com/about",
+    url: "https://www.amsupplycheck.com/about",
     type: "website",
   },
   twitter: {
@@ -35,8 +35,8 @@ const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "Organization",
   name: "AMSupplyCheck",
-  url: "https://amsupplycheck.com",
-  logo: "https://amsupplycheck.com/amsupplycheck-logo-white.png",
+  url: "https://www.amsupplycheck.com",
+  logo: "https://www.amsupplycheck.com/amsupplycheck-logo-white.png",
   description:
     "AMSupplyCheck is a Danish Company that helps people who need to have parts produced, by guiding them to the right supplier for their specific need. Simple, Transparent, Fast and for FREE.",
   foundingDate: "2024",

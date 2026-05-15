@@ -14,12 +14,12 @@ export const metadata: Metadata = {
   title: "3D Printing Technology-Material Compatibility Matrix | AMSupplyCheck",
   description:
     "Discover which 3D printing materials work with which technologies. Interactive compatibility matrix for FDM, SLA, SLS, MJF, DMLS, and other additive manufacturing processes.",
-  alternates: { canonical: "https://amsupplycheck.com/compatibility" },
+  alternates: { canonical: "https://www.amsupplycheck.com/compatibility" },
   openGraph: {
     title: "3D Printing Compatibility Matrix | AMSupplyCheck",
     description:
       "Interactive matrix showing technology-material compatibility for 3D printing and additive manufacturing.",
-    url: "https://amsupplycheck.com/compatibility",
+    url: "https://www.amsupplycheck.com/compatibility",
     type: "website",
   },
   twitter: {
@@ -41,7 +41,7 @@ export default async function CompatibilityPage() {
     name: "3D Printing Technology-Material Compatibility Matrix",
     description:
       "Comprehensive compatibility matrix showing which materials work with which 3D printing technologies including FDM, SLA, SLS, MJF, DMLS, and more.",
-    url: "https://amsupplycheck.com/compatibility",
+    url: "https://www.amsupplycheck.com/compatibility",
     about: { "@type": "Thing", name: "3D Printing Compatibility" },
   };
 
