@@ -7,15 +7,19 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 
 interface FloatingNavProps {
-  onNavigate: (sectionId: string) => void;
+  onNavigate?: (sectionId: string) => void;
   showScrollTop?: boolean;
   onScrollTop?: () => void;
 }
 
-const FloatingNav: React.FC<FloatingNavProps> = ({ 
-  onNavigate, 
-  showScrollTop = false, 
-  onScrollTop 
+const defaultOnNavigate = (sectionId: string) => {
+  document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+};
+
+const FloatingNav: React.FC<FloatingNavProps> = ({
+  onNavigate = defaultOnNavigate,
+  showScrollTop = false,
+  onScrollTop,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 

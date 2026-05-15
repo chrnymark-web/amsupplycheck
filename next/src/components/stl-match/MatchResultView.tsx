@@ -133,7 +133,7 @@ function StlMatchCard({ match, rank }: { match: MatchResult; rank: number }) {
       </div>
       <CardHeader className="pt-12">
         <div className="flex items-start gap-4">
-          <SupplierLogo logoUrl={supplier.logo_url} name={supplier.name} size="md" />
+          <SupplierLogo logoUrl={supplier.logo_url ?? undefined} name={supplier.name} size="md" />
           <div className="flex-1 min-w-0">
             <CardTitle className="text-lg truncate">{supplier.name}</CardTitle>
             <CardDescription className="flex items-center gap-1 mt-1">

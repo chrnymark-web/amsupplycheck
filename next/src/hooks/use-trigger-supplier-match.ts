@@ -76,7 +76,7 @@ export function useTriggerSupplierMatch(): TriggerSupplierMatchReturn {
           setStatus("completed");
           setResult({
             requirements: data.extracted_requirements as MatchingResult["requirements"],
-            matches: data.matches as MatchingResult["matches"],
+            matches: data.matches as unknown as MatchingResult["matches"],
             totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
             technologyRationale: data.technology_rationale as
               | MatchingResult["technologyRationale"]

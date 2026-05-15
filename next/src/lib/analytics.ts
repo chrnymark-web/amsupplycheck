@@ -201,3 +201,13 @@ export const trackCTAClick = (buttonText: string, section: string, destination?:
     ...(destination && { destination }),
   });
 };
+
+export const trackScrollDepth = (
+  depth: 25 | 50 | 75 | 90 | 100,
+  section?: string,
+): void => {
+  trackEvent("scroll", {
+    scroll_depth: depth,
+    ...(section && { page_section: section }),
+  });
+};

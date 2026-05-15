@@ -291,7 +291,7 @@ function ChipSelect({
   selected: string[];
   onChange: (values: string[]) => void;
   label: string;
-  icon?: React.ElementType;
+  icon?: React.ComponentType<{ className?: string }>;
 }) {
   const toggleValue = (value: string) => {
     if (value === "none") {

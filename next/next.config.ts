@@ -9,10 +9,10 @@ const nextConfig: NextConfig = {
   // (img elements in supplier-logo, exhaustive-deps in use-in-view) — those are
   // warnings, not errors, so they don't fail the build.
   eslint: { ignoreDuringBuilds: false },
-  // The root package.json's @types/react@18 shadows next/node_modules/@types/react@19
-  // during typecheck, surfacing bigint-in-ReactNode mismatches. Skip TS during build
-  // until the Vite/Next monorepo split is finalized in chunk (d).
-  typescript: { ignoreBuildErrors: true },
+  // Strict TS re-enabled in chunk-d (d3). Root @types/react bumped to ^19 to match
+  // next/, @supabase/ssr upgraded to ^0.10.3 to fix Schema=never inference, and
+  // FloatingNav.onNavigate made optional with a default scrollIntoView.
+  typescript: { ignoreBuildErrors: false },
   images: {
     remotePatterns: [
       { protocol: "https", hostname: "**.supabase.co" },

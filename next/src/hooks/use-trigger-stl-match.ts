@@ -106,12 +106,12 @@ export function useTriggerStlMatch(): TriggerStlMatchReturn {
           cancelled.current = true;
           setStatus("completed");
           setResult({
-            requirements: data.extracted_requirements as MatchingResult["requirements"],
-            matches: data.matches as MatchingResult["matches"],
+            requirements: data.extracted_requirements as unknown as MatchingResult["requirements"],
+            matches: data.matches as unknown as MatchingResult["matches"],
             totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
-            technologyRationale: data.technology_rationale as MatchingResult["technologyRationale"],
+            technologyRationale: data.technology_rationale as unknown as MatchingResult["technologyRationale"],
           });
-          if (data.stl_metrics) setStlMetrics(data.stl_metrics as StlResult);
+          if (data.stl_metrics) setStlMetrics(data.stl_metrics as unknown as StlResult);
           return;
         }
 
@@ -126,13 +126,13 @@ export function useTriggerStlMatch(): TriggerStlMatchReturn {
 
         if (["analyzing", "matching", "ranking"].includes(dbStatus)) {
           setStatus(dbStatus);
-          if (data.stl_metrics) setStlMetrics(data.stl_metrics as StlResult);
+          if (data.stl_metrics) setStlMetrics(data.stl_metrics as unknown as StlResult);
           if (dbStatus === "ranking" && data.matches) {
             setResult({
-              requirements: data.extracted_requirements as MatchingResult["requirements"],
-              matches: data.matches as MatchingResult["matches"],
+              requirements: data.extracted_requirements as unknown as MatchingResult["requirements"],
+              matches: data.matches as unknown as MatchingResult["matches"],
               totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
-              technologyRationale: data.technology_rationale as MatchingResult["technologyRationale"],
+              technologyRationale: data.technology_rationale as unknown as MatchingResult["technologyRationale"],
             });
           }
         }
