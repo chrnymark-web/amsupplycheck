@@ -1,8 +1,8 @@
 ---
 current_phase: 2
 current_branch: seo/02-nextjs
-current_pr: null
-current_pr_url: null
+current_pr: 10
+current_pr_url: https://github.com/chrnymark-web/amsupplycheck/pull/10
 phase_started_at: 2026-05-15T11:20:00Z
 last_action_at:   2026-05-15T21:50:00Z
 
