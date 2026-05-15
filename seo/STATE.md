@@ -1,14 +1,14 @@
 ---
-current_phase: 1
-current_branch: seo/01-audit
-current_pr: 7
-current_pr_url: https://github.com/chrnymark-web/amsupplycheck/pull/7
-phase_started_at: 2026-05-15T00:00:00Z
-last_action_at:   2026-05-15T00:00:00Z
+current_phase: 2
+current_branch: seo/02-nextjs
+current_pr: null
+current_pr_url: null
+phase_started_at: 2026-05-15T11:20:00Z
+last_action_at:   2026-05-15T11:50:00Z
 
 phases:
-  "1": { status: in_progress, branch: seo/01-audit, pr: 7 }
-  "2": { status: pending }
+  "1": { status: completed, pr: 7, merged_at: 2026-05-15T11:14:22Z }
+  "2": { status: in_progress, branch: seo/02-nextjs, chunk: "a (scaffold + shared infra)" }
   "3": { status: pending }
   "4": { status: pending }
   "5": { status: pending }
