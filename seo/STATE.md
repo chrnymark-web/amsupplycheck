@@ -4,11 +4,11 @@ current_branch: seo/02-nextjs
 current_pr: null
 current_pr_url: null
 phase_started_at: 2026-05-15T11:20:00Z
-last_action_at:   2026-05-15T15:20:00Z
+last_action_at:   2026-05-15T16:30:00Z
 
 phases:
   "1": { status: completed, pr: 7, merged_at: 2026-05-15T11:14:22Z }
-  "2": { status: in_progress, branch: seo/02-nextjs, chunk: "c2-seo shipped (/compatibility, /search, /keywordsearch); c2-tools (a) shipped (/match, polling-only — no Trigger.dev realtime upgrade); c2-tools (b) Part 1 shipped: /stl-match production route (STL parser + Web Worker + R3F v9 + drei v10 viewer; cards-only result view, map deferred to c4); c2-tools (b) Part 2 shipped: /compare-prices production route (Craftcloud-only live quotes via public v5 REST; LivePriceComparison ported faithfully; treatstock skipped — env-gated and dark in prod); c2-tools (b) Part 3 pending (legacy variants); c3 guides/knowledge, c4 heavy interactives [Map/AISearch/PriceCalc/Shapeways], c5 admin/auth/embed pending" }
+  "2": { status: in_progress, branch: seo/02-nextjs, chunk: "c2-seo shipped (/compatibility, /search, /keywordsearch); c2-tools (a) shipped (/match, polling-only — no Trigger.dev realtime upgrade); c2-tools (b) Part 1 shipped: /stl-match production route (STL parser + Web Worker + R3F v9 + drei v10 viewer; cards-only result view, map deferred to c4); c2-tools (b) Part 2 shipped: /compare-prices production route (Craftcloud-only live quotes via public v5 REST; LivePriceComparison ported faithfully; treatstock skipped — env-gated and dark in prod); c2-tools (b) Part 3 shipped: /stl-match-legacy + /compare-prices-legacy noindex variants (faithful Vite ports; shadcn Dialog + SearchProgress + getEstimatedPrice helpers added; bug-fix-on-port: added noindex to /compare-prices-legacy which Vite source was missing); c2-tools (b) COMPLETE — all 4 tool routes ported; c3 guides/knowledge, c4 heavy interactives [Map/AISearch/PriceCalc/Shapeways], c5 admin/auth/embed pending" }
   "3": { status: pending }
   "4": { status: pending }
   "5": { status: pending }
