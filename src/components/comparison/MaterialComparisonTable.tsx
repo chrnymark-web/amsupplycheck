@@ -13,7 +13,7 @@ const materialComparisonData = [
   { material: 'PLA', category: 'Polymer', strength: 2, flexibility: 1, heatResist: 1, chemResist: 2, price: '€', priceValue: 1 },
   { material: 'ABS', category: 'Polymer', strength: 3, flexibility: 2, heatResist: 3, chemResist: 3, price: '€', priceValue: 1 },
   { material: 'PETG', category: 'Polymer', strength: 3, flexibility: 2, heatResist: 2, chemResist: 3, price: '€', priceValue: 1 },
-  { material: 'Nylon PA-12', category: 'Polymer', strength: 4, flexibility: 3, heatResist: 3, chemResist: 4, price: '€€', priceValue: 2 },
+  { material: 'PA12 Nylon', category: 'Polymer', strength: 4, flexibility: 3, heatResist: 3, chemResist: 4, price: '€€', priceValue: 2 },
   { material: 'TPU', category: 'Elastomer', strength: 2, flexibility: 5, heatResist: 2, chemResist: 3, price: '€€', priceValue: 2 },
   { material: 'PEEK', category: 'High-Performance', strength: 5, flexibility: 1, heatResist: 5, chemResist: 5, price: '€€€€', priceValue: 4 },
   { material: 'Standard Resin', category: 'Photopolymer', strength: 2, flexibility: 1, heatResist: 1, chemResist: 2, price: '€€', priceValue: 2 },

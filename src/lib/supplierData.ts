@@ -225,25 +225,25 @@ const materialMap: Record<string, string> = {
   'pei-ultem-9085-stratasys': 'PEI ULTEM 9085',
   'hips': 'HIPS',
   
-  // Nylon variants
-  'nylon-pa-12': 'Nylon PA-12',
-  'nylon-12': 'Nylon 12',
-  'pa-12': 'PA-12',
-  'pa11-sls': 'PA-11 (SLS)',
-  'PA-11 (SLS)': 'PA-11 (SLS)',
-  'pa-12-carbon-filled': 'PA-12 Carbon Filled',
-  'nylon-12-mineral-filled-hst': 'Nylon 12 Mineral Filled',
-  'nylon-12-glass-bead-filled-gf': 'Nylon 12 Glass Filled',
-  'nylon-12-flame-retardant-fr': 'Nylon 12 Flame Retardant',
-  'nylon-12-aluminum-filled-af': 'Nylon 12 Aluminum Filled',
-  'pa-af': 'PA Aluminum Filled',
-  'pa-gf': 'PA Glass Filled',
-  'duraform-pa-nylon-12': 'DuraForm PA Nylon 12',
-  'mjf_pa12': 'MJF PA12',
-  'sls_pa12_pa2200': 'SLS PA12 PA2200',
-  'pa-12-bluesint': 'PA-12 BlueSint',
-  'nylon-pa-12-blue-metal': 'Nylon PA-12 Blue Metal',
-  'saf_pa11_eco': 'SAF PA11 Eco',
+  // Nylon variants — all PA12/PA11 brand/tech variants collapse to canonical display names
+  'nylon-pa-12': 'PA12 Nylon',
+  'nylon-12': 'PA12 Nylon',
+  'pa-12': 'PA12 Nylon',
+  'pa11-sls': 'PA11 Nylon',
+  'PA-11 (SLS)': 'PA11 Nylon',
+  'pa-12-carbon-filled': 'PA12 Carbon Filled',
+  'nylon-12-mineral-filled-hst': 'PA12 Mineral Filled',
+  'nylon-12-glass-bead-filled-gf': 'PA12 Glass Filled',
+  'nylon-12-flame-retardant-fr': 'PA12 Flame Retardant',
+  'nylon-12-aluminum-filled-af': 'PA12 Aluminum Filled',
+  'pa-af': 'PA12 Aluminum Filled',
+  'pa-gf': 'PA12 Glass Filled',
+  'duraform-pa-nylon-12': 'PA12 Nylon',
+  'mjf_pa12': 'PA12 Nylon',
+  'sls_pa12_pa2200': 'PA12 Nylon',
+  'pa-12-bluesint': 'PA12 Nylon',
+  'nylon-pa-12-blue-metal': 'PA12 Nylon',
+  'saf_pa11_eco': 'PA11 Nylon',
   
   // Flexible materials
   'tpu-70-a-white': 'TPU (Flexible)',
@@ -252,7 +252,7 @@ const materialMap: Record<string, string> = {
   'ultrasint_tpu01_mjf': 'Ultrasint TPU01 MJF',
   
   // Specialty plastics
-  'polypropylene-mjf': 'Polypropylene (MJF)',
+  'polypropylene-mjf': 'Polypropylene',
   'polypropylene-p': 'Polypropylene-P',
   'pp-natural': 'Polypropylene Natural',
   'photopolymer-rigid': 'Photopolymer Rigid',
@@ -291,7 +291,7 @@ const materialMap: Record<string, string> = {
   'duraform-hst': 'DuraForm HST',
   'duraform-tpu': 'DuraForm TPU',
   'duraform-ex': 'DuraForm EX',
-  'duraform-gf-glass-filled-nylon': 'DuraForm GF Glass Filled Nylon'
+  'duraform-gf-glass-filled-nylon': 'PA12 Glass Filled'
 };
 
 // Reverse mappings to convert display names back to database keys
