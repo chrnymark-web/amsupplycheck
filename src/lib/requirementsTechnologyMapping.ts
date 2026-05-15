@@ -83,9 +83,9 @@ export const industryToCertifications: Record<string, string[]> = {
 
 // Mechanical requirements to technologies/materials mapping
 export const mechanicalToTechnologies: Record<string, string[]> = {
-  'high-strength': ['SLS', 'Multi Jet Fusion', 'DMLS', 'SLM', 'Carbon Fiber', 'Nylon PA-12'],
+  'high-strength': ['SLS', 'Multi Jet Fusion', 'DMLS', 'SLM', 'Carbon Fiber', 'PA12 Nylon'],
   'heat-resistant': ['ULTEM', 'PEEK', 'DMLS', 'SLM', 'Inconel', 'Titanium', 'High-Temp Resin'],
-  'chemical-resistant': ['PETG', 'PP', 'PA-11', 'PEEK', 'Stainless Steel'],
+  'chemical-resistant': ['PETG', 'PP', 'PA11 Nylon', 'PEEK', 'Stainless Steel'],
   'wear-resistant': ['Nylon', 'PEEK', 'Carbon Fiber', 'Metal printing'],
   'flexibility': ['TPU', 'Flexible Resin', 'Rubber-like'],
   'lightweight': ['SLS', 'Multi Jet Fusion', 'Aluminum', 'Carbon Fiber'],
