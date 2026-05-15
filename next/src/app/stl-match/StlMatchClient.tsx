@@ -11,7 +11,7 @@ import { ConfiguratorPanel } from "@/components/stl-viewer/ConfiguratorPanel";
 import { ViewerControls } from "@/components/stl-viewer/ViewerControls";
 import { UploadLanding } from "@/components/stl-match/UploadLanding";
 import { MatchResultView } from "@/components/stl-match/MatchResultView";
-import { parseStlInWorker } from "@/lib/stl-parser-client";
+import { parseModelInWorker } from "@/lib/stl-parser-client";
 import { useTriggerStlMatch } from "@/hooks/use-trigger-stl-match";
 import type { StlResult } from "@/lib/stl-types";
 
@@ -75,7 +75,7 @@ export default function StlMatchClient({ technologyToMaterials }: StlMatchClient
     }
     let cancelled = false;
     setParseError(null);
-    parseStlInWorker(file)
+    parseModelInWorker(file)
       .then((metrics) => {
         if (!cancelled) setLocalMetrics(metrics);
       })
@@ -174,31 +174,45 @@ export default function StlMatchClient({ technologyToMaterials }: StlMatchClient
 
       <main className="container mx-auto px-4 py-8">
         {!file ? (
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto space-y-3">
             <UploadLanding
               file={file}
               onFileSelected={handleFile}
               onClear={handleClear}
+              onError={setParseError}
               stlMetrics={localMetrics}
             />
+            {parseError && (
+              <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-lg">
+                {parseError}
+              </div>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
             <div className="relative aspect-square lg:aspect-auto lg:min-h-[480px]">
-              <StlViewer
-                file={file}
-                wireframe={wireframe}
-                resetTrigger={resetTrigger}
-              />
-              <ViewerControls
-                wireframe={wireframe}
-                onToggleWireframe={() => setWireframe((w) => !w)}
-                onResetView={() => setResetTrigger((k) => k + 1)}
-                showDimensions={showDimensions}
-                onToggleDimensions={() => setShowDimensions((s) => !s)}
-                dimensions={dimensions}
-                volumeCm3={volumeCm3}
-              />
+              {file.name.toLowerCase().endsWith(".stl") ? (
+                <>
+                  <StlViewer
+                    file={file}
+                    wireframe={wireframe}
+                    resetTrigger={resetTrigger}
+                  />
+                  <ViewerControls
+                    wireframe={wireframe}
+                    onToggleWireframe={() => setWireframe((w) => !w)}
+                    onResetView={() => setResetTrigger((k) => k + 1)}
+                    showDimensions={showDimensions}
+                    onToggleDimensions={() => setShowDimensions((s) => !s)}
+                    dimensions={dimensions}
+                    volumeCm3={volumeCm3}
+                  />
+                </>
+              ) : (
+                <div className="aspect-square lg:aspect-auto lg:min-h-[480px] rounded-xl bg-zinc-900/40 flex items-center justify-center text-sm text-muted-foreground">
+                  3D preview not available for STEP — geometry metrics extracted below
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -206,9 +220,10 @@ export default function StlMatchClient({ technologyToMaterials }: StlMatchClient
                 file={file}
                 onFileSelected={handleFile}
                 onClear={handleClear}
+                onError={setParseError}
                 stlMetrics={localMetrics}
                 title="Your part"
-                description="Tap the dropzone to choose a different STL"
+                description="Tap the dropzone to choose a different STL or STEP file"
               />
 
               <ConfiguratorPanel
@@ -229,7 +244,7 @@ export default function StlMatchClient({ technologyToMaterials }: StlMatchClient
 
               {parseError && (
                 <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-lg">
-                  Couldn&apos;t read STL geometry: {parseError}. You can still
+                  Couldn&apos;t read geometry: {parseError}. You can still
                   submit — the server will parse it.
                 </div>
               )}
