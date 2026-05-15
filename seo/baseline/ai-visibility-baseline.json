@@ -1,0 +1,23 @@
+{
+  "captured_at": "2026-05-15T00:00:00Z",
+  "method": "firecrawl_search SERP proxy. Web-grounded LLMs (ChatGPT search, Perplexity, Claude with web access) cite mostly from top-10 SERP. If amsupplycheck.com is not in the top 10, it will not be cited.",
+  "limitation": "Does not directly test LLM responses (no ANTHROPIC_API_KEY / OPENAI_API_KEY / PERPLEXITY_API_KEY in env). Phase 8 must set this up properly with live model calls.",
+  "queries": [
+    { "q": "best 3d printing service",            "amsupplycheck_in_top_10": false, "top_competitors_seen": ["craftcloud3d.com", "sculpteo.com", "shapeways.com", "xometry.com", "jlc3dp.com", "ponoko.com", "all3dp.com", "rapiddirect.com"] },
+    { "q": "xometry alternatives",                "amsupplycheck_in_top_10": false, "top_competitors_seen": ["fictiv.com", "rapiddirect.com", "makerverse.com", "jiga.io", "geomiq.com", "unionfab.com", "frigate.ai"] },
+    { "q": "3d printing supplier denmark",        "amsupplycheck_in_top_10": false, "top_competitors_seen": ["teccluster.com", "mdt-as.dk", "ensun.io", "3dindustriprint.dk", "perfi.dk", "makerfactory.dk", "dti.dk"] },
+    { "q": "find 3d printing manufacturer europe","amsupplycheck_in_top_10": false, "top_competitors_seen": ["mordorintelligence.com", "xometry.eu", "eos.info", "3dwasp.com", "beskamold.com"] },
+    { "q": "protolabs vs xometry",                "amsupplycheck_in_top_10": false, "top_competitors_seen": ["jiga.io", "all3dp.com", "rapiddirect.com", "unionfab.com", "ezramade.com", "sigmatechnik.com"] },
+    { "q": "SLS 3d printing service europe",      "amsupplycheck_in_top_10": false, "top_competitors_seen": ["xometry.eu", "3dprint-uk.co.uk", "zelta3d.ch", "partsondemand.eu", "aenium.es", "all3dp.com"] },
+    { "q": "aluminum 3d printing service supplier","amsupplycheck_in_top_10": false, "top_competitors_seen": ["protolabs.com", "craftcloud3d.com", "xometry.com", "all3dp.com", "shapeways.com", "norck.com", "rapiddirect.com"] },
+    { "q": "instant 3d printing quote online",    "amsupplycheck_in_top_10": false, "top_competitors_seen": ["sculpteo.com", "craftcloud3d.com", "hubs.com", "xometry.com", "protolabs.com", "rapidmade.com"] },
+    { "q": "amsupplycheck",                       "amsupplycheck_in_top_10": false, "top_competitors_seen": ["check.supply (UNRELATED — check mailing service)"], "note": "Even branded query returns zero results for amsupplycheck.com" },
+    { "q": "3d printing supplier directory verified","amsupplycheck_in_top_10": false, "top_competitors_seen": ["voxelmatters.directory", "metoree.com", "3dnatives.com", "additivemanufacturing.media", "ensun.io", "thomasnet.com", "gartner.com", "3dprint.com"] }
+  ],
+  "summary": {
+    "queries_tested": 10,
+    "queries_with_amsupplycheck_in_top_10": 0,
+    "serp_visibility_rate": 0.0,
+    "implication_for_ai_visibility": "Web-grounded LLMs (ChatGPT/Perplexity/Claude with web access) will not cite SupplyCheck for any of these queries. Pure-parametric LLM recall (no web grounding) is untestable without API keys, but unlikely to be higher given absence from training-time crawl signal."
+  }
+}

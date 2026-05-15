@@ -1,0 +1,143 @@
+{
+  "captured_at": "2026-05-15T11:01:52.525Z",
+  "totals": {
+    "urls_audited": 10,
+    "pages_with_jsonld": 3,
+    "pages_with_canonical": 4,
+    "pages_with_hreflang": 2,
+    "soft_404s": 2,
+    "rendered_indexable": 8
+  },
+  "by_url": {
+    "https://www.amsupplycheck.com/": {
+      "jsonld_blocks": 3,
+      "types": [
+        "Organization",
+        "WebSite",
+        "WebSite",
+        "ContactPage"
+      ],
+      "canonical": "https://amsupplycheck.com/",
+      "canonical_self": false,
+      "hreflang_count": 3,
+      "hreflang_distinct_urls": 1,
+      "title": "SupplyCheck - Find 3D Printing Suppliers Worldwide",
+      "h1": "Find AM suppliers by capability, not by name",
+      "is_soft_404": false,
+      "rendered_indexable": true
+    },
+    "https://www.amsupplycheck.com/about": {
+      "jsonld_blocks": 1,
+      "types": [
+        "Organization"
+      ],
+      "canonical": "https://amsupplycheck.com/about",
+      "canonical_self": true,
+      "hreflang_count": 3,
+      "hreflang_distinct_urls": 1,
+      "title": "About Us - AMSupplyCheck | 3D Printing Supplier Platform",
+      "h1": "Our Story",
+      "is_soft_404": false,
+      "rendered_indexable": true
+    },
+    "https://www.amsupplycheck.com/suppliers": {
+      "jsonld_blocks": 0,
+      "types": [],
+      "canonical": null,
+      "canonical_self": null,
+      "hreflang_count": 0,
+      "hreflang_distinct_urls": 0,
+      "title": "Find Manufacturing Suppliers | Supplycheck",
+      "h1": "Find Manufacturing Suppliers",
+      "is_soft_404": false,
+      "rendered_indexable": true
+    },
+    "https://www.amsupplycheck.com/browse": {
+      "jsonld_blocks": 0,
+      "types": [],
+      "canonical": "https://amsupplycheck.com/browse",
+      "canonical_self": true,
+      "hreflang_count": 0,
+      "hreflang_distinct_urls": 0,
+      "title": "Browse Manufacturing Capabilities | Supplycheck",
+      "h1": "Browse Capabilities",
+      "is_soft_404": false,
+      "rendered_indexable": true
+    },
+    "https://www.amsupplycheck.com/suppliers/materialise-onsite": {
+      "jsonld_blocks": 0,
+      "types": [],
+      "canonical": null,
+      "canonical_self": null,
+      "hreflang_count": 0,
+      "hreflang_distinct_urls": 0,
+      "title": "AMSupplyCheck - Find 3D Printing Suppliers Worldwide",
+      "h1": "Supplier not found",
+      "is_soft_404": true,
+      "rendered_indexable": false
+    },
+    "https://www.amsupplycheck.com/suppliers/protolabs": {
+      "jsonld_blocks": 0,
+      "types": [],
+      "canonical": null,
+      "canonical_self": null,
+      "hreflang_count": 0,
+      "hreflang_distinct_urls": 0,
+      "title": "Protolabs – Digital Manufacturing & Rapid Prototyping - Manufacturing Supplier | Supplycheck",
+      "h1": "Protolabs – Digital Manufacturing & Rapid Prototyping",
+      "is_soft_404": false,
+      "rendered_indexable": true
+    },
+    "https://www.amsupplycheck.com/suppliers/xometry": {
+      "jsonld_blocks": 0,
+      "types": [],
+      "canonical": null,
+      "canonical_self": null,
+      "hreflang_count": 0,
+      "hreflang_distinct_urls": 0,
+      "title": "Xometry - Manufacturing Supplier | Supplycheck",
+      "h1": "Xometry",
+      "is_soft_404": false,
+      "rendered_indexable": true
+    },
+    "https://www.amsupplycheck.com/suppliers/laserhub": {
+      "jsonld_blocks": 0,
+      "types": [],
+      "canonical": null,
+      "canonical_self": null,
+      "hreflang_count": 0,
+      "hreflang_distinct_urls": 0,
+      "title": "AMSupplyCheck - Find 3D Printing Suppliers Worldwide",
+      "h1": "Supplier not found",
+      "is_soft_404": true,
+      "rendered_indexable": false
+    },
+    "https://www.amsupplycheck.com/suppliers/whiteclouds": {
+      "jsonld_blocks": 0,
+      "types": [],
+      "canonical": null,
+      "canonical_self": null,
+      "hreflang_count": 0,
+      "hreflang_distinct_urls": 0,
+      "title": "WhiteClouds - Manufacturing Supplier | Supplycheck",
+      "h1": "WhiteClouds",
+      "is_soft_404": false,
+      "rendered_indexable": true
+    },
+    "https://www.amsupplycheck.com/guides/best-xometry-alternatives": {
+      "jsonld_blocks": 2,
+      "types": [
+        "FAQPage",
+        "BreadcrumbList"
+      ],
+      "canonical": "https://amsupplycheck.com/guides/best-xometry-alternatives",
+      "canonical_self": true,
+      "hreflang_count": 0,
+      "hreflang_distinct_urls": 0,
+      "title": "Best Xometry Alternatives 2026 | Compare Top Manufacturing Platforms",
+      "h1": "7 Best Xometry Alternatives for 3D Printing & CNC (2026)",
+      "is_soft_404": false,
+      "rendered_indexable": true
+    }
+  }
+}
