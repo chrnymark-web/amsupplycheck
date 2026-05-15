@@ -1,22 +1,11 @@
 // Technology ↔ Material compatibility — UI-side types, categories, requirements, and pricing.
 // The compatibility matrix itself lives in Supabase (tables: technology_materials,
-// technology_children; view: technology_materials_resolved) and is fetched via
-// src/hooks/use-compatibility-matrix.ts.
+// technology_children; view: technology_materials_resolved) and is fetched
+// server-side via next/src/lib/compatibility.ts.
 
 export interface CompatibilityMatrix {
   [technology: string]: string[];
 }
-
-export {
-  useTechnologyToMaterials,
-  useMaterialToTechnologies,
-  useCompatibleMaterials,
-  useCompatibleTechnologies,
-  useIsMaterialCompatible,
-  useIsTechnologyCompatible,
-  getCompatibleMaterialsFromMap,
-  getCompatibleTechnologiesFromMap,
-} from '@/hooks/use-compatibility-matrix';
 
 // ============================================
 // CATEGORIZATION: Technology & Material Groups
@@ -58,12 +47,11 @@ export const materialCategories: CategoryGroup[] = [
     items: [
       'PLA', 'ABS (White)', 'ABS-like (Black)', 'ABS M30', 'ABS+ (Stratasys)', 'ABS M30i',
       'PETG', 'Polycarbonate', 'PC/PC-ABS', 'HIPS',
-      'Nylon PA-12', 'Nylon 12', 'PA-12', 'PA-11 (SLS)', 'PA-12 Carbon Filled',
-      'Nylon 12 Mineral Filled', 'Nylon 12 Glass Filled', 'Nylon 12 Flame Retardant',
-      'Nylon 12 Aluminum Filled', 'PA Aluminum Filled', 'PA Glass Filled',
-      'DuraForm PA Nylon 12', 'MJF PA12', 'SLS PA12 PA2200', 'PA-12 BlueSint',
-      'Nylon PA-12 Blue Metal', 'SAF PA11 Eco', 'DuraForm HST', 'DuraForm EX', 'DuraForm GF Glass Filled Nylon',
-      'Polypropylene (MJF)', 'Polypropylene-P', 'Polypropylene Natural'
+      'PA12 Nylon', 'PA11 Nylon',
+      'PA12 Carbon Filled', 'PA12 Glass Filled', 'PA12 Aluminum Filled',
+      'PA12 Mineral Filled', 'PA12 Flame Retardant',
+      'DuraForm HST', 'DuraForm EX',
+      'Polypropylene', 'Polypropylene-P', 'Polypropylene Natural'
     ]
   },
   {
@@ -133,38 +121,27 @@ export const materialPriceIndex: Record<string, number> = {
   'PETG': 1.3,
   'HIPS': 1.1,
   'Wood Filled PLA': 1.4,
-  
+
   // Medium cost - Standard polymers
   'Polycarbonate': 2.5,
   'PC/PC-ABS': 2.8,
-  'Nylon PA-12': 3.0,
-  'Nylon 12': 3.0,
-  'PA-12': 3.0,
-  'PA-11 (SLS)': 3.2,
-  'MJF PA12': 3.2,
-  'SLS PA12 PA2200': 3.0,
-  'PA-12 BlueSint': 3.1,
-  'Nylon PA-12 Blue Metal': 3.3,
-  'SAF PA11 Eco': 2.8,
-  'DuraForm PA Nylon 12': 3.0,
+  'PA12 Nylon': 3.0,
+  'PA11 Nylon': 3.2,
   'DuraForm HST': 3.5,
   'DuraForm EX': 3.2,
-  'Polypropylene (MJF)': 2.8,
+  'Polypropylene': 2.8,
   'Polypropylene-P': 2.6,
   'Polypropylene Natural': 2.4,
-  
+
   // Medium-high cost - Reinforced polymers
-  'PA-12 Carbon Filled': 4.0,
-  'Nylon 12 Mineral Filled': 3.5,
-  'Nylon 12 Glass Filled': 3.8,
-  'Nylon 12 Flame Retardant': 4.0,
-  'Nylon 12 Aluminum Filled': 4.2,
-  'PA Aluminum Filled': 4.2,
-  'PA Glass Filled': 3.8,
-  'DuraForm GF Glass Filled Nylon': 4.0,
+  'PA12 Carbon Filled': 4.0,
+  'PA12 Mineral Filled': 3.5,
+  'PA12 Glass Filled': 3.8,
+  'PA12 Flame Retardant': 4.0,
+  'PA12 Aluminum Filled': 4.2,
   'Carbon Fiber Reinforced': 5.0,
   'Kevlar Reinforced': 5.5,
-  
+
   // Medium-high cost - Flexible
   'TPU (Flexible)': 2.5,
   'TPU MJF': 3.0,
@@ -172,7 +149,7 @@ export const materialPriceIndex: Record<string, number> = {
   'Ultrasint TPU01 MJF': 3.5,
   'DuraForm TPU': 3.2,
   'Flexible Resin 80A': 2.8,
-  
+
   // Medium cost - Resins
   'Standard Resin': 1.8,
   'Clear Resin': 2.0,
@@ -182,12 +159,12 @@ export const materialPriceIndex: Record<string, number> = {
   'Somos WaterClear Ultra': 3.0,
   'Photopolymer Rigid': 2.2,
   'Accura 25': 2.8,
-  
+
   // High cost - High-performance polymers
   'PEI ULTEM 1010': 6.0,
   'PEI ULTEM 9085': 5.5,
   'ULTEM 9085': 5.5,
-  
+
   // Very high cost - Metals
   'Stainless Steel 316L': 8.0,
   'Stainless Steel 17-4PH': 9.0,
@@ -197,7 +174,7 @@ export const materialPriceIndex: Record<string, number> = {
   'Bronze': 7.5,
   '420i 420SS Bronze': 7.5,
   'Gold Plated Brass': 12.0,
-  
+
   // Premium metals
   'Titanium Ti-6Al-4V': 15.0,
   'Inconel 718': 18.0,
@@ -249,9 +226,9 @@ export const requirementToTechnologies: Record<SearchRequirement, string[]> = {
 // Maps requirements to compatible materials
 export const requirementToMaterials: Record<SearchRequirement, string[]> = {
   'High strength': [
-    'Nylon PA-12', 'PA-12 Carbon Filled', 'Carbon Fiber Reinforced', 'Kevlar Reinforced',
+    'PA12 Nylon', 'PA12 Carbon Filled', 'Carbon Fiber Reinforced', 'Kevlar Reinforced',
     'Stainless Steel 316L', 'Titanium Ti-6Al-4V', 'Maraging Steel', 'Inconel 718',
-    'PC/PC-ABS', 'Polycarbonate', 'DuraForm GF Glass Filled Nylon', 'Nylon 12 Glass Filled'
+    'PC/PC-ABS', 'Polycarbonate', 'PA12 Glass Filled'
   ],
   'High precision': [
     'Clear Resin', 'Standard Resin', 'Tough Resin 2000', 'Photopolymer Rigid',
@@ -262,7 +239,7 @@ export const requirementToMaterials: Record<SearchRequirement, string[]> = {
     'Titanium Ti-6Al-4V', 'Inconel 718', 'Inconel 625', 'Stainless Steel 316L'
   ],
   'Chemical resistant': [
-    'PA-11 (SLS)', 'Polypropylene (MJF)', 'Polypropylene-P', 'PETG',
+    'PA11 Nylon', 'Polypropylene', 'Polypropylene-P', 'PETG',
     'Stainless Steel 316L', 'Titanium Ti-6Al-4V', 'Inconel 625'
   ],
   'Flexible/Elastic': [
@@ -270,16 +247,16 @@ export const requirementToMaterials: Record<SearchRequirement, string[]> = {
     'Flexible Resin 80A', 'DuraForm TPU'
   ],
   'Biocompatible': [
-    'Clear Resin', 'PA-11 (SLS)', 'Titanium Ti-6Al-4V', 'Stainless Steel 316L'
+    'Clear Resin', 'PA11 Nylon', 'Titanium Ti-6Al-4V', 'Stainless Steel 316L'
   ],
   'Food-grade': [
-    'PA-11 (SLS)', 'Polypropylene (MJF)', 'Stainless Steel 316L'
+    'PA11 Nylon', 'Polypropylene', 'Stainless Steel 316L'
   ],
   'Cosmetic finish': [
     'Clear Resin', 'Standard Resin', 'Somos WaterClear Ultra', 'Photopolymer Rigid', 'Accura 25'
   ],
   'Outdoor/UV resistant': [
-    'PA-12', 'Nylon PA-12', 'PA-11 (SLS)', 'Stainless Steel 316L', 'Titanium Ti-6Al-4V', 'ASA'
+    'PA12 Nylon', 'PA11 Nylon', 'Stainless Steel 316L', 'Titanium Ti-6Al-4V', 'ASA'
   ],
   'Low cost': [
     'PLA', 'ABS (White)', 'PETG', 'Standard Resin', 'HIPS'
@@ -289,25 +266,25 @@ export const requirementToMaterials: Record<SearchRequirement, string[]> = {
 // Get technologies matching requirements
 export function getTechnologiesForRequirements(requirements: SearchRequirement[]): string[] {
   if (requirements.length === 0) return [];
-  
+
   const techSets = requirements.map(req => new Set(requirementToTechnologies[req]));
   // Return intersection of all requirement sets
-  const intersection = techSets.reduce((acc, set) => 
+  const intersection = techSets.reduce((acc, set) =>
     new Set([...acc].filter(x => set.has(x)))
   );
-  
+
   return Array.from(intersection).sort();
 }
 
 // Get materials matching requirements
 export function getMaterialsForRequirements(requirements: SearchRequirement[]): string[] {
   if (requirements.length === 0) return [];
-  
+
   const matSets = requirements.map(req => new Set(requirementToMaterials[req]));
   // Return intersection of all requirement sets
-  const intersection = matSets.reduce((acc, set) => 
+  const intersection = matSets.reduce((acc, set) =>
     new Set([...acc].filter(x => set.has(x)))
   );
-  
+
   return Array.from(intersection).sort();
 }

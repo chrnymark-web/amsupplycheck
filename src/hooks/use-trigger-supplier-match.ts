@@ -1,9 +1,12 @@
-import { useState, useCallback, useEffect } from "react";
-import { useRealtimeRun } from "@trigger.dev/react-hooks";
-import { supabase } from "@/integrations/supabase/client";
-import type { MatchingResult, ProjectRequirements } from "./use-supplier-matching";
+"use client";
 
-type SearchStatus = "idle" | "pending" | "analyzing" | "matching" | "ranking" | "completed" | "failed";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { supabase } from "@/lib/supabase/client";
+import type {
+  MatchingResult,
+  ProjectRequirements,
+  SearchStatus,
+} from "@/lib/supplier-matching-types";
 
 const STATUS_MESSAGES: Record<SearchStatus, string> = {
   idle: "",
@@ -31,32 +34,11 @@ export function useTriggerSupplierMatch(): TriggerSupplierMatchReturn {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<MatchingResult | null>(null);
   const [searchResultId, setSearchResultId] = useState<string | null>(null);
-  const [runId, setRunId] = useState<string | undefined>(undefined);
-  const [accessToken, setAccessToken] = useState<string | undefined>(undefined);
+  const cancelled = useRef(false);
 
-  // Subscribe to realtime updates when we have a run ID
-  const { run } = useRealtimeRun(runId, {
-    accessToken,
-    enabled: !!runId && !!accessToken,
-    onComplete: (run) => {
-      // Task completed — extract result from the output
-      const output = run.output as MatchingResult | undefined;
-      if (output) {
-        setResult(output);
-      }
-      setStatus("completed");
-    },
-    onError: (run) => {
-      setStatus("failed");
-      const raw = run.error?.message || "";
-      const looksLikeApiJson = /^\d{3}\s*\{/.test(raw);
-      setError(looksLikeApiJson ? "Search failed. Please try again." : (raw || "Task failed"));
-    },
-  });
+  useEffect(() => () => { cancelled.current = true; }, []);
 
-  // Watchdog: surface a user-visible error instead of spinning forever when
-  // the backend or network hangs silently. Cleared on every status transition,
-  // so a healthy run renews the deadline as it progresses.
+  // Watchdog
   useEffect(() => {
     if (status === "idle" || status === "completed" || status === "failed") return;
     const startPhase = status === "pending";
@@ -71,62 +53,59 @@ export function useTriggerSupplierMatch(): TriggerSupplierMatchReturn {
     return () => clearTimeout(timer);
   }, [status]);
 
-  // Poll search_results status for step-by-step updates
-  // (Trigger.dev realtime gives run-level status, but our task updates the DB with granular steps).
-  // Only "completed" and "failed" are terminal. For any other result
-  // (including transient errors, missing row, unknown status) we keep
-  // polling — the watchdog effect above guarantees we don't spin forever.
-  const pollStatus = useCallback(
-    async (id: string) => {
-      const poll = async () => {
-        try {
-          const { data, error } = await supabase
-            .from("search_results")
-            .select("status, matches, extracted_requirements, technology_rationale, total_suppliers_analyzed, error_message")
-            .eq("id", id)
-            .single();
+  const pollStatus = useCallback(async (id: string) => {
+    const poll = async () => {
+      if (cancelled.current) return;
+      try {
+        const { data, error } = await supabase
+          .from("search_results")
+          .select(
+            "status, matches, extracted_requirements, technology_rationale, total_suppliers_analyzed, error_message",
+          )
+          .eq("id", id)
+          .single();
 
-          if (error || !data) {
-            setTimeout(() => poll(), 1500);
-            return;
-          }
-
-          const dbStatus = data.status as SearchStatus;
-
-          if (dbStatus === "completed" && data.matches) {
-            setStatus("completed");
-            setResult({
-              requirements: data.extracted_requirements as any,
-              matches: data.matches as any,
-              totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
-              technologyRationale: data.technology_rationale as any,
-            });
-            return;
-          }
-
-          if (dbStatus === "failed") {
-            setStatus("failed");
-            const raw = data.error_message || "";
-            const looksLikeApiJson = /^\d{3}\s*\{/.test(raw);
-            setError(looksLikeApiJson ? "Search failed. Please try again." : (raw || "Search failed"));
-            return;
-          }
-
-          if (["analyzing", "matching", "ranking"].includes(dbStatus)) {
-            setStatus(dbStatus);
-          }
-
-          setTimeout(() => poll(), 1500);
-        } catch (err) {
-          console.warn("[pollStatus] transient error, retrying:", err);
-          setTimeout(() => poll(), 1500);
+        if (error || !data) {
+          setTimeout(poll, 1500);
+          return;
         }
-      };
 
-      setTimeout(() => poll(), 1000);
-    },
-    []
-  );
+        const dbStatus = data.status as SearchStatus;
+
+        if (dbStatus === "completed" && data.matches) {
+          setStatus("completed");
+          setResult({
+            requirements: data.extracted_requirements as MatchingResult["requirements"],
+            matches: data.matches as unknown as MatchingResult["matches"],
+            totalSuppliersAnalyzed: data.total_suppliers_analyzed || 0,
+            technologyRationale: data.technology_rationale as
+              | MatchingResult["technologyRationale"]
+              | undefined,
+          });
+          return;
+        }
+
+        if (dbStatus === "failed") {
+          setStatus("failed");
+          const raw = data.error_message || "";
+          const looksLikeApiJson = /^\d{3}\s*\{/.test(raw);
+          setError(looksLikeApiJson ? "Search failed. Please try again." : raw || "Search failed");
+          return;
+        }
+
+        if (["analyzing", "matching", "ranking"].includes(dbStatus)) {
+          setStatus(dbStatus);
+        }
+
+        setTimeout(poll, 1500);
+      } catch (err) {
+        console.warn("[pollStatus] transient error, retrying:", err);
+        setTimeout(poll, 1500);
+      }
+    };
+
+    setTimeout(poll, 1000);
+  }, []);
 
   const triggerMatch = useCallback(
     async (project: ProjectRequirements) => {
@@ -137,18 +116,14 @@ export function useTriggerSupplierMatch(): TriggerSupplierMatchReturn {
       try {
         const { data, error: invokeError } = await supabase.functions.invoke(
           "trigger-supplier-match",
-          { body: { project } }
+          { body: { project } },
         );
 
         if (invokeError) throw new Error(invokeError.message);
         if (data?.error) throw new Error(data.error);
 
-        const { searchResultId: id, runId: rid, publicAccessToken: pat } = data;
+        const { searchResultId: id } = data as { searchResultId: string };
         setSearchResultId(id);
-        setRunId(rid);
-        setAccessToken(pat);
-
-        // Start polling DB for granular status updates
         pollStatus(id);
       } catch (err) {
         const msg = err instanceof Error ? err.message : "Failed to start search";
@@ -156,7 +131,7 @@ export function useTriggerSupplierMatch(): TriggerSupplierMatchReturn {
         setStatus("failed");
       }
     },
-    [pollStatus]
+    [pollStatus],
   );
 
   const reset = useCallback(() => {
@@ -164,8 +139,6 @@ export function useTriggerSupplierMatch(): TriggerSupplierMatchReturn {
     setError(null);
     setResult(null);
     setSearchResultId(null);
-    setRunId(undefined);
-    setAccessToken(undefined);
   }, []);
 
   return {

@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Menu, X, Home, Map, Shield, Award, Mail, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -5,15 +7,19 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { cn } from '@/lib/utils';
 
 interface FloatingNavProps {
-  onNavigate: (sectionId: string) => void;
+  onNavigate?: (sectionId: string) => void;
   showScrollTop?: boolean;
   onScrollTop?: () => void;
 }
 
-const FloatingNav: React.FC<FloatingNavProps> = ({ 
-  onNavigate, 
-  showScrollTop = false, 
-  onScrollTop 
+const defaultOnNavigate = (sectionId: string) => {
+  document.getElementById(sectionId)?.scrollIntoView({ behavior: "smooth" });
+};
+
+const FloatingNav: React.FC<FloatingNavProps> = ({
+  onNavigate = defaultOnNavigate,
+  showScrollTop = false,
+  onScrollTop,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
 

@@ -1,3 +1,5 @@
+"use client";
+
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { getLocalLogoForSupplier } from '@/lib/supplierLogos';
@@ -8,21 +10,6 @@ interface SupplierLogoProps {
   size?: 'sm' | 'md' | 'lg' | 'xl' | '2xl';
   className?: string;
 }
-
-// Generate a consistent color based on company name
-const generateColor = (name: string): string => {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  
-  // Generate HSL color with good contrast
-  const hue = Math.abs(hash % 360);
-  const saturation = 65 + (Math.abs(hash) % 20); // 65-85%
-  const lightness = 45 + (Math.abs(hash) % 15); // 45-60%
-  
-  return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-};
 
 // Extract initials from company name
 const getInitials = (name: string): string => {
@@ -90,9 +77,9 @@ const SupplierLogo: React.FC<SupplierLogoProps> = ({
   if (logoUrl) {
     if (typeof logoUrl === 'string' && logoUrl.trim() !== '' && logoUrl !== 'undefined') {
       actualLogoUrl = logoUrl;
-    } else if (typeof logoUrl === 'object' && logoUrl !== null) {
-      const urlValue = (logoUrl as any).value;
-      if (typeof urlValue === 'string' && urlValue !== 'undefined' && urlValue.trim() !== '') {
+    } else if (typeof logoUrl === "object" && logoUrl !== null) {
+      const urlValue = (logoUrl as { value?: unknown }).value;
+      if (typeof urlValue === "string" && urlValue !== "undefined" && urlValue.trim() !== "") {
         actualLogoUrl = urlValue;
       }
     }

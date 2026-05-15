@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
@@ -41,7 +43,7 @@ const CookieConsent: React.FC = () => {
               </h3>
               <p className="text-sm text-muted-foreground mb-4">
                 We use cookies to enhance your browsing experience, analyze site traffic, and personalize content. 
-                By clicking "Accept All", you consent to our use of cookies. 
+                By clicking &ldquo;Accept All&rdquo;, you consent to our use of cookies.
                 You can manage your preferences or learn more in our{' '}
                 <a href="/privacy" className="text-primary hover:underline">
                   Privacy Policy

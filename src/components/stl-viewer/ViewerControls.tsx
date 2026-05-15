@@ -1,6 +1,8 @@
-import { RotateCcw, Grid3x3, Ruler, Box, Maximize2 } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
+"use client";
+
+import { RotateCcw, Ruler, Box } from "lucide-react";
+import type { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
 interface ViewerControlsProps {
   wireframe: boolean;
@@ -25,14 +27,13 @@ export function ViewerControls({
 }: ViewerControlsProps) {
   return (
     <>
-      {/* Top-right: dimensions readout */}
       {showDimensions && dimensions && (
         <div
           className={cn(
-            'absolute top-3 right-3 pointer-events-auto',
-            'rounded-lg border border-white/10 bg-black/50 backdrop-blur-md',
-            'px-3 py-2 text-[11px] font-mono text-white/90',
-            'shadow-[0_8px_32px_hsl(87,20%,45%,0.15)]'
+            "absolute top-3 right-3 pointer-events-auto",
+            "rounded-lg border border-white/10 bg-black/50 backdrop-blur-md",
+            "px-3 py-2 text-[11px] font-mono text-white/90",
+            "shadow-[0_8px_32px_hsl(87,20%,45%,0.15)]",
           )}
         >
           <div className="flex items-center gap-3">
@@ -62,12 +63,11 @@ export function ViewerControls({
         </div>
       )}
 
-      {/* Bottom-left: action buttons */}
       <div
         className={cn(
-          'absolute bottom-3 left-3 pointer-events-none',
-          'flex items-center gap-1.5',
-          className
+          "absolute bottom-3 left-3 pointer-events-none",
+          "flex items-center gap-1.5",
+          className,
         )}
       >
         <div className="flex items-center gap-1.5 pointer-events-auto">
@@ -100,7 +100,7 @@ function ControlButton({
   active,
   onClick,
 }: {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   active?: boolean;
   onClick: () => void;
@@ -111,15 +111,15 @@ function ControlButton({
       aria-label={label}
       aria-pressed={active}
       className={cn(
-        'group flex items-center gap-1.5 rounded-lg px-2.5 py-1.5',
-        'border backdrop-blur-md',
-        'text-[11px] font-medium',
-        'transition-[background-color,border-color,color,transform] duration-200',
-        'hover:scale-[1.02] active:scale-[0.98]',
-        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-0',
+        "group flex items-center gap-1.5 rounded-lg px-2.5 py-1.5",
+        "border backdrop-blur-md",
+        "text-[11px] font-medium",
+        "transition-[background-color,border-color,color,transform] duration-200",
+        "hover:scale-[1.02] active:scale-[0.98]",
+        "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-0",
         active
-          ? 'border-primary/40 bg-primary/15 text-primary'
-          : 'border-white/10 bg-black/50 text-white/70 hover:border-white/20 hover:bg-black/60 hover:text-white'
+          ? "border-primary/40 bg-primary/15 text-primary"
+          : "border-white/10 bg-black/50 text-white/70 hover:border-white/20 hover:bg-black/60 hover:text-white",
       )}
     >
       {icon}

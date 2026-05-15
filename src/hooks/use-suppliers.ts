@@ -1,5 +1,7 @@
+"use client";
+
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 
 export interface GalleryImage {
   url: string;
@@ -358,11 +360,11 @@ export function useSupplierDetail(supplierSlug: string) {
         logo_url: resolvedSupplier.logo_url,
         hero_image_url: ((resolvedSupplier as Record<string, unknown>).hero_image_url as string | null) ?? null,
         gallery_images: ((resolvedSupplier as Record<string, unknown>).gallery_images as GalleryImage[] | null) ?? null,
-        technologies: (techs.data || []) as any[],
-        materials: (mats.data || []) as any[],
-        certifications: (certs.data || []) as any[],
-        tags: (tags.data || []) as any[],
-        country: country.data as any,
+        technologies: (techs.data ?? []) as SupplierListItem["technologies"],
+        materials: (mats.data ?? []) as SupplierListItem["materials"],
+        certifications: (certs.data ?? []) as SupplierListItem["certifications"],
+        tags: (tags.data ?? []) as SupplierListItem["tags"],
+        country: country.data as SupplierListItem["country"],
       };
     },
     enabled: !!supplierSlug,

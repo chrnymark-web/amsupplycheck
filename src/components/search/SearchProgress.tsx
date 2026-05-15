@@ -1,3 +1,5 @@
+"use client";
+
 import { CheckCircle2, Loader2, Circle, Sparkles } from "lucide-react";
 import {
   Dialog,
