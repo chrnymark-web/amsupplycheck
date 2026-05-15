@@ -36,7 +36,7 @@ baseline:
 
 notes:
   vercel_preview_url: https://amsupplycheck-next.vercel.app    # alias may decay between deploys; per-deploy URLs always work
-  vercel_preview_latest_deploy: https://amsupplycheck-next-35do574xs-chrnymark-webs-projects.vercel.app   # d2 deploy
+  vercel_preview_latest_deploy: https://amsupplycheck-next-ho22rrhbg-chrnymark-webs-projects.vercel.app   # d3 deploy (READY)
   vercel_preview_project: chrnymark-webs-projects/amsupplycheck-next
   vercel_prod_project: chrnymark-webs-projects/amsupplycheck   # prj_GVyTQxHxsultT5z5pvphQsq97Knp; serves both www.amsupplycheck.com (canonical) and www.supplycheck.io (legacy, to 301 — see vercel_dashboard_todo)
   production_domain_canonical: www.amsupplycheck.com
