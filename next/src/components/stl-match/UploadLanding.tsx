@@ -9,11 +9,13 @@ import { trackEvent } from "@/lib/analytics";
 import type { StlResult } from "@/lib/stl-types";
 
 const MAX_BYTES = 100 * 1024 * 1024;
+const SUPPORTED_EXTS = [".stl", ".step", ".stp"] as const;
 
 interface UploadLandingProps {
   file: File | null;
   onFileSelected: (file: File) => void;
   onClear: () => void;
+  onError?: (message: string) => void;
   stlMetrics?: StlResult | null;
   title?: string;
   description?: string;
@@ -23,20 +25,30 @@ export function UploadLanding({
   file,
   onFileSelected,
   onClear,
+  onError,
   stlMetrics,
-  title = "Upload STL file",
-  description = "Drag and drop or click to upload your 3D model (max 100 MB)",
+  title = "Upload STL or STEP file",
+  description = "Drag and drop or click to upload your 3D model (STL or STEP, max 100 MB)",
 }: UploadLandingProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFile = useCallback(
     (f: File) => {
-      if (!f.name.toLowerCase().endsWith(".stl")) return;
-      if (f.size > MAX_BYTES) return;
+      const ext = f.name.toLowerCase().slice(f.name.lastIndexOf("."));
+      if (!SUPPORTED_EXTS.includes(ext as typeof SUPPORTED_EXTS[number])) {
+        onError?.(`Filformat ${ext || "ukendt"} understøttes ikke. Upload venligst en STL- eller STEP-fil.`);
+        return;
+      }
+      if (f.size > MAX_BYTES) {
+        onError?.(`Filen er for stor (${(f.size / 1024 / 1024).toFixed(1)} MB). Maks 100 MB.`);
+        return;
+      }
+
+      const fileExtension = ext.replace(/^\./, "");
 
       trackEvent("file_uploaded", {
         file_size_bytes: f.size,
-        file_extension: "stl",
+        file_extension: fileExtension,
         page: "stl_match",
       });
 
@@ -45,7 +57,7 @@ export function UploadLanding({
         .insert({
           file_name: f.name,
           file_size_bytes: f.size,
-          file_extension: "stl",
+          file_extension: fileExtension,
           source_page: "stl_match",
           user_agent: typeof navigator !== "undefined" ? navigator.userAgent : null,
         })
@@ -55,7 +67,7 @@ export function UploadLanding({
 
       onFileSelected(f);
     },
-    [onFileSelected],
+    [onFileSelected, onError],
   );
 
   const handleDrop = useCallback(
@@ -87,7 +99,7 @@ export function UploadLanding({
           <input
             ref={fileInputRef}
             type="file"
-            accept=".stl"
+            accept=".stl,.step,.stp"
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0];
@@ -119,7 +131,7 @@ export function UploadLanding({
             <>
               <Upload className="h-10 w-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-muted-foreground">
-                Drop your STL file here or click to browse
+                Drop your STL or STEP file here or click to browse
               </p>
             </>
           )}

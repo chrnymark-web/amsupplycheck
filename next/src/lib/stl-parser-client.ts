@@ -2,6 +2,7 @@
 
 import type { StlResult } from "./stl-types";
 import { parseStl } from "./stl-parser";
+import { parseStep } from "./step-parser";
 
 interface WorkerSuccess { ok: true; result: StlResult }
 interface WorkerFailure { ok: false; error: string }
@@ -9,6 +10,10 @@ type WorkerResponse = WorkerSuccess | WorkerFailure;
 
 function canUseWorker(): boolean {
   return typeof window !== "undefined" && typeof Worker !== "undefined";
+}
+
+function extOf(name: string): string {
+  return name.toLowerCase().slice(name.lastIndexOf("."));
 }
 
 export async function parseStlInWorker(file: File): Promise<StlResult> {
@@ -39,4 +44,14 @@ export async function parseStlInWorker(file: File): Promise<StlResult> {
 
     worker.postMessage(buf, [buf]);
   });
+}
+
+export async function parseModelInWorker(file: File): Promise<StlResult> {
+  const ext = extOf(file.name);
+  if (ext === ".stl") return parseStlInWorker(file);
+  if (ext === ".step" || ext === ".stp") {
+    const buf = await file.arrayBuffer();
+    return parseStep(buf);
+  }
+  throw new Error(`Unsupported file format: ${ext || file.name}. Use STL or STEP.`);
 }

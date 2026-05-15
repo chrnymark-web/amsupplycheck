@@ -47,12 +47,11 @@ export const materialCategories: CategoryGroup[] = [
     items: [
       'PLA', 'ABS (White)', 'ABS-like (Black)', 'ABS M30', 'ABS+ (Stratasys)', 'ABS M30i',
       'PETG', 'Polycarbonate', 'PC/PC-ABS', 'HIPS',
-      'Nylon PA-12', 'Nylon 12', 'PA-12', 'PA-11 (SLS)', 'PA-12 Carbon Filled',
-      'Nylon 12 Mineral Filled', 'Nylon 12 Glass Filled', 'Nylon 12 Flame Retardant',
-      'Nylon 12 Aluminum Filled', 'PA Aluminum Filled', 'PA Glass Filled',
-      'DuraForm PA Nylon 12', 'MJF PA12', 'SLS PA12 PA2200', 'PA-12 BlueSint',
-      'Nylon PA-12 Blue Metal', 'SAF PA11 Eco', 'DuraForm HST', 'DuraForm EX', 'DuraForm GF Glass Filled Nylon',
-      'Polypropylene (MJF)', 'Polypropylene-P', 'Polypropylene Natural'
+      'PA12 Nylon', 'PA11 Nylon',
+      'PA12 Carbon Filled', 'PA12 Glass Filled', 'PA12 Aluminum Filled',
+      'PA12 Mineral Filled', 'PA12 Flame Retardant',
+      'DuraForm HST', 'DuraForm EX',
+      'Polypropylene', 'Polypropylene-P', 'Polypropylene Natural'
     ]
   },
   {
@@ -126,31 +125,20 @@ export const materialPriceIndex: Record<string, number> = {
   // Medium cost - Standard polymers
   'Polycarbonate': 2.5,
   'PC/PC-ABS': 2.8,
-  'Nylon PA-12': 3.0,
-  'Nylon 12': 3.0,
-  'PA-12': 3.0,
-  'PA-11 (SLS)': 3.2,
-  'MJF PA12': 3.2,
-  'SLS PA12 PA2200': 3.0,
-  'PA-12 BlueSint': 3.1,
-  'Nylon PA-12 Blue Metal': 3.3,
-  'SAF PA11 Eco': 2.8,
-  'DuraForm PA Nylon 12': 3.0,
+  'PA12 Nylon': 3.0,
+  'PA11 Nylon': 3.2,
   'DuraForm HST': 3.5,
   'DuraForm EX': 3.2,
-  'Polypropylene (MJF)': 2.8,
+  'Polypropylene': 2.8,
   'Polypropylene-P': 2.6,
   'Polypropylene Natural': 2.4,
 
   // Medium-high cost - Reinforced polymers
-  'PA-12 Carbon Filled': 4.0,
-  'Nylon 12 Mineral Filled': 3.5,
-  'Nylon 12 Glass Filled': 3.8,
-  'Nylon 12 Flame Retardant': 4.0,
-  'Nylon 12 Aluminum Filled': 4.2,
-  'PA Aluminum Filled': 4.2,
-  'PA Glass Filled': 3.8,
-  'DuraForm GF Glass Filled Nylon': 4.0,
+  'PA12 Carbon Filled': 4.0,
+  'PA12 Mineral Filled': 3.5,
+  'PA12 Glass Filled': 3.8,
+  'PA12 Flame Retardant': 4.0,
+  'PA12 Aluminum Filled': 4.2,
   'Carbon Fiber Reinforced': 5.0,
   'Kevlar Reinforced': 5.5,
 
@@ -238,9 +226,9 @@ export const requirementToTechnologies: Record<SearchRequirement, string[]> = {
 // Maps requirements to compatible materials
 export const requirementToMaterials: Record<SearchRequirement, string[]> = {
   'High strength': [
-    'Nylon PA-12', 'PA-12 Carbon Filled', 'Carbon Fiber Reinforced', 'Kevlar Reinforced',
+    'PA12 Nylon', 'PA12 Carbon Filled', 'Carbon Fiber Reinforced', 'Kevlar Reinforced',
     'Stainless Steel 316L', 'Titanium Ti-6Al-4V', 'Maraging Steel', 'Inconel 718',
-    'PC/PC-ABS', 'Polycarbonate', 'DuraForm GF Glass Filled Nylon', 'Nylon 12 Glass Filled'
+    'PC/PC-ABS', 'Polycarbonate', 'PA12 Glass Filled'
   ],
   'High precision': [
     'Clear Resin', 'Standard Resin', 'Tough Resin 2000', 'Photopolymer Rigid',
@@ -251,7 +239,7 @@ export const requirementToMaterials: Record<SearchRequirement, string[]> = {
     'Titanium Ti-6Al-4V', 'Inconel 718', 'Inconel 625', 'Stainless Steel 316L'
   ],
   'Chemical resistant': [
-    'PA-11 (SLS)', 'Polypropylene (MJF)', 'Polypropylene-P', 'PETG',
+    'PA11 Nylon', 'Polypropylene', 'Polypropylene-P', 'PETG',
     'Stainless Steel 316L', 'Titanium Ti-6Al-4V', 'Inconel 625'
   ],
   'Flexible/Elastic': [
@@ -259,16 +247,16 @@ export const requirementToMaterials: Record<SearchRequirement, string[]> = {
     'Flexible Resin 80A', 'DuraForm TPU'
   ],
   'Biocompatible': [
-    'Clear Resin', 'PA-11 (SLS)', 'Titanium Ti-6Al-4V', 'Stainless Steel 316L'
+    'Clear Resin', 'PA11 Nylon', 'Titanium Ti-6Al-4V', 'Stainless Steel 316L'
   ],
   'Food-grade': [
-    'PA-11 (SLS)', 'Polypropylene (MJF)', 'Stainless Steel 316L'
+    'PA11 Nylon', 'Polypropylene', 'Stainless Steel 316L'
   ],
   'Cosmetic finish': [
     'Clear Resin', 'Standard Resin', 'Somos WaterClear Ultra', 'Photopolymer Rigid', 'Accura 25'
   ],
   'Outdoor/UV resistant': [
-    'PA-12', 'Nylon PA-12', 'PA-11 (SLS)', 'Stainless Steel 316L', 'Titanium Ti-6Al-4V', 'ASA'
+    'PA12 Nylon', 'PA11 Nylon', 'Stainless Steel 316L', 'Titanium Ti-6Al-4V', 'ASA'
   ],
   'Low cost': [
     'PLA', 'ABS (White)', 'PETG', 'Standard Resin', 'HIPS'

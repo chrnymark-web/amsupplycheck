@@ -9,6 +9,7 @@ import { Upload, ArrowUpDown, ExternalLink, AlertCircle, AlertTriangle, Clock, P
 import { useLiveQuotes } from '@/hooks/use-live-quotes';
 import type { LiveQuote, EstimatedPrice, Currency, QuoteGeometry } from '@/lib/quote-types';
 import { parseStl } from '@/lib/stl-parser';
+import { parseStep } from '@/lib/step-parser';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/format';
 
@@ -295,6 +296,7 @@ export function LivePriceComparison({
   const [sortAsc, setSortAsc] = useState(true);
   const [showEstimates, setShowEstimates] = useState(true);
   const [dragActive, setDragActive] = useState(false);
+  const [localError, setLocalError] = useState<string | null>(null);
 
   const handleSort = (field: SortField) => {
     if (sortField === field) setSortAsc((v) => !v);
@@ -331,22 +333,35 @@ export function LivePriceComparison({
     async (file: File, quantity: number = 1) => {
       const validExts = ['.stl', '.obj', '.3mf', '.step', '.stp'];
       const ext = file.name.toLowerCase().slice(file.name.lastIndexOf('.'));
-      if (!validExts.includes(ext)) return;
+      if (!validExts.includes(ext)) {
+        setLocalError(`Filformat ${ext || 'ukendt'} understøttes ikke. Upload STL, STEP, OBJ eller 3MF.`);
+        return;
+      }
+      setLocalError(null);
 
-      // Parse STL geometry for sanity checking (only for STL files)
       let geometry: QuoteGeometry | undefined;
-      if (ext === '.stl') {
-        try {
-          const buffer = await file.arrayBuffer();
+      try {
+        const buffer = await file.arrayBuffer();
+        if (ext === '.stl') {
           const result = parseStl(buffer);
           geometry = {
             volumeCm3: result.volumeCm3,
             boundingBox: result.boundingBox,
             triangleCount: result.triangleCount,
           };
-        } catch {
-          // If parsing fails, proceed without geometry — sanity check will use peer comparison only
+        } else if (ext === '.step' || ext === '.stp') {
+          const result = await parseStep(buffer);
+          geometry = {
+            volumeCm3: result.volumeCm3,
+            boundingBox: result.boundingBox,
+            triangleCount: result.triangleCount,
+          };
         }
+      } catch (err) {
+        // Parsing failed — proceed without geometry; sanity check falls back to peer comparison.
+        // Surface a non-blocking warning so the user knows volume-based pricing is unavailable.
+        const msg = err instanceof Error ? err.message : String(err);
+        setLocalError(`Kunne ikke læse geometri (${msg}). Live-priser fortsætter uden volumen-tjek.`);
       }
 
       getQuotes(file, quantity, geometry);
@@ -449,6 +464,14 @@ export function LivePriceComparison({
           <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20">
             <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
             <p className="text-xs text-destructive">{error.message}</p>
+          </div>
+        )}
+
+        {/* Local file parse error / unsupported format */}
+        {localError && (
+          <div className="flex items-center gap-2 p-3 rounded-lg bg-destructive/10 border border-destructive/20 mt-2">
+            <AlertCircle className="h-4 w-4 text-destructive shrink-0" />
+            <p className="text-xs text-destructive">{localError}</p>
           </div>
         )}
 
