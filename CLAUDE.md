@@ -3,6 +3,16 @@
 ## Always Do First
 - **Invoke the `frontend-design` skill** before writing any frontend code, every session, no exceptions.
 
+## Project Skills
+Skills live in `.claude/skills/<name>/SKILL.md`. Invoke via `/<name>` or natural language matching the description.
+
+- **`/seo`** — SEO + AI-visibility master skill. 9-phase autonomous program (audit → Next.js migration → schema → content → programmatic SEO → LLM optimization → off-page → measurement → CI). Branch-per-phase, PR-per-phase. State lives in `seo/STATE.md` at repo root. Triggers: "kør seo", "lav seo", "seo audit", "boost rankings", "ai visibility".
+- **`/onboard`** (wraps `supplier-onboarding`) — Onboard a new paying SupplyCheck partner from a Google Form submission.
+- **`/fix-supplier`** (wraps `supplier-data-correction`) — Audit and correct a supplier row against their own website.
+- **`/status`** — Quick mobile-friendly snapshot: git, PRs, deploy, recent activity. Read-only.
+- `supplier-outreach` — Reusable LinkedIn DM templates and Trello pipeline workflow for supplier prospecting.
+- `google-workspace` — Wrappers around the `gws` CLI for Forms, Drive, Calendar, Gmail.
+
 ## Web Search
 - When asked to search the web for information, **always use Firecrawl first** (`firecrawl_search`, `firecrawl_scrape`, `firecrawl_extract`, `firecrawl_crawl`, `firecrawl_map`).
 - Only fall back to `WebFetch` / `WebSearch` if Firecrawl fails, returns insufficient data, or the task genuinely requires it (e.g. very fast single-URL fetch where Firecrawl is overkill).
