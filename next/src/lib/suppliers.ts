@@ -162,6 +162,41 @@ export const getSupplier = cache(async (slug: string): Promise<SupplierListItem 
   };
 });
 
+export interface SupplierListCard {
+  id: string;
+  supplier_id: string;
+  name: string;
+  description: string | null;
+  location_city: string | null;
+  location_country: string | null;
+  verified: boolean;
+  is_partner: boolean;
+  logo_url: string | null;
+  website: string | null;
+}
+
+export const getVerifiedSuppliers = cache(async (): Promise<SupplierListCard[]> => {
+  const supabase = createStaticClient();
+  const { data } = await supabase
+    .from("suppliers")
+    .select("id, supplier_id, name, description, location_city, location_country, verified, is_partner, logo_url, website")
+    .eq("verified", true)
+    .order("is_partner", { ascending: false })
+    .order("name");
+  return ((data as SupplierListCard[] | null) ?? []).map((s) => ({
+    id: s.id,
+    supplier_id: s.supplier_id,
+    name: s.name,
+    description: s.description,
+    location_city: s.location_city,
+    location_country: s.location_country,
+    verified: s.verified ?? false,
+    is_partner: s.is_partner ?? false,
+    logo_url: s.logo_url,
+    website: s.website,
+  }));
+});
+
 export const getVerifiedSupplierSlugs = cache(async (): Promise<string[]> => {
   const supabase = createStaticClient();
   const { data } = await supabase
