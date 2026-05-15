@@ -18,6 +18,10 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "storage.googleapis.com" },
     ],
   },
+  // Legacy /supplier(/:id) → /suppliers(/:id) redirects live as App Router pages
+  // (src/app/supplier/page.tsx + src/app/supplier/[id]/page.tsx) using
+  // permanentRedirect(). next.config.ts `redirects()` and middleware.ts both
+  // trigger build crashes on Next 15.5.18 (500.html rename, pages-manifest).
 };
 
 export default nextConfig;

@@ -4,11 +4,11 @@ current_branch: seo/02-nextjs
 current_pr: null
 current_pr_url: null
 phase_started_at: 2026-05-15T11:20:00Z
-last_action_at:   2026-05-15T14:35:00Z
+last_action_at:   2026-05-15T15:10:00Z
 
 phases:
   "1": { status: completed, pr: 7, merged_at: 2026-05-15T11:14:22Z }
-  "2": { status: in_progress, branch: seo/02-nextjs, chunk: "b (homepage SEO-shell + supplier detail shipped; chunk c picks up Map/AI/PriceCalculator/STL)" }
+  "2": { status: in_progress, branch: seo/02-nextjs, chunk: "c1 (list/browse/about + dynamic sitemap + legacy redirects shipped; c2 search, c3 guides/knowledge, c4 heavy interactives [Map/AISearch/PriceCalc/Shapeways], c5 admin/auth/embed pending)" }
   "3": { status: pending }
   "4": { status: pending }
   "5": { status: pending }

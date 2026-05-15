@@ -207,3 +207,182 @@ export const getVerifiedSupplierSlugs = cache(async (): Promise<string[]> => {
     .map((s) => s.supplier_id)
     .filter(Boolean);
 });
+
+interface SupplierRowLite {
+  id: string;
+  supplier_id: string;
+  name: string;
+  website: string | null;
+  description: string | null;
+  location_city: string | null;
+  location_country: string | null;
+  location_lat: number | string | null;
+  location_lng: number | string | null;
+  verified: boolean | null;
+  premium: boolean | null;
+  is_partner: boolean | null;
+  logo_url: string | null;
+  country_id: string | null;
+  metadata: Record<string, unknown> | null;
+}
+
+export const getVerifiedSuppliersList = cache(async (): Promise<SupplierListItem[]> => {
+  const supabase = createStaticClient();
+
+  const { data: suppliers } = await supabase
+    .from("suppliers")
+    .select(
+      "id, supplier_id, name, website, description, location_city, location_country, location_lat, location_lng, verified, premium, is_partner, logo_url, country_id, metadata"
+    )
+    .eq("verified", true)
+    .order("is_partner", { ascending: false })
+    .order("name");
+
+  const rows = (suppliers as SupplierRowLite[] | null) ?? [];
+  if (rows.length === 0) return [];
+
+  const [techJoin, matJoin, certJoin, tagJoin, techList, matList, certList, tagList, countryList] =
+    await Promise.all([
+      supabase.from("supplier_technologies").select("supplier_id, technology_id"),
+      supabase.from("supplier_materials").select("supplier_id, material_id"),
+      supabase.from("supplier_certifications").select("supplier_id, certification_id"),
+      supabase.from("supplier_tags").select("supplier_id, tag_id"),
+      supabase.from("technologies").select("id, name, slug, category"),
+      supabase.from("materials").select("id, name, slug, category"),
+      supabase.from("certifications").select("id, name, slug"),
+      supabase.from("tags").select("id, name, slug, category"),
+      supabase.from("countries").select("id, name, code, region"),
+    ]);
+
+  const techMap = new Map(
+    ((techList.data as SupplierTaxonomy[] | null) ?? []).map((t) => [t.id, t])
+  );
+  const matMap = new Map(
+    ((matList.data as SupplierTaxonomy[] | null) ?? []).map((m) => [m.id, m])
+  );
+  const certMap = new Map(
+    ((certList.data as { id: string; name: string; slug: string }[] | null) ?? []).map((c) => [c.id, c])
+  );
+  const tagMap = new Map(
+    ((tagList.data as SupplierTaxonomy[] | null) ?? []).map((t) => [t.id, t])
+  );
+  const countryMap = new Map(
+    ((countryList.data as SupplierCountry[] | null) ?? []).map((c) => [c.id, c])
+  );
+
+  const supTechs = new Map<string, SupplierTaxonomy[]>();
+  for (const j of (techJoin.data as { supplier_id: string; technology_id: string }[] | null) ?? []) {
+    const t = techMap.get(j.technology_id);
+    if (!t) continue;
+    const arr = supTechs.get(j.supplier_id) ?? [];
+    arr.push(t);
+    supTechs.set(j.supplier_id, arr);
+  }
+
+  const supMats = new Map<string, SupplierTaxonomy[]>();
+  for (const j of (matJoin.data as { supplier_id: string; material_id: string }[] | null) ?? []) {
+    const m = matMap.get(j.material_id);
+    if (!m) continue;
+    const arr = supMats.get(j.supplier_id) ?? [];
+    arr.push(m);
+    supMats.set(j.supplier_id, arr);
+  }
+
+  const supCerts = new Map<string, { id: string; name: string; slug: string }[]>();
+  for (const j of (certJoin.data as { supplier_id: string; certification_id: string }[] | null) ?? []) {
+    const c = certMap.get(j.certification_id);
+    if (!c) continue;
+    const arr = supCerts.get(j.supplier_id) ?? [];
+    arr.push(c);
+    supCerts.set(j.supplier_id, arr);
+  }
+
+  const supTags = new Map<string, SupplierTaxonomy[]>();
+  for (const j of (tagJoin.data as { supplier_id: string; tag_id: string }[] | null) ?? []) {
+    const t = tagMap.get(j.tag_id);
+    if (!t) continue;
+    const arr = supTags.get(j.supplier_id) ?? [];
+    arr.push(t);
+    supTags.set(j.supplier_id, arr);
+  }
+
+  return rows.map((s) => {
+    const meta = s.metadata ?? null;
+    return {
+      id: s.id,
+      supplier_id: s.supplier_id,
+      name: s.name,
+      website: s.website,
+      description: s.description,
+      location_city: s.location_city,
+      location_country: s.location_country,
+      location_lat: s.location_lat ? Number(s.location_lat) : null,
+      location_lng: s.location_lng ? Number(s.location_lng) : null,
+      verified: s.verified ?? false,
+      premium: s.premium ?? false,
+      is_partner: s.is_partner ?? false,
+      instant_quote_url: (meta?.instant_quote_url as string | undefined) ?? null,
+      logo_url: s.logo_url,
+      technologies: supTechs.get(s.id) ?? [],
+      materials: supMats.get(s.id) ?? [],
+      certifications: supCerts.get(s.id) ?? [],
+      tags: supTags.get(s.id) ?? [],
+      country: s.country_id ? countryMap.get(s.country_id) ?? null : null,
+    };
+  });
+});
+
+export interface KnowledgeTaxonomy {
+  id: string;
+  name: string;
+  slug: string;
+  category: string | null;
+  description: string | null;
+  supplierCount: number;
+}
+
+export interface KnowledgeData {
+  technologies: KnowledgeTaxonomy[];
+  materials: KnowledgeTaxonomy[];
+}
+
+export const getKnowledgeData = cache(async (): Promise<KnowledgeData> => {
+  const supabase = createStaticClient();
+
+  const [techRes, matRes, stRes, smRes] = await Promise.all([
+    supabase.from("technologies").select("id, name, slug, category, description").order("name"),
+    supabase.from("materials").select("id, name, slug, category, description").order("name"),
+    supabase.from("supplier_technologies").select("technology_id"),
+    supabase.from("supplier_materials").select("material_id"),
+  ]);
+
+  const techCount = new Map<string, number>();
+  for (const r of (stRes.data as { technology_id: string }[] | null) ?? []) {
+    techCount.set(r.technology_id, (techCount.get(r.technology_id) ?? 0) + 1);
+  }
+
+  const matCount = new Map<string, number>();
+  for (const r of (smRes.data as { material_id: string }[] | null) ?? []) {
+    matCount.set(r.material_id, (matCount.get(r.material_id) ?? 0) + 1);
+  }
+
+  type TaxonomyRow = {
+    id: string;
+    name: string;
+    slug: string;
+    category: string | null;
+    description: string | null;
+  };
+
+  const technologies = ((techRes.data as TaxonomyRow[] | null) ?? []).map((t) => ({
+    ...t,
+    supplierCount: techCount.get(t.id) ?? 0,
+  }));
+
+  const materials = ((matRes.data as TaxonomyRow[] | null) ?? []).map((m) => ({
+    ...m,
+    supplierCount: matCount.get(m.id) ?? 0,
+  }));
+
+  return { technologies, materials };
+});
