@@ -1,0 +1,377 @@
+{
+  "captured_at": "2026-05-15T11:01:52.525Z",
+  "by_url": {
+    "https://www.amsupplycheck.com/": {
+      "title": "SupplyCheck - Find 3D Printing Suppliers Worldwide",
+      "h1": "Find AM suppliers by capability, not by name",
+      "desc": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+      "robots": null,
+      "canonical": "https://amsupplycheck.com/",
+      "hreflang": [
+        {
+          "hreflang": "en",
+          "href": "https://www.amsupplycheck.com"
+        },
+        {
+          "hreflang": "da",
+          "href": "https://www.amsupplycheck.com"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "https://www.amsupplycheck.com"
+        }
+      ],
+      "jsonld": [
+        [
+          {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "AMSupplyCheck",
+            "url": "https://amsupplycheck.com",
+            "logo": "https://amsupplycheck.com/favicon.ico",
+            "description": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+            "sameAs": [],
+            "contactPoint": {
+              "@type": "ContactPoint",
+              "contactType": "customer service",
+              "url": "https://amsupplycheck.com/about"
+            },
+            "foundingDate": "2025",
+            "knowsAbout": [
+              "3D Printing",
+              "Additive Manufacturing",
+              "FDM",
+              "SLA",
+              "SLS",
+              "MJF",
+              "DMLS",
+              "EBM",
+              "Prototyping",
+              "Manufacturing Suppliers"
+            ]
+          },
+          {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "AMSupplyCheck",
+            "url": "https://amsupplycheck.com",
+            "description": "Find and compare 3D printing suppliers worldwide",
+            "potentialAction": {
+              "@type": "SearchAction",
+              "target": "https://amsupplycheck.com/search?q={search_term_string}",
+              "query-input": "required name=search_term_string"
+            }
+          }
+        ],
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          "name": "SupplyCheck",
+          "url": "https://www.amsupplycheck.com",
+          "description": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+          "inLanguage": [
+            "en",
+            "da"
+          ],
+          "potentialAction": {
+            "@type": "SearchAction",
+            "target": {
+              "@type": "EntryPoint",
+              "urlTemplate": "https://www.amsupplycheck.com/search?keywords={search_term_string}"
+            },
+            "query-input": "required name=search_term_string"
+          },
+          "publisher": {
+            "@type": "Organization",
+            "name": "AMSupplyCheck",
+            "logo": {
+              "@type": "ImageObject",
+              "url": "https://www.amsupplycheck.com/logo.png"
+            }
+          }
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          "name": "Become a Supplier - AMSupplyCheck",
+          "description": "Join our network of verified 3D printing suppliers and connect with customers worldwide.",
+          "url": "https://www.amsupplycheck.com/#contact",
+          "inLanguage": [
+            "en",
+            "da"
+          ],
+          "mainEntity": {
+            "@type": "Organization",
+            "name": "AMSupplyCheck",
+            "url": "https://www.amsupplycheck.com",
+            "contactPoint": [
+              {
+                "@type": "ContactPoint",
+                "contactType": "Supplier Relations",
+                "availableLanguage": [
+                  "English",
+                  "Danish"
+                ],
+                "contactOption": "TollFree"
+              },
+              {
+                "@type": "ContactPoint",
+                "contactType": "Customer Support",
+                "availableLanguage": [
+                  "English",
+                  "Danish"
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png",
+        "og:title": "AMSupplyCheck - Find 3D Printing Suppliers Worldwide",
+        "og:description": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+        "og:url": "https://amsupplycheck.com/"
+      }
+    },
+    "https://www.amsupplycheck.com/about": {
+      "title": "About Us - AMSupplyCheck | 3D Printing Supplier Platform",
+      "h1": "Our Story",
+      "desc": "Learn about AMSupplyCheck - A Danish company democratizing 3D printing manufacturing. Meet our team and discover our mission to help innovators, engineers, and creators find the right suppliers.",
+      "robots": null,
+      "canonical": "https://amsupplycheck.com/about",
+      "hreflang": [
+        {
+          "hreflang": "en",
+          "href": "https://www.amsupplycheck.com/about"
+        },
+        {
+          "hreflang": "da",
+          "href": "https://www.amsupplycheck.com/about"
+        },
+        {
+          "hreflang": "x-default",
+          "href": "https://www.amsupplycheck.com/about"
+        }
+      ],
+      "jsonld": [
+        {
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "AMSupplyCheck",
+          "url": "https://www.amsupplycheck.com",
+          "logo": "https://www.amsupplycheck.com/assets/amsupplycheck-logo-GZ0iBie8.png",
+          "description": "AMSupplyCheck is a Danish Company that helps people who need to have parts produced, by guiding them to the right supplier for their specific need. Simple, Transparent, Fast and for FREE.",
+          "foundingDate": "2024",
+          "inLanguage": [
+            "en",
+            "da"
+          ],
+          "founders": [
+            {
+              "@type": "Person",
+              "name": "Kristoffer Ryelund Nielsen",
+              "jobTitle": "Founder"
+            },
+            {
+              "@type": "Person",
+              "name": "Christian Nymark Groth",
+              "jobTitle": "CEO"
+            },
+            {
+              "@type": "Person",
+              "name": "Johan Søberg",
+              "jobTitle": "CTO"
+            }
+          ],
+          "address": {
+            "@type": "PostalAddress",
+            "addressCountry": "DK"
+          },
+          "sameAs": [],
+          "contactPoint": {
+            "@type": "ContactPoint",
+            "contactType": "Customer Service",
+            "availableLanguage": [
+              "English",
+              "Danish"
+            ]
+          },
+          "knowsAbout": [
+            "3D Printing",
+            "Additive Manufacturing",
+            "Supplier Management",
+            "Manufacturing Procurement",
+            "Industrial Design"
+          ]
+        }
+      ],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png",
+        "og:title": "About AMSupplyCheck | 3D Printing Supplier Platform",
+        "og:description": "Connecting businesses with verified 3D printing suppliers worldwide. Meet our team and discover our mission.",
+        "og:url": "https://amsupplycheck.com/about"
+      }
+    },
+    "https://www.amsupplycheck.com/suppliers": {
+      "title": "Find Manufacturing Suppliers | Supplycheck",
+      "h1": "Find Manufacturing Suppliers",
+      "desc": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+      "robots": null,
+      "canonical": null,
+      "hreflang": [],
+      "jsonld": [],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png"
+      }
+    },
+    "https://www.amsupplycheck.com/browse": {
+      "title": "Browse Manufacturing Capabilities | Supplycheck",
+      "h1": "Browse Capabilities",
+      "desc": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+      "robots": null,
+      "canonical": "https://amsupplycheck.com/browse",
+      "hreflang": [],
+      "jsonld": [],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png"
+      }
+    },
+    "https://www.amsupplycheck.com/suppliers/materialise-onsite": {
+      "title": "AMSupplyCheck - Find 3D Printing Suppliers Worldwide",
+      "h1": "Supplier not found",
+      "desc": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+      "robots": null,
+      "canonical": null,
+      "hreflang": [],
+      "jsonld": [],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png"
+      }
+    },
+    "https://www.amsupplycheck.com/suppliers/protolabs": {
+      "title": "Protolabs – Digital Manufacturing & Rapid Prototyping - Manufacturing Supplier | Supplycheck",
+      "h1": "Protolabs – Digital Manufacturing & Rapid Prototyping",
+      "desc": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+      "robots": null,
+      "canonical": null,
+      "hreflang": [],
+      "jsonld": [],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png"
+      }
+    },
+    "https://www.amsupplycheck.com/suppliers/xometry": {
+      "title": "Xometry - Manufacturing Supplier | Supplycheck",
+      "h1": "Xometry",
+      "desc": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+      "robots": null,
+      "canonical": null,
+      "hreflang": [],
+      "jsonld": [],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png"
+      }
+    },
+    "https://www.amsupplycheck.com/suppliers/laserhub": {
+      "title": "AMSupplyCheck - Find 3D Printing Suppliers Worldwide",
+      "h1": "Supplier not found",
+      "desc": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+      "robots": null,
+      "canonical": null,
+      "hreflang": [],
+      "jsonld": [],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png"
+      }
+    },
+    "https://www.amsupplycheck.com/suppliers/whiteclouds": {
+      "title": "WhiteClouds - Manufacturing Supplier | Supplycheck",
+      "h1": "WhiteClouds",
+      "desc": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+      "robots": null,
+      "canonical": null,
+      "hreflang": [],
+      "jsonld": [],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png"
+      }
+    },
+    "https://www.amsupplycheck.com/guides/best-xometry-alternatives": {
+      "title": "Best Xometry Alternatives 2026 | Compare Top Manufacturing Platforms",
+      "h1": "7 Best Xometry Alternatives for 3D Printing & CNC (2026)",
+      "desc": "Connect with verified 3D printing suppliers worldwide. Filter by materials, technologies, and location to find the perfect match for your project.",
+      "robots": null,
+      "canonical": "https://amsupplycheck.com/guides/best-xometry-alternatives",
+      "hreflang": [],
+      "jsonld": [
+        {
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": [
+            {
+              "@type": "Question",
+              "name": "Is Xometry the cheapest option for 3D printing?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Not always. Xometry's pricing is competitive for US-based orders, but European suppliers like Protolabs, Sculpteo, and Craftcloud often offer better pricing for EU customers due to lower shipping costs and local production."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Which Xometry alternative has the fastest turnaround?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Protolabs consistently offers the fastest turnaround times, with CNC parts shipping in as little as 1 day and 3D printed parts in 1-3 days. Fictiv also offers express manufacturing services."
+              }
+            },
+            {
+              "@type": "Question",
+              "name": "Can I get instant quotes from Xometry alternatives?",
+              "acceptedAnswer": {
+                "@type": "Answer",
+                "text": "Yes. Protolabs, Hubs, Craftcloud, Fictiv, and Sculpteo all offer instant or near-instant online quoting. Upload your CAD file and get pricing within minutes."
+              }
+            }
+          ]
+        },
+        {
+          "@context": "https://schema.org",
+          "@type": "BreadcrumbList",
+          "itemListElement": [
+            {
+              "@type": "ListItem",
+              "position": 1,
+              "name": "Home",
+              "item": "https://amsupplycheck.com"
+            },
+            {
+              "@type": "ListItem",
+              "position": 2,
+              "name": "Guides",
+              "item": "https://amsupplycheck.com/guides"
+            },
+            {
+              "@type": "ListItem",
+              "position": 3,
+              "name": "7 Best Xometry Alternatives for 3D Printing & CNC (2026)",
+              "item": "https://amsupplycheck.com/guides/best-xometry-alternatives"
+            }
+          ]
+        }
+      ],
+      "og": {
+        "og:type": "website",
+        "og:image": "https://storage.googleapis.com/gpt-engineer-file-uploads/dxW3rFyH41QD9GU85eq2uILRGzn2/social-images/social-1758992856210-ChatGPT Image Jul 14, 2025, 10_59_30 AM.png"
+      }
+    }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "captured_at": "2026-05-15T10:57:22.145Z",
+  "by_url": {
+    "https://www.amsupplycheck.com/": {
+      "perf": 0.34,
+      "seo": 1,
+      "a11y": 0.92,
+      "bp": 0.77,
+      "lcp_ms": 25234.211000000007,
+      "tbt_ms": 6642.999999999998,
+      "cls": 0.0028190000000000003,
+      "fcp_ms": 2332.531,
+      "seo_failed": []
+    },
+    "https://www.amsupplycheck.com/about": {
+      "perf": 0.73,
+      "seo": 1,
+      "a11y": 0.89,
+      "bp": 1,
+      "lcp_ms": 8641.318,
+      "tbt_ms": 76,
+      "cls": 0,
+      "fcp_ms": 1959.6619999999998,
+      "seo_failed": []
+    },
+    "https://www.amsupplycheck.com/suppliers": {
+      "perf": 0.45,
+      "seo": 1,
+      "a11y": 0.89,
+      "bp": 1,
+      "lcp_ms": 18367.985780000006,
+      "tbt_ms": 924.5000000000009,
+      "cls": 0,
+      "fcp_ms": 1982.8204649999998,
+      "seo_failed": []
+    },
+    "https://www.amsupplycheck.com/browse": {
+      "perf": 0.73,
+      "seo": 1,
+      "a11y": 0.9,
+      "bp": 1,
+      "lcp_ms": 8911.0795,
+      "tbt_ms": 117,
+      "cls": 0,
+      "fcp_ms": 1924.616,
+      "seo_failed": []
+    },
+    "https://www.amsupplycheck.com/suppliers/materialise-onsite": {
+      "perf": 0.54,
+      "seo": 1,
+      "a11y": 0.94,
+      "bp": 1,
+      "lcp_ms": 16375.77944000001,
+      "tbt_ms": 281,
+      "cls": 0.275017,
+      "fcp_ms": 1905.4325999999999,
+      "seo_failed": []
+    },
+    "https://www.amsupplycheck.com/suppliers/protolabs": {
+      "perf": 0.7,
+      "seo": 1,
+      "a11y": 0.89,
+      "bp": 1,
+      "lcp_ms": 18486.622,
+      "tbt_ms": 194,
+      "cls": 0,
+      "fcp_ms": 1968.5359999999998,
+      "seo_failed": []
+    },
+    "https://www.amsupplycheck.com/suppliers/xometry": {
+      "perf": 0.69,
+      "seo": 1,
+      "a11y": 0.89,
+      "bp": 1,
+      "lcp_ms": 18835.260119999984,
+      "tbt_ms": 209,
+      "cls": 0,
+      "fcp_ms": 2037.580919999998,
+      "seo_failed": []
+    },
+    "https://www.amsupplycheck.com/suppliers/laserhub": {
+      "perf": 0.55,
+      "seo": 1,
+      "a11y": 0.94,
+      "bp": 1,
+      "lcp_ms": 16504.671399999992,
+      "tbt_ms": 229,
+      "cls": 0.275017,
+      "fcp_ms": 2033.2809000000002,
+      "seo_failed": []
+    },
+    "https://www.amsupplycheck.com/suppliers/whiteclouds": {
+      "perf": 0.69,
+      "seo": 1,
+      "a11y": 0.89,
+      "bp": 1,
+      "lcp_ms": 18744.059919999992,
+      "tbt_ms": 213,
+      "cls": 0,
+      "fcp_ms": 2009.62946,
+      "seo_failed": []
+    },
+    "https://www.amsupplycheck.com/guides/best-xometry-alternatives": {
+      "error": "Command failed: npx --yes lighthouse \"https://www.amsupplycheck.com/guides/best-xometry-alternatives\" --only-categories=performance,seo,accessibility,best-practices --chrome-flags=\"--headless=new --no-sandbox\" --output=json --output-path=seo/baseline/lighthouse-www_amsupplycheck_com_guides_best_xometry_alternatives.json --quiet --max-wait-for-load=60000\nRuntime error encountered: The page did not paint any content. Please ensure you keep the browser window in the foreground during the load and t"
+    }
+  },
+  "averages": {
+    "perf": 0.6022222222222222,
+    "seo": 1,
+    "a11y": 0.9055555555555556,
+    "bp": 0.9744444444444444
+  },
+  "core_web_vitals": {
+    "lcp_p75_ms": 18744,
+    "tbt_p75_ms": 281,
+    "cls_p75": 0.003
+  }
+}
