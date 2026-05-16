@@ -1,42 +1,39 @@
-import { useEffect, useMemo } from 'react';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { cn } from '@/lib/utils';
-import {
-  useTechnologyToMaterials,
-  useMaterialToTechnologies,
-} from '@/hooks/use-compatibility-matrix';
+"use client";
 
-const ANY = 'any';
+import { useEffect, useMemo, type ReactNode } from "react";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
-// Color swatches per typical material category
+const ANY = "any";
+
 export const COLOR_OPTIONS: Array<{ value: string; label: string; hex: string }> = [
-  { value: 'natural', label: 'Natural', hex: '#e8e4d9' },
-  { value: 'white', label: 'White', hex: '#f5f5f5' },
-  { value: 'black', label: 'Black', hex: '#1a1a1a' },
-  { value: 'gray', label: 'Gray', hex: '#808080' },
-  { value: 'red', label: 'Red', hex: '#c94a4a' },
-  { value: 'blue', label: 'Blue', hex: '#4a6fa5' },
-  { value: 'yellow', label: 'Yellow', hex: '#e8c547' },
-  { value: 'green', label: 'Green', hex: '#6b8e4e' },
+  { value: "natural", label: "Natural", hex: "#e8e4d9" },
+  { value: "white", label: "White", hex: "#f5f5f5" },
+  { value: "black", label: "Black", hex: "#1a1a1a" },
+  { value: "gray", label: "Gray", hex: "#808080" },
+  { value: "red", label: "Red", hex: "#c94a4a" },
+  { value: "blue", label: "Blue", hex: "#4a6fa5" },
+  { value: "yellow", label: "Yellow", hex: "#e8c547" },
+  { value: "green", label: "Green", hex: "#6b8e4e" },
 ];
 
 export const FINISH_OPTIONS = [
-  { value: 'standard', label: 'Standard (as printed)' },
-  { value: 'sanded', label: 'Sanded' },
-  { value: 'polished', label: 'Polished' },
-  { value: 'painted', label: 'Painted' },
-  { value: 'dyed', label: 'Dyed' },
+  { value: "standard", label: "Standard (as printed)" },
+  { value: "sanded", label: "Sanded" },
+  { value: "polished", label: "Polished" },
+  { value: "painted", label: "Painted" },
+  { value: "dyed", label: "Dyed" },
 ];
 
 export const AREA_OPTIONS: string[] = [
-  'North America',
-  'Europe',
-  'Asia',
-  'South America',
-  'Africa',
-  'Oceania',
+  "North America",
+  "Europe",
+  "Asia",
+  "South America",
+  "Africa",
+  "Oceania",
 ];
 
 interface ConfiguratorPanelProps {
@@ -52,6 +49,7 @@ interface ConfiguratorPanelProps {
   onFinishChange: (v: string) => void;
   onAreaChange: (v: string) => void;
   onQuantityChange: (v: number) => void;
+  technologyToMaterials: Record<string, string[]>;
   className?: string;
 }
 
@@ -68,32 +66,46 @@ export function ConfiguratorPanel({
   onFinishChange,
   onAreaChange,
   onQuantityChange,
+  technologyToMaterials,
   className,
 }: ConfiguratorPanelProps) {
-  const { data: techToMatMap } = useTechnologyToMaterials();
-  const { data: matToTechMap } = useMaterialToTechnologies();
+  const materialToTechnologies = useMemo<Record<string, string[]>>(() => {
+    const out: Record<string, string[]> = {};
+    for (const [tech, mats] of Object.entries(technologyToMaterials)) {
+      for (const mat of mats) {
+        const list = out[mat] ?? [];
+        if (!list.includes(tech)) list.push(tech);
+        out[mat] = list;
+      }
+    }
+    return out;
+  }, [technologyToMaterials]);
 
-  const materialOptions = useMemo(() => Object.keys(matToTechMap).sort(), [matToTechMap]);
-  const techOptions = material ? matToTechMap[material] ?? [] : Object.keys(techToMatMap).sort();
+  const materialOptions = useMemo(
+    () => Object.keys(materialToTechnologies).sort(),
+    [materialToTechnologies],
+  );
+  const techOptions = material
+    ? materialToTechnologies[material] ?? []
+    : Object.keys(technologyToMaterials).sort();
   const selectedColor = COLOR_OPTIONS.find((c) => c.value === color);
 
-  // Clear technology if it's no longer compatible with the chosen material.
   useEffect(() => {
     if (!material) return;
-    const compat = matToTechMap[material] || [];
+    const compat = materialToTechnologies[material] || [];
     if (technology && compat.length > 0 && !compat.includes(technology)) {
-      onTechnologyChange('');
+      onTechnologyChange("");
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [material, matToTechMap]);
+  }, [material, materialToTechnologies]);
 
   return (
     <div
       className={cn(
-        'rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm',
-        'shadow-[0_8px_30px_hsl(87,20%,45%,0.06),0_1px_2px_hsl(0,0%,0%,0.4)]',
-        'p-4 space-y-4',
-        className
+        "rounded-xl border border-border/60 bg-card/60 backdrop-blur-sm",
+        "shadow-[0_8px_30px_hsl(87,20%,45%,0.06),0_1px_2px_hsl(0,0%,0%,0.4)]",
+        "p-4 space-y-4",
+        className,
       )}
     >
       <div>
@@ -107,7 +119,7 @@ export function ConfiguratorPanel({
         <ConfigField label="Material">
           <Select
             value={material || ANY}
-            onValueChange={(v) => onMaterialChange(v === ANY ? '' : v)}
+            onValueChange={(v) => onMaterialChange(v === ANY ? "" : v)}
           >
             <SelectTrigger className="h-9 text-sm">
               <SelectValue />
@@ -128,7 +140,7 @@ export function ConfiguratorPanel({
         <ConfigField label="Technology">
           <Select
             value={technology || ANY}
-            onValueChange={(v) => onTechnologyChange(v === ANY ? '' : v)}
+            onValueChange={(v) => onTechnologyChange(v === ANY ? "" : v)}
           >
             <SelectTrigger className="h-9 text-sm">
               <SelectValue />
@@ -194,7 +206,7 @@ export function ConfiguratorPanel({
       <ConfigField label="Area">
         <Select
           value={area || ANY}
-          onValueChange={(v) => onAreaChange(v === ANY ? '' : v)}
+          onValueChange={(v) => onAreaChange(v === ANY ? "" : v)}
         >
           <SelectTrigger className="h-9 text-sm">
             <SelectValue />
@@ -221,11 +233,11 @@ export function ConfiguratorPanel({
                 key={q}
                 onClick={() => onQuantityChange(q)}
                 className={cn(
-                  'px-2 py-1 text-[11px] rounded-md border transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40',
+                  "px-2 py-1 text-[11px] rounded-md border transition-colors",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
                   quantity === q
-                    ? 'border-primary/50 bg-primary/10 text-primary'
-                    : 'border-border/60 text-muted-foreground hover:border-border hover:text-foreground'
+                    ? "border-primary/50 bg-primary/10 text-primary"
+                    : "border-border/60 text-muted-foreground hover:border-border hover:text-foreground",
                 )}
               >
                 {q}
@@ -238,7 +250,7 @@ export function ConfiguratorPanel({
   );
 }
 
-function ConfigField({ label, children }: { label: string; children: React.ReactNode }) {
+function ConfigField({ label, children }: { label: string; children: ReactNode }) {
   return (
     <div className="space-y-1.5">
       <Label className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider">

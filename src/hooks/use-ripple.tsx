@@ -1,4 +1,6 @@
-import { useState, useCallback } from 'react';
+"use client";
+
+import { useState, useCallback } from "react";
 
 interface Ripple {
   x: number;
@@ -25,7 +27,6 @@ export const useRipple = () => {
 
     setRipples((prevRipples) => [...prevRipples, newRipple]);
 
-    // Remove ripple after animation completes
     setTimeout(() => {
       setRipples((prevRipples) => prevRipples.filter((r) => r.id !== newRipple.id));
     }, 600);

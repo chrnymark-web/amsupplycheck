@@ -1,22 +1,11 @@
 // Technology ↔ Material compatibility — UI-side types, categories, requirements, and pricing.
 // The compatibility matrix itself lives in Supabase (tables: technology_materials,
-// technology_children; view: technology_materials_resolved) and is fetched via
-// src/hooks/use-compatibility-matrix.ts.
+// technology_children; view: technology_materials_resolved) and is fetched
+// server-side via next/src/lib/compatibility.ts.
 
 export interface CompatibilityMatrix {
   [technology: string]: string[];
 }
-
-export {
-  useTechnologyToMaterials,
-  useMaterialToTechnologies,
-  useCompatibleMaterials,
-  useCompatibleTechnologies,
-  useIsMaterialCompatible,
-  useIsTechnologyCompatible,
-  getCompatibleMaterialsFromMap,
-  getCompatibleTechnologiesFromMap,
-} from '@/hooks/use-compatibility-matrix';
 
 // ============================================
 // CATEGORIZATION: Technology & Material Groups
@@ -132,7 +121,7 @@ export const materialPriceIndex: Record<string, number> = {
   'PETG': 1.3,
   'HIPS': 1.1,
   'Wood Filled PLA': 1.4,
-  
+
   // Medium cost - Standard polymers
   'Polycarbonate': 2.5,
   'PC/PC-ABS': 2.8,
@@ -152,7 +141,7 @@ export const materialPriceIndex: Record<string, number> = {
   'PA12 Aluminum Filled': 4.2,
   'Carbon Fiber Reinforced': 5.0,
   'Kevlar Reinforced': 5.5,
-  
+
   // Medium-high cost - Flexible
   'TPU (Flexible)': 2.5,
   'TPU MJF': 3.0,
@@ -160,7 +149,7 @@ export const materialPriceIndex: Record<string, number> = {
   'Ultrasint TPU01 MJF': 3.5,
   'DuraForm TPU': 3.2,
   'Flexible Resin 80A': 2.8,
-  
+
   // Medium cost - Resins
   'Standard Resin': 1.8,
   'Clear Resin': 2.0,
@@ -170,12 +159,12 @@ export const materialPriceIndex: Record<string, number> = {
   'Somos WaterClear Ultra': 3.0,
   'Photopolymer Rigid': 2.2,
   'Accura 25': 2.8,
-  
+
   // High cost - High-performance polymers
   'PEI ULTEM 1010': 6.0,
   'PEI ULTEM 9085': 5.5,
   'ULTEM 9085': 5.5,
-  
+
   // Very high cost - Metals
   'Stainless Steel 316L': 8.0,
   'Stainless Steel 17-4PH': 9.0,
@@ -185,7 +174,7 @@ export const materialPriceIndex: Record<string, number> = {
   'Bronze': 7.5,
   '420i 420SS Bronze': 7.5,
   'Gold Plated Brass': 12.0,
-  
+
   // Premium metals
   'Titanium Ti-6Al-4V': 15.0,
   'Inconel 718': 18.0,
@@ -277,25 +266,25 @@ export const requirementToMaterials: Record<SearchRequirement, string[]> = {
 // Get technologies matching requirements
 export function getTechnologiesForRequirements(requirements: SearchRequirement[]): string[] {
   if (requirements.length === 0) return [];
-  
+
   const techSets = requirements.map(req => new Set(requirementToTechnologies[req]));
   // Return intersection of all requirement sets
-  const intersection = techSets.reduce((acc, set) => 
+  const intersection = techSets.reduce((acc, set) =>
     new Set([...acc].filter(x => set.has(x)))
   );
-  
+
   return Array.from(intersection).sort();
 }
 
 // Get materials matching requirements
 export function getMaterialsForRequirements(requirements: SearchRequirement[]): string[] {
   if (requirements.length === 0) return [];
-  
+
   const matSets = requirements.map(req => new Set(requirementToMaterials[req]));
   // Return intersection of all requirement sets
-  const intersection = matSets.reduce((acc, set) => 
+  const intersection = matSets.reduce((acc, set) =>
     new Set([...acc].filter(x => set.has(x)))
   );
-  
+
   return Array.from(intersection).sort();
 }

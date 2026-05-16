@@ -1,10 +1,12 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useInView } from '@/hooks/use-in-view';
 import { Mail, Zap } from 'lucide-react';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase } from '@/lib/supabase/client';
 import { trackConversion } from '@/lib/analytics';
 
 const NewsletterSignup = () => {
@@ -40,8 +42,8 @@ const NewsletterSignup = () => {
 
     try {
       // Save to database
-      const { error: dbError } = await supabase
-        .from('newsletter_signups')
+      const { error: dbError } = await (supabase
+        .from('newsletter_signups') as unknown as { insert: (rows: { email: string }[]) => Promise<{ error: { code?: string } | null }> })
         .insert([{ email }]);
 
       if (dbError) {

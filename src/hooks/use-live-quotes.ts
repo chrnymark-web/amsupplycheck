@@ -1,6 +1,6 @@
 import { startTransition, useCallback, useEffect, useRef, useState } from 'react';
-import { fetchLiveQuotes } from '@/lib/api';
-import type { QuoteRequest, LiveQuote, QuoteOption, QuoteResult, Currency, QuoteGeometry } from '@/lib/api/types';
+import { fetchLiveQuotes } from '@/lib/live-quotes';
+import type { QuoteRequest, LiveQuote, QuoteOption, QuoteResult, Currency, QuoteGeometry } from '@/lib/quote-types';
 import { filterQuotesByTech } from '@/lib/materialTechClassifier';
 
 interface UseLiveQuotesOptions {
