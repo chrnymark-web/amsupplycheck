@@ -9,7 +9,8 @@ import { ConfiguratorPanel } from "@/components/stl-viewer/ConfiguratorPanel";
 import { ViewerControls } from "@/components/stl-viewer/ViewerControls";
 import { UploadLanding } from "@/components/stl-match/UploadLanding";
 import { LivePriceComparison } from "@/components/compare-prices/LivePriceComparison";
-import { parseStlInWorker } from "@/lib/stl-parser-client";
+import { parseModelInWorker } from "@/lib/stl-parser-client";
+import { consumePendingHeroUpload } from "@/lib/pendingHeroUpload";
 import type { StlResult } from "@/lib/stl-types";
 
 const StlViewer = dynamic(
@@ -31,6 +32,11 @@ export default function ComparePricesClient({ technologyToMaterials }: ComparePr
   const [localMetrics, setLocalMetrics] = useState<StlResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const pending = consumePendingHeroUpload();
+    if (pending) setFile(pending);
+  }, []);
+
   const [technology, setTechnology] = useState("");
   const [material, setMaterial] = useState("");
   const [color, setColor] = useState("natural");
@@ -50,7 +56,7 @@ export default function ComparePricesClient({ technologyToMaterials }: ComparePr
     }
     let cancelled = false;
     setParseError(null);
-    parseStlInWorker(file)
+    parseModelInWorker(file)
       .then((metrics) => {
         if (!cancelled) setLocalMetrics(metrics);
       })
@@ -88,7 +94,7 @@ export default function ComparePricesClient({ technologyToMaterials }: ComparePr
               Compare 3D Printing Quotes
             </h1>
             <p className="text-sm text-muted-foreground">
-              Upload your STL — we&apos;ll fetch live quotes from Craftcloud&apos;s vendor network
+              Upload your STL or STEP file — we&apos;ll fetch live quotes from Craftcloud&apos;s vendor network
             </p>
           </div>
         </div>
@@ -107,20 +113,28 @@ export default function ComparePricesClient({ technologyToMaterials }: ComparePr
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-[1.4fr_1fr] gap-6">
             <div className="relative aspect-square lg:aspect-auto lg:min-h-[480px]">
-              <StlViewer
-                file={file}
-                wireframe={wireframe}
-                resetTrigger={resetTrigger}
-              />
-              <ViewerControls
-                wireframe={wireframe}
-                onToggleWireframe={() => setWireframe((w) => !w)}
-                onResetView={() => setResetTrigger((k) => k + 1)}
-                showDimensions={showDimensions}
-                onToggleDimensions={() => setShowDimensions((s) => !s)}
-                dimensions={dimensions}
-                volumeCm3={volumeCm3}
-              />
+              {file.name.toLowerCase().endsWith(".stl") ? (
+                <>
+                  <StlViewer
+                    file={file}
+                    wireframe={wireframe}
+                    resetTrigger={resetTrigger}
+                  />
+                  <ViewerControls
+                    wireframe={wireframe}
+                    onToggleWireframe={() => setWireframe((w) => !w)}
+                    onResetView={() => setResetTrigger((k) => k + 1)}
+                    showDimensions={showDimensions}
+                    onToggleDimensions={() => setShowDimensions((s) => !s)}
+                    dimensions={dimensions}
+                    volumeCm3={volumeCm3}
+                  />
+                </>
+              ) : (
+                <div className="aspect-square lg:aspect-auto lg:min-h-[480px] rounded-xl bg-zinc-900/40 flex items-center justify-center text-sm text-muted-foreground">
+                  3D preview not available for STEP — geometry metrics extracted below
+                </div>
+              )}
             </div>
 
             <div className="space-y-4">
@@ -130,7 +144,7 @@ export default function ComparePricesClient({ technologyToMaterials }: ComparePr
                 onClear={handleClear}
                 stlMetrics={localMetrics}
                 title="Your part"
-                description="Tap the dropzone to choose a different STL"
+                description="Tap the dropzone to choose a different STL or STEP file"
               />
 
               <ConfiguratorPanel
@@ -151,7 +165,7 @@ export default function ComparePricesClient({ technologyToMaterials }: ComparePr
 
               {parseError && (
                 <div className="p-3 bg-destructive/10 text-destructive text-sm rounded-lg">
-                  Couldn&apos;t read STL geometry: {parseError}. Live quotes will
+                  Couldn&apos;t read geometry: {parseError}. Live quotes will
                   still work, but the suspect-price checker will use peer
                   comparison only.
                 </div>
