@@ -1,8 +1,8 @@
 ---
 current_phase: 3
 current_branch: seo/03-content-c3a
-current_pr: null
-current_pr_url: null
+current_pr: 11
+current_pr_url: https://github.com/chrnymark-web/amsupplycheck/pull/11
 phase_started_at: 2026-05-16T13:55:00Z
 last_action_at:   2026-05-16T13:55:00Z
 
