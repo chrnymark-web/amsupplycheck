@@ -11,7 +11,20 @@ import FloatingNav from "@/components/layout/FloatingNav";
 import NewsletterSignup from "@/components/forms/NewsletterSignup";
 import SupplierLogo from "@/components/ui/supplier-logo";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, Globe, Zap, Star, Search, ArrowRight, Shield, Users, MapPin } from "lucide-react";
+import {
+  CheckCircle,
+  Globe,
+  Zap,
+  Star,
+  Search,
+  ArrowRight,
+  Shield,
+  Users,
+  MapPin,
+  Upload,
+  BarChart3,
+  Sparkles,
+} from "lucide-react";
 
 export const revalidate = 3600;
 
@@ -113,6 +126,31 @@ export default async function HomePage() {
                 </div>
               </form>
 
+              <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mb-6 md:mb-8 text-sm">
+                <span className="text-muted-foreground">Or try a tool:</span>
+                <Link
+                  href="/stl-match"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/60 backdrop-blur-sm border border-border/30 text-foreground hover:border-primary/50 hover:bg-card/80 transition-colors"
+                >
+                  <Upload className="h-3.5 w-3.5 text-primary" />
+                  Upload STL
+                </Link>
+                <Link
+                  href="/match"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/60 backdrop-blur-sm border border-border/30 text-foreground hover:border-primary/50 hover:bg-card/80 transition-colors"
+                >
+                  <Sparkles className="h-3.5 w-3.5 text-primary" />
+                  Smart Match
+                </Link>
+                <Link
+                  href="/compare-prices"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/60 backdrop-blur-sm border border-border/30 text-foreground hover:border-primary/50 hover:bg-card/80 transition-colors"
+                >
+                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
+                  Compare Prices
+                </Link>
+              </div>
+
               <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center">
                   <CheckCircle className="h-4 w-4 text-supplier-verified mr-2" />
@@ -135,6 +173,98 @@ export default async function HomePage() {
           </div>
         </div>
       </CinematicHero>
+
+      {/* Quick Tools — direct entry points to the matching, STL, pricing, and directory tools */}
+      <section id="tools" className="py-12 md:py-16 relative z-0">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8 md:mb-10">
+            <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+              Get started in seconds
+            </h2>
+            <p className="text-sm md:text-base text-muted-foreground">
+              Four tools to find the right supplier for your project — pick the one that fits how you start.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <Link href="/match" className="group">
+              <Card className="h-full bg-card border-border hover:border-primary/40 transition-colors">
+                <CardContent className="p-5">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <Sparkles className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-1.5 group-hover:text-primary transition-colors">
+                    Smart Match
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Describe what you need in plain English and get matched to suppliers with the right capabilities.
+                  </p>
+                  <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                    Start matching <ArrowRight className="h-3 w-3" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/stl-match" className="group">
+              <Card className="h-full bg-card border-border hover:border-primary/40 transition-colors">
+                <CardContent className="p-5">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <Upload className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-1.5 group-hover:text-primary transition-colors">
+                    Upload STL
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Drop in a 3D file. We analyze the geometry and match it to suppliers that can print it.
+                  </p>
+                  <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                    Upload file <ArrowRight className="h-3 w-3" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/compare-prices" className="group">
+              <Card className="h-full bg-card border-border hover:border-primary/40 transition-colors">
+                <CardContent className="p-5">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <BarChart3 className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-1.5 group-hover:text-primary transition-colors">
+                    Compare Prices
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Get live quotes across multiple 3D printing services in seconds, side-by-side.
+                  </p>
+                  <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                    Get quotes <ArrowRight className="h-3 w-3" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+
+            <Link href="/suppliers" className="group">
+              <Card className="h-full bg-card border-border hover:border-primary/40 transition-colors">
+                <CardContent className="p-5">
+                  <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center mb-4">
+                    <MapPin className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-foreground mb-1.5 group-hover:text-primary transition-colors">
+                    Browse Directory
+                  </h3>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Explore all {supplierCount} verified suppliers — filter by technology, material, and location.
+                  </p>
+                  <div className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                    Browse suppliers <ArrowRight className="h-3 w-3" />
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          </div>
+        </div>
+      </section>
 
       {/* Featured Suppliers — server-rendered list for SEO */}
       <section id="suppliers" className="py-16 relative z-0">
