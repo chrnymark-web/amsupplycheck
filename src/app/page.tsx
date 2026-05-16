@@ -5,6 +5,7 @@ import { getAllMaterials, getAllTechnologies } from "@/lib/supplierData";
 import { getPopularCategories } from "@/lib/seoSlugs";
 import Navbar from "@/components/ui/navbar";
 import CinematicHero from "@/components/hero/CinematicHero";
+import { HeroUploadTabs } from "@/components/hero/HeroUploadTabs";
 import PageVideoBackground from "@/components/layout/PageVideoBackground";
 import CookieConsent from "@/components/layout/CookieConsent";
 import FloatingNav from "@/components/layout/FloatingNav";
@@ -126,30 +127,7 @@ export default async function HomePage() {
                 </div>
               </form>
 
-              <div className="flex flex-wrap justify-center items-center gap-2 sm:gap-3 mb-6 md:mb-8 text-sm">
-                <span className="text-muted-foreground">Or try a tool:</span>
-                <Link
-                  href="/stl-match"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/60 backdrop-blur-sm border border-border/30 text-foreground hover:border-primary/50 hover:bg-card/80 transition-colors"
-                >
-                  <Upload className="h-3.5 w-3.5 text-primary" />
-                  Upload STL
-                </Link>
-                <Link
-                  href="/match"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/60 backdrop-blur-sm border border-border/30 text-foreground hover:border-primary/50 hover:bg-card/80 transition-colors"
-                >
-                  <Sparkles className="h-3.5 w-3.5 text-primary" />
-                  Smart Match
-                </Link>
-                <Link
-                  href="/compare-prices"
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card/60 backdrop-blur-sm border border-border/30 text-foreground hover:border-primary/50 hover:bg-card/80 transition-colors"
-                >
-                  <BarChart3 className="h-3.5 w-3.5 text-primary" />
-                  Compare Prices
-                </Link>
-              </div>
+              <HeroUploadTabs />
 
               <div className="flex flex-wrap justify-center gap-2 sm:gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center">

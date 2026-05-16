@@ -12,6 +12,7 @@ import { ViewerControls } from "@/components/stl-viewer/ViewerControls";
 import { UploadLanding } from "@/components/stl-match/UploadLanding";
 import { MatchResultView } from "@/components/stl-match/MatchResultView";
 import { parseModelInWorker } from "@/lib/stl-parser-client";
+import { consumePendingHeroUpload } from "@/lib/pendingHeroUpload";
 import { useTriggerStlMatch } from "@/hooks/use-trigger-stl-match";
 import type { StlResult } from "@/lib/stl-types";
 
@@ -55,6 +56,11 @@ export default function StlMatchClient({ technologyToMaterials }: StlMatchClient
   const [file, setFile] = useState<File | null>(null);
   const [localMetrics, setLocalMetrics] = useState<StlResult | null>(null);
   const [parseError, setParseError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const pending = consumePendingHeroUpload();
+    if (pending) setFile(pending);
+  }, []);
 
   const [technology, setTechnology] = useState("");
   const [material, setMaterial] = useState("");
