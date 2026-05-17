@@ -137,7 +137,7 @@ export function PriceCalculator() {
           <Calculator className="h-5 w-5 shrink-0" />
           <div className="flex flex-col items-start sm:items-center sm:flex-row sm:gap-2 text-left sm:text-center">
             <span className="text-base font-semibold leading-tight">Compare prices for different suppliers</span>
-            <span className="text-xs text-primary/70 font-normal">Upload STL for instant prices</span>
+            <span className="text-xs text-primary/70 font-normal">Upload STL or STEP file for instant prices</span>
           </div>
           <ChevronDown className="h-4 w-4 shrink-0 transition-transform group-hover:translate-y-0.5" />
         </button>
@@ -166,13 +166,13 @@ export function PriceCalculator() {
             >
               <Upload className="h-8 w-8 mx-auto mb-2 text-muted-foreground" />
               <p className="text-sm text-muted-foreground">
-                Drop your <strong>STL file</strong> here or click to browse
+                Drop your <strong>STL or STEP file</strong> here or click to browse
               </p>
               <p className="text-xs text-muted-foreground/60 mt-1">Max 100MB. Analysis runs locally in your browser.</p>
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".stl"
+                accept=".stl,.step,.stp"
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
