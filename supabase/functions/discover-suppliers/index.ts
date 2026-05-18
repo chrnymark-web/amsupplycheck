@@ -8,38 +8,82 @@ const corsHeaders = {
 };
 
 // Search queries for finding 3D printing suppliers.
-// Curated for high yield against the existing catalog: niche tech + specialty
-// applications + emerging-market geos. Generic North America / Western Europe
-// queries dropped — already heavily mined.
-const SEARCH_QUERIES = [
+//
+// QUERY_POOL: typed entries with explicit category + subregion. Used for LRU
+// rotation when discovery_config.rotation_enabled = true. First STATIC_QUERY_COUNT
+// entries are the historically-stable list — order preserved from the pre-rotation
+// SEARCH_QUERIES constant, so flag-off behavior is identical.
+type PoolEntry = { query: string; category: string; subregion?: string };
+
+const QUERY_POOL: PoolEntry[] = [
+  // ── Stable 20 (used as static fallback when rotation off) ──
   // Niche technologies (5)
-  "bioprinting service tissue engineering",
-  "ceramic 3D printing service industrial",
-  "sand casting 3D printing foundry mold",
-  "WAAM wire arc additive manufacturing service",
-  "micro 3D printing precision manufacturing",
-
+  { query: "bioprinting service tissue engineering", category: "Niche Tech" },
+  { query: "ceramic 3D printing service industrial", category: "Niche Tech" },
+  { query: "sand casting 3D printing foundry mold", category: "Niche Tech" },
+  { query: "WAAM wire arc additive manufacturing service", category: "Niche Tech" },
+  { query: "micro 3D printing precision manufacturing", category: "Niche Tech" },
   // Specialty applications (4)
-  "concrete 3D printing construction service",
-  "jewelry 3D printing casting service",
-  "eyewear 3D printing glasses frames",
-  "footwear 3D printing shoe manufacturing",
-
+  { query: "concrete 3D printing construction service", category: "Specialty" },
+  { query: "jewelry 3D printing casting service", category: "Specialty" },
+  { query: "eyewear 3D printing glasses frames", category: "Specialty" },
+  { query: "footwear 3D printing shoe manufacturing", category: "Specialty" },
   // Advanced materials (3)
-  "PEEK 3D printing service high performance",
-  "carbon fiber 3D printing continuous fiber",
-  "titanium 3D printing medical aerospace",
+  { query: "PEEK 3D printing service high performance", category: "Materials" },
+  { query: "carbon fiber 3D printing continuous fiber", category: "Materials" },
+  { query: "titanium 3D printing medical aerospace", category: "Materials" },
+  // Geographic — emerging markets (8)
+  { query: "3D printing service Japan additive manufacturing", category: "Geographic", subregion: "Asia-East" },
+  { query: "3D printing service Korea manufacturing", category: "Geographic", subregion: "Asia-East" },
+  { query: "3D printing service Singapore industrial", category: "Geographic", subregion: "Asia-SE" },
+  { query: "3D printing service Bangalore additive manufacturing", category: "Geographic", subregion: "Asia-South" },
+  { query: "3D printing service Mumbai industrial manufacturing", category: "Geographic", subregion: "Asia-South" },
+  { query: "3D printing service São Paulo Brazil manufatura aditiva", category: "Geographic", subregion: "LatAm" },
+  { query: "3D printing service Ciudad de México prototipado", category: "Geographic", subregion: "LatAm" },
+  { query: "3D printing service UAE Dubai manufacturing", category: "Geographic", subregion: "MEA" },
 
-  // Emerging-market geos (8)
-  "3D printing service Japan additive manufacturing",
-  "3D printing service Korea manufacturing",
-  "3D printing service Singapore industrial",
-  "3D printing service Bangalore additive manufacturing",
-  "3D printing service Mumbai industrial manufacturing",
-  "3D printing service São Paulo Brazil manufatura aditiva",
-  "3D printing service Ciudad de México prototipado",
-  "3D printing service UAE Dubai manufacturing",
+  // ── Rotation-only extension (30) ──
+  // Africa (5)
+  { query: "3D printing service Egypt Cairo additive manufacturing", category: "Geographic", subregion: "Africa" },
+  { query: "3D printing service Nigeria Lagos manufacturing", category: "Geographic", subregion: "Africa" },
+  { query: "3D printing service South Africa Johannesburg additive", category: "Geographic", subregion: "Africa" },
+  { query: "3D printing service Morocco Casablanca prototypage", category: "Geographic", subregion: "Africa" },
+  { query: "3D printing service Kenya Nairobi industrial", category: "Geographic", subregion: "Africa" },
+  // Eastern Europe (5)
+  { query: "3D printing service Poland Warsaw druk 3D", category: "Geographic", subregion: "Europe-East" },
+  { query: "3D printing service Czech Republic Prague tisk 3D", category: "Geographic", subregion: "Europe-East" },
+  { query: "3D printing service Romania Bucharest imprimare 3D", category: "Geographic", subregion: "Europe-East" },
+  { query: "3D printing service Estonia Tallinn additive manufacturing", category: "Geographic", subregion: "Europe-East" },
+  { query: "3D printing service Hungary Budapest gyártás", category: "Geographic", subregion: "Europe-East" },
+  // Southeast Asia (5)
+  { query: "3D printing service Vietnam Ho Chi Minh manufacturing", category: "Geographic", subregion: "Asia-SE" },
+  { query: "3D printing service Indonesia Jakarta percetakan 3D", category: "Geographic", subregion: "Asia-SE" },
+  { query: "3D printing service Thailand Bangkok additive manufacturing", category: "Geographic", subregion: "Asia-SE" },
+  { query: "3D printing service Philippines Manila prototyping", category: "Geographic", subregion: "Asia-SE" },
+  { query: "3D printing service Malaysia Kuala Lumpur industrial", category: "Geographic", subregion: "Asia-SE" },
+  // Iberian / LatAm local-language (3)
+  { query: "servicio impresión 3D Madrid Barcelona fabricación aditiva", category: "Geographic", subregion: "Europe" },
+  { query: "serviço impressão 3D Portugal Lisboa Porto manufatura aditiva", category: "Geographic", subregion: "Europe" },
+  { query: "servicio impresión 3D Argentina Buenos Aires prototipado", category: "Geographic", subregion: "LatAm" },
+  // Niche tech extension (5)
+  { query: "DLP 3D printing dental laboratory crowns aligners", category: "Niche Tech" },
+  { query: "MJF Multi Jet Fusion nylon PA12 service", category: "Niche Tech" },
+  { query: "EBM electron beam melting titanium implant service", category: "Niche Tech" },
+  { query: "hybrid additive subtractive manufacturing 5-axis", category: "Niche Tech" },
+  { query: "binder jetting metal 3D printing service production", category: "Niche Tech" },
+  // Underexplored applications (5)
+  { query: "3D printing sports equipment custom helmets cycling", category: "Application" },
+  { query: "3D printing prosthetics orthotics custom limbs", category: "Application" },
+  { query: "3D printing archaeology museum replicas heritage", category: "Application" },
+  { query: "3D printing marine industry boat parts custom", category: "Application" },
+  { query: "3D printing oil gas downhole tooling service", category: "Application" },
 ];
+
+const STATIC_QUERY_COUNT = 20;
+
+// Lookup map: query string → PoolEntry. Used by getQueryCategory so the
+// category lives with the entry instead of being inferred from substring matches.
+const POOL_BY_QUERY = new Map<string, PoolEntry>(QUERY_POOL.map(e => [e.query, e]));
 
 // Results per query (balanced for credit efficiency)
 const RESULTS_PER_QUERY = 5;
@@ -47,40 +91,120 @@ const RESULTS_PER_QUERY = 5;
 // Maximum new suppliers to discover per run
 const MAX_NEW_SUPPLIERS = 10;
 
-// Helper to categorize queries for logging
+// Helper to categorize queries for logging. Consults POOL_BY_QUERY first (where
+// category is authoritatively defined per entry); falls back to substring
+// matching for any query that arrives from outside the pool (defensive only —
+// shouldn't happen in practice).
 function getQueryCategory(query: string): string {
+  const entry = POOL_BY_QUERY.get(query);
+  if (entry) return entry.category;
   if (query.includes('Japan') || query.includes('Korea') ||
-      query.includes('Singapore') || query.includes('Israel') ||
-      query.includes('Australia') || query.includes('India') ||
+      query.includes('Singapore') || query.includes('India') ||
       query.includes('Brazil') || query.includes('Mexico') ||
       query.includes('UAE') || query.includes('Dubai') ||
-      query.includes('Bangalore') || query.includes('Mumbai') ||
-      query.includes('Pune') || query.includes('Chennai') ||
-      query.includes('Hyderabad') || query.includes('Delhi') ||
-      query.includes('São Paulo') || query.includes('Rio de Janeiro') ||
-      query.includes('Minas Gerais') || query.includes('Querétaro') ||
-      query.includes('Monterrey') || query.includes('Ciudad de México') ||
-      query.includes('Saudi Arabia') || query.includes('Riyadh') ||
-      query.includes('Turkey') || query.includes('Istanbul') ||
-      query.includes('Egypt') || query.includes('Cairo') ||
-      query.includes('Qatar') || query.includes('Doha') ||
-      query.includes('Jordan') || query.includes('Amman') ||
-      query.includes('Kuwait') || query.includes('impressão') ||
-      query.includes('impresión')) return 'Geographic';
-  if (query.includes('bio') || query.includes('ceramic') || 
-      query.includes('sand casting') || query.includes('WAAM') || 
-      query.includes('micro') || query.includes('full color')) return 'Niche Tech';
-  if (query.includes('dental') || query.includes('medical') || 
-      query.includes('aerospace') || query.includes('automotive') || 
-      query.includes('architectural')) return 'Industry';
-  if (query.includes('PEEK') || query.includes('titanium') || 
+      query.includes('impressão') || query.includes('impresión')) return 'Geographic';
+  if (query.includes('bio') || query.includes('ceramic') ||
+      query.includes('WAAM') || query.includes('micro')) return 'Niche Tech';
+  if (query.includes('PEEK') || query.includes('titanium') ||
       query.includes('carbon fiber')) return 'Materials';
-  if (query.includes('concrete') || query.includes('food') || 
-      query.includes('jewelry') || query.includes('electronics') ||
-      query.includes('eyewear') || query.includes('footwear') ||
-      query.includes('glass') || query.includes('silicone') ||
-      query.includes('recycled')) return 'Specialty';
+  if (query.includes('concrete') || query.includes('jewelry') ||
+      query.includes('eyewear') || query.includes('footwear')) return 'Specialty';
   return 'General';
+}
+
+// LRU + category-balanced query selection for rotation mode.
+// Reads last 30 days of discovery_runs.search_queries to compute per-query
+// last-used-at, sorts pool ascending by that timestamp (alphabetical tie-break
+// so chained call sees the same order), then round-robins by category. Within
+// Geographic, interleaves by subregion so the first N geo queries span N
+// different subregions even if the category-skip fires early.
+async function selectQueriesForRun(
+  pool: PoolEntry[],
+  offset: number,
+  count: number,
+  // deno-lint-ignore no-explicit-any
+  supabase: any,
+  log: (m: string) => void,
+): Promise<PoolEntry[]> {
+  const lastUsedByQuery = new Map<string, number>();
+  try {
+    const sinceIso = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: recentRuns } = await supabase
+      .from('discovery_runs')
+      .select('search_queries, started_at')
+      .eq('source', 'search')
+      .gte('started_at', sinceIso)
+      .order('started_at', { ascending: false })
+      .limit(200);
+    for (const row of recentRuns || []) {
+      const ts = new Date(row.started_at).getTime();
+      for (const q of row.search_queries || []) {
+        const prev = lastUsedByQuery.get(q) ?? 0;
+        if (ts > prev) lastUsedByQuery.set(q, ts);
+      }
+    }
+  } catch (err) {
+    log(`selectQueriesForRun: failed to load history (${(err as Error).message}); falling back to pool order`);
+    return pool.slice(offset, offset + count);
+  }
+
+  // Sort ascending by last_used_at (never-seen = epoch 0 = stalest), alphabetical tie-break
+  const ranked = [...pool].sort((a, b) => {
+    const aTs = lastUsedByQuery.get(a.query) ?? 0;
+    const bTs = lastUsedByQuery.get(b.query) ?? 0;
+    if (aTs !== bTs) return aTs - bTs;
+    return a.query.localeCompare(b.query);
+  });
+
+  // Group by category, preserving ranked order
+  const byCategory = new Map<string, PoolEntry[]>();
+  for (const entry of ranked) {
+    if (!byCategory.has(entry.category)) byCategory.set(entry.category, []);
+    byCategory.get(entry.category)!.push(entry);
+  }
+
+  // Within Geographic, interleave by subregion
+  const geo = byCategory.get('Geographic') || [];
+  if (geo.length > 0) {
+    const bySubregion = new Map<string, PoolEntry[]>();
+    for (const e of geo) {
+      const sr = e.subregion || 'Other';
+      if (!bySubregion.has(sr)) bySubregion.set(sr, []);
+      bySubregion.get(sr)!.push(e);
+    }
+    const interleaved: PoolEntry[] = [];
+    let progress = true;
+    while (progress) {
+      progress = false;
+      for (const entries of bySubregion.values()) {
+        const next = entries.shift();
+        if (next) { interleaved.push(next); progress = true; }
+      }
+    }
+    byCategory.set('Geographic', interleaved);
+  }
+
+  // Round-robin across all categories until we have offset+count picks
+  const orderedCategories = Array.from(byCategory.keys()).sort();
+  const selected: PoolEntry[] = [];
+  const totalNeeded = offset + count;
+  let progress = true;
+  while (progress && selected.length < totalNeeded) {
+    progress = false;
+    for (const cat of orderedCategories) {
+      if (selected.length >= totalNeeded) break;
+      const list = byCategory.get(cat);
+      if (list && list.length > 0) {
+        selected.push(list.shift()!);
+        progress = true;
+      }
+    }
+  }
+
+  const picked = selected.slice(offset, offset + count);
+  const preview = picked.map(e => `[${e.category}${e.subregion ? '/' + e.subregion : ''}]`).join(' ');
+  log(`Rotation selected ${picked.length} queries (offset=${offset}, pool=${pool.length}): ${preview}`);
+  return picked;
 }
 
 interface SupplierData {
@@ -98,6 +222,13 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
+
+  // Chained-call parameters. offset > 0 = this is the second leg of a chained run
+  // (don't re-chain, use serial Firecrawl, link via parent_run_id).
+  const url = new URL(req.url);
+  const offset = Math.max(0, parseInt(url.searchParams.get('offset') || '0', 10) || 0);
+  const parentRunId = url.searchParams.get('parent_run_id');
+  const isChainedCall = offset > 0;
 
   const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
   const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -179,23 +310,43 @@ serve(async (req) => {
 
   const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-  // Fetch auto-approval threshold from config
+  // Fetch auto-approval threshold + rotation/chain feature flags
   const { data: configData } = await supabase
     .from('discovery_config')
-    .select('auto_approve_threshold')
+    .select('auto_approve_threshold, rotation_enabled, chained_call_enabled')
     .limit(1)
     .single();
 
   const autoApproveThreshold = configData?.auto_approve_threshold ?? 85;
-  console.log(`Auto-approve threshold: ${autoApproveThreshold}%`);
+  const rotationEnabled = configData?.rotation_enabled === true;
+  const chainedCallEnabled = configData?.chained_call_enabled === true;
+  console.log(`Auto-approve threshold: ${autoApproveThreshold}%, rotation=${rotationEnabled}, chained=${chainedCallEnabled}, offset=${offset}`);
+
+  const logs: string[] = [];
+  const log = (message: string) => {
+    console.log(message);
+    logs.push(`[${new Date().toISOString()}] ${message}`);
+  };
+
+  // Pick the 20 queries to run this invocation.
+  // Rotation on → LRU + category round-robin from QUERY_POOL.
+  // Rotation off → first STATIC_QUERY_COUNT entries (== pre-rotation behavior).
+  let selectedEntries: PoolEntry[];
+  if (rotationEnabled) {
+    selectedEntries = await selectQueriesForRun(QUERY_POOL, offset, STATIC_QUERY_COUNT, supabase, log);
+  } else {
+    selectedEntries = QUERY_POOL.slice(0, STATIC_QUERY_COUNT);
+  }
+  const selectedQueries: string[] = selectedEntries.map(e => e.query);
 
   // Create a discovery run record
   const { data: runData, error: runError } = await supabase
     .from('discovery_runs')
     .insert({
-      search_queries: SEARCH_QUERIES,
+      search_queries: selectedQueries,
       status: 'running',
       source: 'search',
+      parent_run_id: parentRunId,
     })
     .select()
     .single();
@@ -209,7 +360,24 @@ serve(async (req) => {
   }
 
   const runId = runData.id;
-  const logs: string[] = [];
+
+  // Fire-and-forget chained call. Doubles effective time budget by running
+  // queries 20-39 in parallel with this run. Dual auth (service-role bearer +
+  // pg_net user-agent) covers both auth paths at line ~239 / line ~244.
+  if (chainedCallEnabled && !isChainedCall) {
+    const chainedUrl = `${supabaseUrl}/functions/v1/discover-suppliers?offset=${STATIC_QUERY_COUNT}&parent_run_id=${runId}`;
+    fetch(chainedUrl, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${supabaseServiceKey}`,
+        'User-Agent': 'pg_net/0.8.0',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({}),
+    }).then(r => log(`Chained call kicked off (offset=${STATIC_QUERY_COUNT}, status=${r.status})`))
+      .catch(err => log(`Chained call failed to start: ${err?.message ?? err}`));
+  }
+
   let suppliersFound = 0;
   let suppliersNew = 0;
   let suppliersDuplicate = 0;
@@ -217,21 +385,20 @@ serve(async (req) => {
   let creditsUsed = 0;
   let creditsSkipped = 0;
 
-  const log = (message: string) => {
-    console.log(message);
-    logs.push(`[${new Date().toISOString()}] ${message}`);
-  };
-
   try {
     // Get ALL existing supplier domains to avoid scraping
     const existingDomains = await buildDedupSet(supabase);
 
-    log(`Starting optimized discovery with ${existingDomains.size} known domains`);
-    log(`Using ${SEARCH_QUERIES.length} search queries (optimized from 10)`);
+    log(`Starting discovery (run=${runId}, offset=${offset}, chained=${isChainedCall}, parent=${parentRunId ?? 'none'}) with ${existingDomains.size} known domains`);
+    log(`Using ${selectedQueries.length} search queries (rotation=${rotationEnabled})`);
 
-    // Track duplicate rates per query category to skip low-yield categories
-    const categoryStats: Record<string, { total: number; dupes: number }> = {};
+    // Track duplicate rates per query category to skip low-yield categories.
+    // Tracking `queries` (count of queries actually run in this category) lets us
+    // enforce a floor: never skip until at least MIN_QUERIES_PER_CATEGORY have run,
+    // so two unlucky early queries can't kill the rest of the category.
+    const categoryStats: Record<string, { total: number; dupes: number; queries: number }> = {};
     const skippedCategories = new Set<string>();
+    const MIN_QUERIES_PER_CATEGORY = 3;
 
     // Process a single search query and its results
     async function processQuery(query: string) {
@@ -239,11 +406,13 @@ serve(async (req) => {
 
       const category = getQueryCategory(query);
 
-      // Skip entire category if >70% duplicates after enough samples
+      // Skip entire category only after the floor is met AND >80% duplicates accumulate
       if (skippedCategories.has(category)) return;
-      const stats = categoryStats[category] || { total: 0, dupes: 0 };
-      if (stats.total >= 10 && stats.dupes / stats.total > 0.7) {
-        log(`[${category}] Skipping remaining queries (>70% duplicate rate: ${stats.dupes}/${stats.total})`);
+      const stats = categoryStats[category] || { total: 0, dupes: 0, queries: 0 };
+      if (stats.queries >= MIN_QUERIES_PER_CATEGORY &&
+          stats.total >= 20 &&
+          stats.dupes / stats.total > 0.80) {
+        log(`[${category}] Skipping remaining queries (>80% dupes after ${stats.queries} queries: ${stats.dupes}/${stats.total})`);
         skippedCategories.add(category);
         return;
       }
@@ -341,9 +510,10 @@ serve(async (req) => {
       }
 
       // Update category stats for smart skipping
-      if (!categoryStats[category]) categoryStats[category] = { total: 0, dupes: 0 };
+      if (!categoryStats[category]) categoryStats[category] = { total: 0, dupes: 0, queries: 0 };
       categoryStats[category].total += results.length;
       categoryStats[category].dupes += queryDupes;
+      categoryStats[category].queries += 1;
 
       log(`After domain filter: ${newResults.length} new domains (skipped ${results.length - newResults.length} known)`);
 
@@ -513,17 +683,18 @@ serve(async (req) => {
     }
 
     // Process queries in small parallel batches. Firecrawl Hobby plan throttles
-    // concurrent requests and returns a misleading "Insufficient credits" error
-    // when saturated, so keep this low.
-    const BATCH_SIZE = 2;
-    for (let i = 0; i < SEARCH_QUERIES.length; i += BATCH_SIZE) {
+    // concurrent requests, so keep parallelism low. In chained calls (offset>0)
+    // we run serial because the primary call's parallel batches are using the
+    // same throttle window.
+    const BATCH_SIZE = isChainedCall ? 1 : 2;
+    for (let i = 0; i < selectedQueries.length; i += BATCH_SIZE) {
       if (suppliersNew >= MAX_NEW_SUPPLIERS) {
         log(`Reached max suppliers limit (${MAX_NEW_SUPPLIERS}). Stopping discovery.`);
         break;
       }
 
-      const batch = SEARCH_QUERIES.slice(i, i + BATCH_SIZE);
-      log(`Processing query batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(SEARCH_QUERIES.length / BATCH_SIZE)} (${batch.length} queries)`);
+      const batch = selectedQueries.slice(i, i + BATCH_SIZE);
+      log(`Processing query batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(selectedQueries.length / BATCH_SIZE)} (${batch.length} queries)`);
 
       const batchResults = await Promise.allSettled(batch.map(q => processQuery(q)));
 
@@ -535,7 +706,7 @@ serve(async (req) => {
       }
 
       // Small delay between batches to avoid rate limiting
-      if (i + BATCH_SIZE < SEARCH_QUERIES.length) {
+      if (i + BATCH_SIZE < selectedQueries.length) {
         await new Promise(resolve => setTimeout(resolve, 500));
       }
     }
@@ -545,7 +716,7 @@ serve(async (req) => {
     const completionHints: string[] = [];
     if (suppliersFound === 0 && suppliersNew === 0) {
       if (suppliersDuplicate > 0 && !logs.some(l => l.includes('Gemini'))) {
-        completionHints.push(`HINT: 0 new suppliers — all ${suppliersDuplicate} candidates matched known domains. Search space may be saturated; consider widening SEARCH_QUERIES.`);
+        completionHints.push(`HINT: 0 new suppliers — all ${suppliersDuplicate} candidates matched known domains. Search space may be saturated; consider widening QUERY_POOL or rotating.`);
       } else if (logs.some(l => l.includes('Gemini'))) {
         completionHints.push(`HINT: 0 new suppliers — Gemini extraction failed for every batch (see Gemini log lines above).`);
       } else {
