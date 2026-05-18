@@ -319,13 +319,9 @@ serve(async (req) => {
 
       // Filter out already known domains BEFORE processing
       let queryDupes = 0;
-      let queryUrlsDropped = 0;
       const newResults = results.filter((result: { url?: string }) => {
         const domain = extractDomain(result.url);
-        if (!domain) {
-          queryUrlsDropped++;
-          return false;
-        }
+        if (!domain) return false;
 
         if (existingDomains.has(domain)) {
           suppliersDuplicate++;
@@ -335,10 +331,6 @@ serve(async (req) => {
         }
         return true;
       });
-
-      if (queryUrlsDropped > 0) {
-        log(`[${category}] Dropped ${queryUrlsDropped} results for "${query}" — extractDomain returned null`);
-      }
 
       // Update category stats for smart skipping
       if (!categoryStats[category]) categoryStats[category] = { total: 0, dupes: 0 };
@@ -362,8 +354,7 @@ serve(async (req) => {
       // Batch AI extraction — one call for all results in this query
       const batchSupplierData = await extractSupplierDataBatch(
         validResults.map(v => v.result),
-        geminiApiKey,
-        log
+        geminiApiKey
       );
 
       // Process extraction results sequentially (DB writes need ordering)
@@ -540,19 +531,6 @@ serve(async (req) => {
       }
     }
 
-    // Root-cause hint when nothing was found — makes silent failures visible
-    // in the Admin UI without having to dig through per-query logs.
-    const completionHints: string[] = [];
-    if (suppliersFound === 0 && suppliersNew === 0) {
-      if (suppliersDuplicate > 0 && !logs.some(l => l.includes('Gemini'))) {
-        completionHints.push(`HINT: 0 new suppliers — all ${suppliersDuplicate} candidates matched known domains. Search space may be saturated; consider widening SEARCH_QUERIES.`);
-      } else if (logs.some(l => l.includes('Gemini'))) {
-        completionHints.push(`HINT: 0 new suppliers — Gemini extraction failed for every batch (see Gemini log lines above).`);
-      } else {
-        completionHints.push(`HINT: 0 new suppliers — candidates passed domain filter but none scored ≥0.5 confidence from Gemini.`);
-      }
-    }
-
     // Update the discovery run as completed
     await supabase
       .from('discovery_runs')
@@ -563,10 +541,9 @@ serve(async (req) => {
         suppliers_new: suppliersNew,
         suppliers_duplicate: suppliersDuplicate,
         logs: [
-          ...logs,
+          ...logs, 
           `Credits used: ~${creditsUsed}, Credits saved by skipping known domains: ~${creditsSkipped}`,
-          `Auto-approved: ${suppliersAutoApproved} suppliers (threshold: ${autoApproveThreshold}%)`,
-          ...completionHints,
+          `Auto-approved: ${suppliersAutoApproved} suppliers (threshold: ${autoApproveThreshold}%)`
         ],
       })
       .eq('id', runId);
@@ -620,8 +597,7 @@ interface SearchResult {
 // Extract supplier data from multiple search results in a single AI call
 async function extractSupplierDataBatch(
   results: SearchResult[],
-  apiKey: string,
-  log: (message: string) => void = (m) => console.log(m)
+  apiKey: string
 ): Promise<(SupplierData | null)[]> {
   if (results.length === 0) return [];
 
@@ -635,25 +611,7 @@ async function extractSupplierDataBatch(
 
 ${entries}
 
-For EACH entry, determine if it is a 3D printing / additive manufacturing service provider.
-
-A page IS a supplier (is_supplier=true) if:
-- The company itself manufactures parts on 3D printers for paying customers (B2B or B2C)
-- They offer at least one of: FDM, SLA, SLS, MJF, SLM/DMLS, MJP, DLP, EBM, binder jetting, WAAM, bioprinting, ceramic/concrete printing, etc.
-- It does not matter if they also offer CNC, injection moulding, post-processing, or an instant-quote calculator
-- Branded manufacturer sites that take orders directly are still suppliers
-
-A page is NOT a supplier (is_supplier=false) only if:
-- It is a pure aggregator/marketplace listing many other suppliers (e.g. Hubs, Treatstock, Craftcloud, Xometry's marketplace listing page, 3D Hubs directory page)
-- It is a news article, blog post, listicle ("Top 10..."), Wikipedia, university press release, or LinkedIn profile
-- It is a hardware vendor selling 3D printers (e.g. Bambu Lab, Prusa, Formlabs storefront) with no service offering
-- It is a software/CAD vendor
-
-Confidence should reflect how clearly the page identifies the company as a service provider:
-- 0.85-1.0: dedicated "3D printing service" / "additive manufacturing service" landing page with clear offering
-- 0.6-0.84: company homepage where service is one of several offerings
-- 0.5-0.59: unclear but signals point to a service provider
-- below 0.5: do not extract
+For EACH entry, determine if it is a legitimate 3D printing service provider (not a marketplace, directory, or news site).
 
 Respond ONLY with a JSON array of ${results.length} object(s), one per entry, in this exact format:
 [
@@ -681,7 +639,6 @@ Set is_supplier to false and confidence to 0 for non-suppliers.`;
       },
       body: JSON.stringify({
         model: 'gemini-2.5-flash',
-        temperature: 0,
         messages: [
           { role: 'system', content: 'You are an expert at identifying 3D printing and additive manufacturing service providers. Respond only with a valid JSON array.' },
           { role: 'user', content: prompt }
@@ -690,8 +647,7 @@ Set is_supplier to false and confidence to 0 for non-suppliers.`;
     });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      log(`Gemini API error ${response.status}: ${errorText.slice(0, 400)}`);
+      console.error('Gemini batch error:', await response.text());
       return results.map(() => null);
     }
 
@@ -700,27 +656,15 @@ Set is_supplier to false and confidence to 0 for non-suppliers.`;
 
     // Extract JSON array from response
     const jsonMatch = responseText.match(/\[[\s\S]*\]/);
-    if (!jsonMatch) {
-      log(`Gemini returned no JSON array — raw response (first 400 chars): ${responseText.slice(0, 400)}`);
-      return results.map(() => null);
-    }
+    if (!jsonMatch) return results.map(() => null);
 
     const parsed = JSON.parse(jsonMatch[0]);
-    if (!Array.isArray(parsed)) {
-      log(`Gemini response was not a JSON array — raw (first 400 chars): ${responseText.slice(0, 400)}`);
-      return results.map(() => null);
-    }
+    if (!Array.isArray(parsed)) return results.map(() => null);
 
-    let nonSupplier = 0;
-    let lowConfidence = 0;
-    let missing = 0;
-    let extracted = 0;
-    const out = results.map((r, i) => {
+    return results.map((r, i) => {
       const entry = parsed[i] || parsed.find((p: any) => p.entry === i + 1);
-      if (!entry) { missing++; return null; }
-      if (!entry.is_supplier) { nonSupplier++; return null; }
-      if (entry.confidence < 0.5) { lowConfidence++; return null; }
-      extracted++;
+      if (!entry || !entry.is_supplier || entry.confidence < 0.5) return null;
+
       return {
         name: entry.name || r.title || '',
         website: r.url || '',
@@ -732,13 +676,8 @@ Set is_supplier to false and confidence to 0 for non-suppliers.`;
         confidence: entry.confidence,
       };
     });
-
-    log(`Gemini batch (${results.length} candidates): ${extracted} extracted, ${nonSupplier} not-a-supplier, ${lowConfidence} low-confidence, ${missing} missing-entry`);
-
-    return out;
   } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    log(`Gemini batch extraction threw: ${msg}`);
+    console.error('Error in batch extraction:', error);
     return results.map(() => null);
   }
 }
